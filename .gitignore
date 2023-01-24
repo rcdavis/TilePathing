@@ -24,9 +24,24 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
 *.out
 *.app
+
+!Vendor/Premake/premake5.exe
+
+# VS
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+
+**/Build/
+**/Bin/
+**/Obj/
+
+*.log
+*.tlog
