@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+#include <glm/glm.hpp>
+
 struct GLFWwindow;
 
 class Application
@@ -22,5 +24,9 @@ private:
 
 private:
     GLFWwindow* mWindow = nullptr;
+
+    glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
+    glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
+
     bool mInitialized = false;
 };

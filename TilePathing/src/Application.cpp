@@ -9,6 +9,9 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 Application::~Application()
 {
     Shutdown();
@@ -98,7 +101,12 @@ void Application::RenderImGuiPanels()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
+    if (ImGui::Begin("Tile Map Properties"))
+    {
+        ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
+        ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
+    }
+    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
