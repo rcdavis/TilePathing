@@ -43,6 +43,15 @@ bool Application::Init()
 {
     assert(!mInitialized && "Application is already initialized!");
 
+    mConsoleWindow.AddLine({ "INFO", "Starting app...", glm::vec3 { 0.0f, 1.0f, 0.0f } });
+    mConsoleWindow.AddLine({ "ERROR", "Test Error", glm::vec3 { 1.0f, 0.0f, 0.0f } });
+    for (int i = 1; i <= 98; ++i)
+    {
+        char message[64] = {};
+        std::sprintf(message, "Debug message %i", i);
+        mConsoleWindow.AddLine({ "DEBUG", message, glm::vec3 { 1.0f } });
+    }
+
     glfwSetErrorCallback(GlfwErrorCallback);
 
     if (!glfwInit())
@@ -107,7 +116,12 @@ void Application::RenderImGuiPanels()
     {
         if (ImGui::BeginMenu("Windows"))
         {
-            ImGui::MenuItem("Tile Map Properties", nullptr, &mIsTileMapPropertiesWindowOpen);
+            if (ImGui::MenuItem("Tile Map Properties", nullptr, &mIsTileMapPropertiesWindowOpen))
+                mConsoleWindow.AddLine({ "INFO", "Opened Tile Map Properties", glm::vec3 { 0.0f, 1.0f, 0.0f } });
+
+            bool isConsoleWindowOpen = mConsoleWindow.IsOpen();
+            if (ImGui::MenuItem("Console", nullptr, &isConsoleWindowOpen))
+                mConsoleWindow.Open(isConsoleWindowOpen);
 
             ImGui::EndMenu();
         }
@@ -122,6 +136,8 @@ void Application::RenderImGuiPanels()
         ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
         ImGui::End();
     }
+
+    mConsoleWindow.Render();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

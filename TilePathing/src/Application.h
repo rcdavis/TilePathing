@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Core.h"
-
 #include <glm/glm.hpp>
+
+#include "Core.h"
+#include "ConsoleWindow.h"
 
 struct GLFWwindow;
 
@@ -23,6 +24,7 @@ private:
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
+    ConsoleWindow mConsoleWindow;
     GLFWwindow* mWindow = nullptr;
 
     glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
