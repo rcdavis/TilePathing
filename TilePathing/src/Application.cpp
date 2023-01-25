@@ -75,6 +75,8 @@ bool Application::Init()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
     mInitialized = true;
 
     return true;
@@ -101,12 +103,25 @@ void Application::RenderImGuiPanels()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    if (ImGui::Begin("Tile Map Properties"))
+    if (ImGui::BeginMainMenuBar())
     {
+        if (ImGui::BeginMenu("Windows"))
+        {
+            ImGui::MenuItem("Tile Map Properties", nullptr, &mIsTileMapPropertiesWindowOpen);
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    if (mIsTileMapPropertiesWindowOpen)
+    {
+        ImGui::Begin("Tile Map Properties", &mIsTileMapPropertiesWindowOpen);
         ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
         ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
+        ImGui::End();
     }
-    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

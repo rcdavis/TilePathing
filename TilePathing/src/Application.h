@@ -29,4 +29,5 @@ private:
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
 
     bool mInitialized = false;
+    bool mIsTileMapPropertiesWindowOpen = false;
 };
