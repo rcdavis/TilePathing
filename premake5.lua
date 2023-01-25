@@ -22,3 +22,4 @@ outputObjDir = "Build/%{cfg.platform}-%{cfg.buildcfg}/Obj"
 
 include "Vendor/ImGui"
 include "TilePathing"
+include "Benchmarking"
