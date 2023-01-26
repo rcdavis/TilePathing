@@ -9,9 +9,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 Application::~Application()
 {
     Shutdown();
@@ -41,16 +38,7 @@ void Application::Run()
 
 bool Application::Init()
 {
-    assert(!mInitialized && "Application is already initialized!");
-
-    mConsoleWindow.AddLine({ "INFO", "Starting app...", glm::vec3 { 0.0f, 1.0f, 0.0f } });
-    mConsoleWindow.AddLine({ "ERROR", "Test Error", glm::vec3 { 1.0f, 0.0f, 0.0f } });
-    for (int i = 1; i <= 98; ++i)
-    {
-        char message[64] = {};
-        std::sprintf(message, "Debug message %i", i);
-        mConsoleWindow.AddLine({ "DEBUG", message, glm::vec3 { 1.0f } });
-    }
+    assert(!mInitializedImGui && "Application is already initialized!");
 
     glfwSetErrorCallback(GlfwErrorCallback);
 
@@ -81,29 +69,29 @@ bool Application::Init()
     ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
     ImGui_ImplOpenGL3_Init("#version 460 core");
 
+    mInitializedImGui = true;
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-
-    mInitialized = true;
 
     return true;
 }
 
 void Application::Shutdown()
 {
-    if (mInitialized)
+    if (mInitializedImGui)
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+        mInitializedImGui = false;
     }
 
     glfwTerminate();
 
     mWindow = nullptr;
-    mInitialized = false;
 }
 
 void Application::RenderImGuiPanels()
@@ -116,12 +104,7 @@ void Application::RenderImGuiPanels()
     {
         if (ImGui::BeginMenu("Windows"))
         {
-            if (ImGui::MenuItem("Tile Map Properties", nullptr, &mIsTileMapPropertiesWindowOpen))
-                mConsoleWindow.AddLine({ "INFO", "Opened Tile Map Properties", glm::vec3 { 0.0f, 1.0f, 0.0f } });
-
-            bool isConsoleWindowOpen = mConsoleWindow.IsOpen();
-            if (ImGui::MenuItem("Console", nullptr, &isConsoleWindowOpen))
-                mConsoleWindow.Open(isConsoleWindowOpen);
+            mTileMapPropertiesWindow.RenderMenuItem();
 
             ImGui::EndMenu();
         }
@@ -129,15 +112,7 @@ void Application::RenderImGuiPanels()
         ImGui::EndMainMenuBar();
     }
 
-    if (mIsTileMapPropertiesWindowOpen)
-    {
-        ImGui::Begin("Tile Map Properties", &mIsTileMapPropertiesWindowOpen);
-        ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
-        ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
-        ImGui::End();
-    }
-
-    mConsoleWindow.Render();
+    mTileMapPropertiesWindow.Render();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

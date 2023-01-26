@@ -2,6 +2,10 @@
 
 #include <imgui.h>
 
+ConsoleWindow::ConsoleWindow(bool isOpen) :
+    ImGuiWindow("Console", isOpen)
+{}
+
 void ConsoleWindow::AddLine(ConsoleItem item)
 {
     if (std::size(mItems) == mLimit)
@@ -14,7 +18,7 @@ void ConsoleWindow::Render()
 {
     if (mIsOpen)
     {
-        ImGui::Begin("Console", &mIsOpen);
+        ImGui::Begin(std::data(mTitle), &mIsOpen);
 
         if (ImGui::BeginChild("ConsoleLines"))
         {

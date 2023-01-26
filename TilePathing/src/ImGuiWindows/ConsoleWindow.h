@@ -1,11 +1,12 @@
 #pragma once
 
 #include <deque>
-#include <string>
 
 #include <glm/glm.hpp>
 
-class ConsoleWindow
+#include "ImGuiWindow.h"
+
+class ConsoleWindow : public ImGuiWindow
 {
 public:
     struct ConsoleItem
@@ -16,20 +17,16 @@ public:
     };
 
 public:
-    ConsoleWindow() = default;
+    ConsoleWindow(bool isOpen = false);
 
     void SetEntryLimit(int limit) { mLimit = limit; }
-
-    bool IsOpen() const { return mIsOpen; }
-    void Open(bool isOpen) { mIsOpen = isOpen; }
 
     void AddLine(ConsoleItem item);
     void Clear() { mItems.clear(); }
 
-    void Render();
+    void Render() override;
 
 private:
     std::deque<ConsoleItem> mItems;
     int mLimit = 100;
-    bool mIsOpen = false;
 };

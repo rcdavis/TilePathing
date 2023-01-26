@@ -1,9 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "Core.h"
-#include "ConsoleWindow.h"
+
+#include "ImGuiWindows/TileMapPropertiesWindow.h"
 
 struct GLFWwindow;
 
@@ -24,12 +23,9 @@ private:
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
-    ConsoleWindow mConsoleWindow;
+    TileMapPropertiesWindow mTileMapPropertiesWindow;
+
     GLFWwindow* mWindow = nullptr;
 
-    glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
-    glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
-
-    bool mInitialized = false;
-    bool mIsTileMapPropertiesWindowOpen = false;
+    bool mInitializedImGui = false;
 };
