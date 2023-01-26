@@ -21,12 +21,14 @@ project "TilePathing"
         "%{IncludeDir.glm}",
         "%{IncludeDir.glfw}",
         "%{IncludeDir.glad}",
-        "%{IncludeDir.stb_image}"
+        "%{IncludeDir.stb_image}",
+        "%{IncludeDir.pugixml}"
     }
 
     links {
         "%{Library.glfw}",
         "%{Library.glad}",
+        "%{Library.pugixml}",
         "opengl32.lib",
         "ImGui"
     }
