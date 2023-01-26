@@ -8,7 +8,11 @@ project "TilePathing"
     targetdir (outputTargetDir)
     objdir (outputObjDir)
 
-    files { "src/**.h", "src/**.hpp", "src/**.cpp" }
+    files {
+        "src/**.h",
+        "src/**.hpp",
+        "src/**.cpp"
+    }
 
     includedirs {
         "src",
@@ -16,7 +20,8 @@ project "TilePathing"
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.glfw}",
-        "%{IncludeDir.glad}"
+        "%{IncludeDir.glad}",
+        "%{IncludeDir.stb_image}"
     }
 
     links {
@@ -26,7 +31,10 @@ project "TilePathing"
         "ImGui"
     }
 
-    defines { "GLFW_INCLUDE_NONE" }
+    defines {
+        "GLFW_INCLUDE_NONE",
+        "STB_IMAGE_IMPLEMENTATION"
+    }
 
     filter { "configurations:Debug" }
         symbols "On"

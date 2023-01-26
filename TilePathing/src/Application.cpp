@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include "Log.h"
+#include "OpenGL/GLTexture.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -75,6 +76,8 @@ bool Application::Init()
     glEnable(GL_CULL_FACE);
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+    mTestTexture = GLTexture::Load("assets/textures/SMB_BlockTiles.png");
 
     return true;
 }

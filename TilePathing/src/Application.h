@@ -5,6 +5,7 @@
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 
 struct GLFWwindow;
+class GLTexture;
 
 class Application
 {
@@ -24,6 +25,7 @@ private:
 
 private:
     TileMapPropertiesWindow mTileMapPropertiesWindow;
+    Ref<GLTexture> mTestTexture;
 
     GLFWwindow* mWindow = nullptr;
 
