@@ -22,6 +22,8 @@ Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
     tileMap->mName = filepath.stem().string();
     tileMap->mWidth = root.attribute("width").as_uint();
     tileMap->mHeight = root.attribute("height").as_uint();
+    tileMap->mTileWidth = root.attribute("tilewidth").as_uint();
+    tileMap->mTileHeight = root.attribute("tileheight").as_uint();
     tileMap->mProperties = Property::LoadList(root.child("properties"));
 
     for (auto node = root.child("tileset"); node; node = node.next_sibling("tileset"))

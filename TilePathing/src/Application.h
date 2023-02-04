@@ -48,6 +48,11 @@ private:
     std::vector<Vertex> CreateTileMapVertices();
     void CreateTileMapMesh();
 
+    void CreateColoredTileMesh();
+    void RenderTilePaths();
+
+    glm::mat4 GetTileTransform(glm::uvec2 coords);
+
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
@@ -62,6 +67,9 @@ private:
     Ref<GLTexture> mTestTexture;
     Ref<TileMap> mTileMap;
     Ref<GLShader> mShader;
+
+    Ref<GLVertexArray> mColoredRectVao;
+    Ref<GLShader> mColorShader;
 
     GLFWwindow* mWindow = nullptr;
 
