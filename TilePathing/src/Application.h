@@ -1,31 +1,65 @@
 #pragma once
 
 #include "Core.h"
+#include "TimeStep.h"
+#include "Camera.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 
+#include <glm/glm.hpp>
+
 struct GLFWwindow;
 class GLTexture;
+class GLVertexArray;
+class GLShader;
+class TileMap;
 
 class Application
 {
 public:
-    Application() = default;
+    struct Vertex
+    {
+        glm::vec3 position{ 0.0f };
+        glm::vec2 texCoord{ 0.0f };
+    };
+
+public:
+    Application();
     ~Application();
 
     void Run();
+
+    static Application& Get()
+    {
+        static Application app;
+        return app;
+    }
+
+    GLFWwindow* GetWindow() { return mWindow; }
 
 private:
     bool Init();
     void Shutdown();
 
+    void RenderScene();
     void RenderImGuiPanels();
+
+    std::vector<Vertex> CreateTileMapVertices();
+    void CreateTileMapMesh();
 
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
     TileMapPropertiesWindow mTileMapPropertiesWindow;
+    Camera mCamera;
+    TimeStep mLastFrameTime;
+
+    glm::mat4 mTileMapTransform;
+
+    Ref<GLVertexArray> mVAO;
     Ref<GLTexture> mTestTexture;
+    Ref<TileMap> mTileMap;
+    Ref<GLShader> mShader;
 
     GLFWwindow* mWindow = nullptr;
 

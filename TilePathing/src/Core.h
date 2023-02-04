@@ -28,3 +28,6 @@ Scope<T> CreateScope(Args&&... args) { return std::make_unique<T>(std::forward<A
 
 template <typename T, typename... Args>
 Ref<T> CreateRef(Args&&... args) { return std::make_shared<T>(std::forward<Args>(args)...); }
+
+template <typename T, typename U>
+Ref<T> DynamicCastRef(const Ref<U>& r) { return std::dynamic_pointer_cast<T>(r); }

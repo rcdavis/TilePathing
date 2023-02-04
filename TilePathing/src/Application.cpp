@@ -2,13 +2,40 @@
 
 #include "Log.h"
 #include "OpenGL/GLTexture.h"
+#include "OpenGL/GLVertexArray.h"
+#include "OpenGL/GLVertexBuffer.h"
+#include "OpenGL/GLIndexBuffer.h"
+#include "OpenGL/GLShader.h"
+
+#include "TileMap/TileMap.h"
+#include "TileMap/TileMapLayer.h"
+#include "TileMap/TileLayer.h"
+#include "TileMap/TileSet.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+
+#include <cassert>
+
+static constexpr uint32 WindowWidth = 1280;
+static constexpr uint32 WindowHeight = 720;
+
+Application::Application() :
+    mTileMapPropertiesWindow(),
+    mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
+    mTileMap(),
+    mLastFrameTime(0.0f),
+    mTileMapTransform(1.0f),
+    mTestTexture(),
+    mWindow(nullptr),
+    mInitializedImGui(false)
+{}
 
 Application::~Application()
 {
@@ -25,9 +52,15 @@ void Application::Run()
 
     while (!glfwWindowShouldClose(mWindow))
     {
+        const TimeStep time((f32)glfwGetTime());
+        const TimeStep timestep = time - mLastFrameTime;
+        mLastFrameTime = time;
+
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        RenderScene();
 
         RenderImGuiPanels();
 
@@ -53,7 +86,7 @@ bool Application::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    mWindow = glfwCreateWindow(1280, 720, "Tile Pathing", nullptr, nullptr);
+    mWindow = glfwCreateWindow(WindowWidth, WindowHeight, "Tile Pathing", nullptr, nullptr);
 
     glfwMakeContextCurrent(mWindow);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -73,17 +106,25 @@ bool Application::Init()
     mInitializedImGui = true;
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
     mTestTexture = GLTexture::Load("assets/textures/SMB_BlockTiles.png");
+    mShader = GLShader::Create("TileMap", "assets/shaders/TileMap.vert", "assets/shaders/TileMap.frag");
+    mTileMap = TileMap::Load("assets/tilemaps/SMBMap.tmx");
+
+    CreateTileMapMesh();
 
     return true;
 }
 
 void Application::Shutdown()
 {
+    mTestTexture = nullptr;
+    mShader = nullptr;
+    mTileMap = nullptr;
+    mVAO = nullptr;
+
     if (mInitializedImGui)
     {
         ImGui_ImplOpenGL3_Shutdown();
@@ -95,6 +136,20 @@ void Application::Shutdown()
     glfwTerminate();
 
     mWindow = nullptr;
+}
+
+void Application::RenderScene()
+{
+    mTestTexture->Bind();
+
+    mShader->Bind();
+    mShader->SetMat4("u_Transform", mTileMapTransform);
+    mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+
+    mVAO->Bind();
+
+    const uint32 count = mVAO->GetIndexBuffer()->GetCount();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void Application::RenderImGuiPanels()
@@ -119,6 +174,97 @@ void Application::RenderImGuiPanels()
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+std::vector<Application::Vertex> Application::CreateTileMapVertices()
+{
+    assert(mTileMap && "Passing in a null tile map");
+    assert(!std::empty(mTileMap->GetTileSets()) && "Tile map does not have a tile set");
+
+    std::vector<Application::Vertex> vertices;
+
+    for (const Ref<TileMapLayer>& layer : mTileMap->GetLayers())
+    {
+        if (layer->GetType() != TileMapLayer::Type::Tile)
+            continue;
+
+        auto tileLayer = DynamicCastRef<TileLayer>(layer);
+        const auto& tiles = tileLayer->GetTiles();
+        for (uint32 i = 0; i < std::size(tiles); ++i)
+        {
+            const auto& tile = tiles[i];
+            Ref<TileSet> tileSet;
+            for (const auto& ts : mTileMap->GetTileSets())
+            {
+                if (tile.mId >= ts->GetFirstGid())
+                {
+                    tileSet = ts;
+                    break;
+                }
+            }
+
+            assert(tileSet && "Tile Layer does not have a tile set");
+
+            const uint32 tileWidth = tileSet->GetTileWidth();
+            const uint32 tileHeight = tileSet->GetTileHeight();
+            const uint32 numTilesWidth = tileLayer->GetWidth();
+            const uint32 numTilesHeight = tileLayer->GetHeight();
+
+            const uint32 xPos = ((i % numTilesWidth) * tileWidth);
+            const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
+
+            const std::array<glm::vec4, 4> vertPositions = {
+                glm::vec4 { xPos, yPos, 0.0f, 1.0f },
+                glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
+                glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
+                glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
+            };
+
+            const std::array<glm::vec2, 4> texCoords = tileSet->GetTexCoords(tile.mId);
+
+            for (int i = 0; i < 4; ++i)
+                vertices.push_back({ vertPositions[i], texCoords[i] });
+        }
+    }
+
+    return vertices;
+}
+
+void Application::CreateTileMapMesh()
+{
+    const auto vertices = CreateTileMapVertices();
+
+    mVAO = GLVertexArray::Create();
+    mVAO->Bind();
+
+    auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
+    vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
+    vb->SetLayout({
+        { ShaderDataType::Float3, "a_Position" },
+        { ShaderDataType::Float2, "a_TexCoord" }
+        });
+    mVAO->AddVertexBuffer(vb);
+
+    std::vector<uint16> quadIndices(std::size(vertices) * 6);
+
+    uint16 offset = 0;
+    for (size_t i = 0; i < std::size(quadIndices); i += 6)
+    {
+        quadIndices[i] = offset;
+        quadIndices[i + 1] = offset + 1;
+        quadIndices[i + 2] = offset + 2;
+
+        quadIndices[i + 3] = offset + 2;
+        quadIndices[i + 4] = offset + 3;
+        quadIndices[i + 5] = offset;
+
+        offset += 4;
+    }
+
+    auto quadIB = GLIndexBuffer::Create(std::data(quadIndices), (uint32)std::size(quadIndices));
+    mVAO->SetIndexBuffer(quadIB);
+
+    mVAO->Unbind();
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)

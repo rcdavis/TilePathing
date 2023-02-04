@@ -1,23 +1,21 @@
 // Tile Map Vertex Shader
 #version 450 core
 
-in vec3 a_Position;
-in vec2 a_TexCoord;
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec2 a_TexCoord;
 
-layout(std140, binding = 0) uniform Camera
-{
-	mat4 u_ViewProjection;
-};
+uniform mat4 u_Transform;
+uniform mat4 u_ViewProjection;
 
 struct VertexOutput
 {
 	vec2 texCoord;
 };
 
-out VertexOutput Output;
+layout(location = 0) out VertexOutput OutVert;
 
 void main()
 {
-	Output.texCoord = a_TexCoord;
-	gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+	OutVert.texCoord = a_TexCoord;
+	gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 }

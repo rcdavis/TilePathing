@@ -8,8 +8,7 @@ int main()
 
     LOG_INFO("Starting Tile Pathing...");
 
-    Application app;
-    app.Run();
+    Application::Get().Run();
 
     LOG_INFO("Closing Tile Pathing...");
 

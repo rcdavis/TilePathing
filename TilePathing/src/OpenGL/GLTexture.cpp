@@ -68,6 +68,14 @@ void GLTexture::Unbind() const
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+bool GLTexture::operator==(const GLTexture& texture) const
+{
+    if (this == &texture)
+        return true;
+
+    return mId == texture.mId;
+}
+
 Ref<GLTexture> GLTexture::Load(const std::filesystem::path& filepath)
 {
     return CreateRef<GLTexture>(filepath);

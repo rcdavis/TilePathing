@@ -20,6 +20,8 @@ public:
 
     bool IsLoaded() const { return mIsLoaded; }
 
+    bool operator==(const GLTexture& texture) const;
+
     static Ref<GLTexture> Load(const std::filesystem::path& filepath);
 
 private:
