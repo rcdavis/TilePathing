@@ -3,6 +3,7 @@
 #include <queue>
 #include <unordered_set>
 #include <set>
+#include <array>
 
 #include "TileMap/TileMap.h"
 
@@ -27,8 +28,12 @@ TilePathing::TilePathing(Ref<TileMap> tileMap) :
 
 std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords)
 {
-    //for (int i = 0; i < std::size(mMap); ++i)
-      //  mMap[i]->parent = nullptr;
+    constexpr std::array<glm::uvec2, 4> neighbors = {
+        glm::uvec2 { 0, -1 },
+        glm::uvec2 { 0, 1 },
+        glm::uvec2 { -1, 0 },
+        glm::uvec2 { 1, 0 }
+    };
 
     std::queue<glm::uvec2> q;
     std::unordered_set<glm::uvec2> visited;
@@ -43,40 +48,17 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
         if (coords == endCoords)
             break;
 
-        if (coords.y > 0 && !visited.count({ coords.x, coords.y - 1 }))
+        for (int i = 0; i < std::size(neighbors); ++i)
         {
-            glm::uvec2 newCoords{ coords.x, coords.y - 1 };
-            q.push(newCoords);
-            visited.insert(newCoords);
-            auto newCell = GetCell(newCoords);
-            newCell->parent = GetCell(coords);
-        }
-
-        if (coords.y < mNumRows && !visited.count({ coords.x, coords.y + 1 }))
-        {
-            glm::uvec2 newCoords{ coords.x, coords.y + 1 };
-            q.push(newCoords);
-            visited.insert(newCoords);
-            auto newCell = GetCell(newCoords);
-            newCell->parent = GetCell(coords);
-        }
-
-        if (coords.x > 0 && !visited.count({ coords.x - 1, coords.y }))
-        {
-            glm::uvec2 newCoords{ coords.x - 1, coords.y };
-            q.push(newCoords);
-            visited.insert(newCoords);
-            auto newCell = GetCell(newCoords);
-            newCell->parent = GetCell(coords);
-        }
-
-        if (coords.x < mNumCols && !visited.count({ coords.x + 1, coords.y }))
-        {
-            glm::uvec2 newCoords{ coords.x + 1, coords.y };
-            q.push(newCoords);
-            visited.insert(newCoords);
-            auto newCell = GetCell(newCoords);
-            newCell->parent = GetCell(coords);
+            const glm::uvec2 newCoords = coords + neighbors[i];
+            if (newCoords.x >= 0 && newCoords.y >= 0 &&
+                newCoords.x < mNumCols && newCoords.y < mNumRows && !visited.count(newCoords))
+            {
+                q.push(newCoords);
+                visited.insert(newCoords);
+                auto newCell = GetCell(newCoords);
+                newCell->parent = GetCell(coords);
+            }
         }
     }
 
@@ -101,9 +83,9 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
     mNumCols = tileMap->GetWidth();
     mMap.resize((size_t)mNumRows * (size_t)mNumCols);
 
-    for (int row = 0; row < mNumRows; ++row)
+    for (uint32 row = 0; row < mNumRows; ++row)
     {
-        for (int col = 0; col < mNumCols; ++col)
+        for (uint32 col = 0; col < mNumCols; ++col)
         {
             mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(row, col), 0);
         }

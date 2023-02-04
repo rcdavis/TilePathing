@@ -118,7 +118,6 @@ bool Application::Init()
     mColorShader = GLShader::Create("ColoredTile", "assets/shaders/ColoredTile.vert", "assets/shaders/ColoredTile.frag");
 
     mTilePathing.SetTileMap(mTileMap);
-    const auto path = mTilePathing.FindPath({ 0, 0 }, { 3, 3 });
 
     CreateTileMapMesh();
     CreateColoredTileMesh();
@@ -173,7 +172,7 @@ void Application::RenderTilePaths()
     mColoredRectVao->Bind();
     mColorShader->Bind();
 
-    const auto path = mTilePathing.FindPath({ 0, 0 }, { 3, 3 });
+    const auto path = mTilePathing.FindPath({ 2, 3 }, { 6, 5 });
     for (const TilePathing::Cell cell : path)
     {
         const auto transform = GetTileTransform(cell.coords);
