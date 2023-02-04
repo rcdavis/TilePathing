@@ -112,6 +112,14 @@ bool Application::Init()
     mTestTexture = GLTexture::Load("assets/textures/SMB_BlockTiles.png");
     mShader = GLShader::Create("TileMap", "assets/shaders/TileMap.vert", "assets/shaders/TileMap.frag");
     mTileMap = TileMap::Load("assets/tilemaps/SMBMap.tmx");
+    mTilePathing.SetTileMap(mTileMap);
+    const auto path = mTilePathing.FindPath({ 0, 0 }, { 3, 3 });
+
+    LOG_INFO("Path:");
+    for (const auto p : path)
+    {
+        LOG_INFO("  row={0} col={1}", p.coords.x, p.coords.y);
+    }
 
     CreateTileMapMesh();
 
@@ -188,7 +196,7 @@ std::vector<Application::Vertex> Application::CreateTileMapVertices()
         if (layer->GetType() != TileMapLayer::Type::Tile)
             continue;
 
-        auto tileLayer = DynamicCastRef<TileLayer>(layer);
+        const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
         const auto& tiles = tileLayer->GetTiles();
         for (uint32 i = 0; i < std::size(tiles); ++i)
         {

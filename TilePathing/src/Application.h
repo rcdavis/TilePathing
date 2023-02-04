@@ -5,6 +5,7 @@
 #include "Camera.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
+#include "TileMap/TilePathing.h"
 
 #include <glm/glm.hpp>
 
@@ -51,6 +52,7 @@ private:
 
 private:
     TileMapPropertiesWindow mTileMapPropertiesWindow;
+    TilePathing mTilePathing;
     Camera mCamera;
     TimeStep mLastFrameTime;
 
