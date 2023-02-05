@@ -45,6 +45,7 @@ public:
     f32 AsFloat32() const { return std::get<f32>(mValue); }
     bool AsBool() const { return std::get<bool>(mValue); }
 
+    const std::string& GetName() const { return mName; }
     Type GetType() const { return mType; }
 
     static std::vector<Property> LoadList(const pugi::xml_node& node);

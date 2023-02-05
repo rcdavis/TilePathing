@@ -5,6 +5,8 @@
 #include <array>
 
 #include "TileMap/TileMap.h"
+#include "TileMap/TileSet.h"
+#include "TileMap/TileLayer.h"
 
 template<>
 struct std::hash<glm::uvec2>
@@ -27,6 +29,9 @@ TilePathing::TilePathing(Ref<TileMap> tileMap) :
 
 std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords)
 {
+    if (!IsInBounds(startCoords) || !IsInBounds(endCoords))
+        return {};
+
     constexpr std::array<glm::uvec2, 4> neighbors = {
         glm::uvec2 { 0, -1 },
         glm::uvec2 { 0, 1 },
@@ -37,14 +42,19 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
     auto startNode = GetCell(startCoords);
     auto endNode = GetCell(endCoords);
 
-    std::queue<Ref<Cell>> q;
+    //std::priority_queue<Ref<Cell>, std::vector<Ref<Cell>>, std::greater<Ref<Cell>>> q;
+    typedef std::pair<uint32, Ref<Cell>> QElement;
+    std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
     std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
-    q.push(startNode);
-    comeFrom.insert(std::make_pair(startNode, nullptr));
+    std::unordered_map<Ref<Cell>, uint32> costSoFar;
+
+    q.emplace(0, startNode);
+    comeFrom[startNode] = nullptr;
+    costSoFar[startNode] = 0;
 
     while (!std::empty(q))
     {
-        Ref<Cell> curNode = q.front();
+        Ref<Cell> curNode = q.top().second;
         q.pop();
 
         if (curNode == endNode)
@@ -53,14 +63,15 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
         for (int i = 0; i < std::size(neighbors); ++i)
         {
             const glm::uvec2 newCoords = curNode->coords + neighbors[i];
-            if (newCoords.x >= 0 && newCoords.y >= 0 &&
-                newCoords.x < mNumCols && newCoords.y < mNumRows)
+            if (IsInBounds(newCoords))
             {
                 Ref<Cell> newNode = GetCell(newCoords);
-                if (comeFrom.find(newNode) == std::end(comeFrom))
+                const uint32 cost = costSoFar[curNode] + newNode->cost;
+                if (costSoFar.find(newNode) == std::end(costSoFar) || cost < costSoFar[newNode])
                 {
-                    q.push(newNode);
-                    comeFrom.insert(std::make_pair(newNode, curNode));
+                    q.emplace(cost, newNode);
+                    costSoFar[newNode] = cost;
+                    comeFrom[newNode] = curNode;
                 }
             }
         }
@@ -86,6 +97,18 @@ void TilePathing::SetHeuristicFunc(HeuristicFunc func)
 void TilePathing::CreateMap(Ref<TileMap> tileMap)
 {
     assert(tileMap && "Tile map is null");
+    assert(!std::empty(tileMap->GetTileSets()) && "Tile map does not have a tile set");
+
+    Ref<TileLayer> tileLayer;
+    for (const auto& layer : tileMap->GetLayers())
+    {
+        if (layer->GetType() == TileMapLayer::Type::Tile)
+        {
+            tileLayer = DynamicCastRef<TileLayer>(layer);
+            break;
+        }
+    }
+    assert(tileLayer && "Tile map does not have a tile layer");
 
     mNumRows = tileMap->GetHeight();
     mNumCols = tileMap->GetWidth();
@@ -95,7 +118,25 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
     {
         for (uint32 col = 0; col < mNumCols; ++col)
         {
-            mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(row, col), 0);
+            const auto& tile = tileLayer->GetTiles()[((uint64)row * tileLayer->GetWidth()) + col];
+            Ref<TileSet> tileSet;
+            for (const auto& ts : tileMap->GetTileSets())
+            {
+                if (tile.mId >= ts->GetFirstGid())
+                {
+                    tileSet = ts;
+                    break;
+                }
+            }
+            assert(tileSet && "Tile does not have a tile set");
+            const auto& props = tileSet->GetTerrain(tile.mId).mProperties;
+            auto iter = std::find_if(std::cbegin(props), std::cend(props), [](const Property& p)
+                {
+                    return p.GetName() == "movementCost";
+                });
+            const uint32 movementCost = (iter != std::cend(props)) ? (uint32)iter->AsInt32() : 1;
+
+            mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(col, row), movementCost);
         }
     }
 }

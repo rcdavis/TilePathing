@@ -23,11 +23,6 @@ public:
         Cell() = default;
         Cell(glm::uvec2 coords, uint32 cost, Ref<Cell> parent = nullptr) :
             parent(parent), coords(coords), cost(cost) {}
-
-        friend bool operator<(const Cell& lhs, const Cell& rhs)
-        {
-            return lhs.cost < rhs.cost;
-        }
     };
 
 public:
@@ -38,6 +33,9 @@ public:
     void SetHeuristicFunc(HeuristicFunc func);
 
     Ref<Cell> GetCell(glm::uvec2 coords) { return mMap[((size_t)coords.y * mNumCols) + coords.x]; }
+    bool IsInBounds(glm::uvec2 coords) const {
+        return coords.x >= 0 && coords.y >= 0 && coords.x < mNumCols && coords.y < mNumRows;
+    }
 
     std::vector<Cell> FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords);
 

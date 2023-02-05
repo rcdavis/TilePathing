@@ -27,6 +27,24 @@ static constexpr uint32 WindowWidth = 1280;
 static constexpr uint32 WindowHeight = 738;
 //static constexpr uint32 WindowHeight = 720;
 
+static constexpr std::array startPaths = {
+    glm::uvec2 { 10, 32 },
+    glm::uvec2 { 0, 26 },
+    glm::uvec2 { 65, 28 },
+    glm::uvec2 { 51, 44 },
+    glm::uvec2 { 0, 0 }
+};
+
+static constexpr std::array endPaths = {
+    glm::uvec2 { 12, 31 },
+    glm::uvec2 { 3, 27 },
+    glm::uvec2 { 58, 21 },
+    glm::uvec2 { 79, 44 },
+    glm::uvec2 { 79, 0 }
+};
+
+static_assert(std::size(startPaths) == std::size(endPaths));
+
 Application::Application() :
     mTileMapPropertiesWindow(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
@@ -124,11 +142,14 @@ bool Application::Init()
 
     mTileMapTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f));
 
-    const auto path = mTilePathing.FindPath({ 2, 3 }, { 6, 5 });
-    LOG_INFO("Tile Path:");
-    for (const auto& p : path)
+    for (int i = 0; i < std::size(startPaths); ++i)
     {
-        LOG_INFO("  row={0}, col={1}", p.coords.y, p.coords.x);
+        const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
+        LOG_INFO("Tile Path {0}:", i);
+        for (const auto& p : path)
+        {
+            LOG_INFO("  row={0}, col={1}", p.coords.y, p.coords.x);
+        }
     }
 
     return true;
@@ -179,16 +200,19 @@ void Application::RenderTilePaths()
     mColoredRectVao->Bind();
     mColorShader->Bind();
 
-    const auto path = mTilePathing.FindPath({ 2, 3 }, { 6, 5 });
-    for (const TilePathing::Cell cell : path)
+    for (int i = 0; i < std::size(startPaths); ++i)
     {
-        const auto transform = GetTileTransform(cell.coords);
-        mColorShader->SetMat4("u_Transform", transform);
-        mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-        mColorShader->SetFloat4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+        const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
+        for (const TilePathing::Cell cell : path)
+        {
+            const auto transform = GetTileTransform(cell.coords);
+            mColorShader->SetMat4("u_Transform", transform);
+            mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+            mColorShader->SetFloat4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
 
-        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+            const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
+            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        }
     }
 
     glDisable(GL_BLEND);
