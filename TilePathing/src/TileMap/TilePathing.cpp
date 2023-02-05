@@ -10,6 +10,7 @@
 
 TilePathing::TilePathing(Ref<TileMap> tileMap) :
     mMap(),
+    mVisitedCoords(),
     mNumRows(0),
     mNumCols(0)
 {
@@ -35,6 +36,8 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
     std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
     std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
     std::unordered_map<Ref<Cell>, uint32> costSoFar;
+    mVisitedCoords.clear();
+    mVisitedCoords.insert(startCoords);
 
     q.emplace(0, startNode);
     comeFrom[startNode] = nullptr;
@@ -60,6 +63,7 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
                     q.emplace(cost + Heuristic(newCoords, endCoords), newNode);
                     costSoFar[newNode] = cost;
                     comeFrom[newNode] = curNode;
+                    mVisitedCoords.insert(newNode->coords);
                 }
             }
         }

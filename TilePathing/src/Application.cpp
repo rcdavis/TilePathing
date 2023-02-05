@@ -28,19 +28,11 @@ static constexpr uint32 WindowHeight = 738;
 //static constexpr uint32 WindowHeight = 720;
 
 static constexpr std::array startPaths = {
-    glm::uvec2 { 10, 32 },
-    glm::uvec2 { 0, 26 },
-    glm::uvec2 { 65, 28 },
-    glm::uvec2 { 51, 44 },
-    glm::uvec2 { 0, 0 }
+    glm::uvec2 { 65, 28 }
 };
 
 static constexpr std::array endPaths = {
-    glm::uvec2 { 12, 31 },
-    glm::uvec2 { 3, 27 },
-    glm::uvec2 { 58, 21 },
-    glm::uvec2 { 79, 44 },
-    glm::uvec2 { 79, 0 }
+    glm::uvec2 { 58, 21 }
 };
 
 static_assert(std::size(startPaths) == std::size(endPaths));
@@ -189,16 +181,32 @@ void Application::RenderTilePaths()
 
     mColoredRectVao->Bind();
     mColorShader->Bind();
+    mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
     for (int i = 0; i < std::size(startPaths); ++i)
     {
         const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
         for (const glm::uvec2 cell : path)
         {
-            const auto transform = GetTileTransform(cell);
-            mColorShader->SetMat4("u_Transform", transform);
-            mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-            mColorShader->SetFloat4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+            glm::vec4 color;
+            if (cell == startPaths[i])
+                color = mTileMapPropertiesWindow.GetStartColor();
+            else if (cell == endPaths[i])
+                color = mTileMapPropertiesWindow.GetEndColor();
+            else
+                color = mTileMapPropertiesWindow.GetPathColor();
+
+            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+            mColorShader->SetFloat4("u_Color", color);
+
+            const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
+            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        }
+
+        for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+        {
+            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+            mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
 
             const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
             glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
