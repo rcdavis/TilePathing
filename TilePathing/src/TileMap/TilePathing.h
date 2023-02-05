@@ -2,9 +2,7 @@
 
 #include "Core.h"
 
-#include <functional>
 #include <vector>
-#include <numeric>
 #include <glm/glm.hpp>
 
 class TileMap;
@@ -12,17 +10,14 @@ class TileMap;
 class TilePathing
 {
 public:
-    using HeuristicFunc = std::function<uint32(glm::vec2, glm::vec2)>;
-
     struct Cell
     {
-        Ref<Cell> parent = nullptr;
-        glm::uvec2 coords{ std::numeric_limits<uint32>::max() };
+        glm::uvec2 coords{ 0, 0 };
         uint32 cost = 0;
 
         Cell() = default;
-        Cell(glm::uvec2 coords, uint32 cost, Ref<Cell> parent = nullptr) :
-            parent(parent), coords(coords), cost(cost) {}
+        Cell(glm::uvec2 coords, uint32 cost) :
+            coords(coords), cost(cost) {}
     };
 
 public:
@@ -30,7 +25,6 @@ public:
     TilePathing(Ref<TileMap> tileMap);
 
     void SetTileMap(Ref<TileMap> tileMap) { CreateMap(tileMap); }
-    void SetHeuristicFunc(HeuristicFunc func);
 
     Ref<Cell> GetCell(glm::uvec2 coords) { return mMap[((size_t)coords.y * mNumCols) + coords.x]; }
     bool IsInBounds(glm::uvec2 coords) const {
@@ -41,10 +35,10 @@ public:
 
 private:
     void CreateMap(Ref<TileMap> tileMap);
+    uint32 Heuristic(glm::uvec2 start, glm::uvec2 end) const;
 
 private:
     std::vector<Ref<Cell>> mMap;
-    HeuristicFunc mHeuristicFunc;
     uint32 mNumRows = 0;
     uint32 mNumCols = 0;
 };

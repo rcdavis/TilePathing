@@ -1,7 +1,7 @@
 #include "TilePathing.h"
 
 #include <queue>
-#include <map>
+#include <unordered_map>
 #include <array>
 
 #include "TileMap/TileMap.h"
@@ -69,7 +69,7 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
                 const uint32 cost = costSoFar[curNode] + newNode->cost;
                 if (costSoFar.find(newNode) == std::end(costSoFar) || cost < costSoFar[newNode])
                 {
-                    q.emplace(cost, newNode);
+                    q.emplace(cost + Heuristic(newCoords, endCoords), newNode);
                     costSoFar[newNode] = cost;
                     comeFrom[newNode] = curNode;
                 }
@@ -89,9 +89,9 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
     return path;
 }
 
-void TilePathing::SetHeuristicFunc(HeuristicFunc func)
+uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const
 {
-    mHeuristicFunc = std::bind(func, std::placeholders::_1, std::placeholders::_2);
+    return std::abs((long)end.x - (long)start.x) + std::abs((long)end.y - (long)start.y);
 }
 
 void TilePathing::CreateMap(Ref<TileMap> tileMap)
