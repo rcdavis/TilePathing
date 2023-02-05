@@ -8,17 +8,6 @@
 #include "TileMap/TileSet.h"
 #include "TileMap/TileLayer.h"
 
-template<>
-struct std::hash<glm::uvec2>
-{
-    std::size_t operator()(glm::uvec2 v) const noexcept
-    {
-        size_t h1 = std::hash<size_t>{}(v.x);
-        size_t h2 = std::hash<size_t>{}(v.y);
-        return h1 ^ (h2 << 1);
-    }
-};
-
 TilePathing::TilePathing(Ref<TileMap> tileMap) :
     mMap(),
     mNumRows(0),
@@ -27,7 +16,7 @@ TilePathing::TilePathing(Ref<TileMap> tileMap) :
     CreateMap(tileMap);
 }
 
-std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords)
+std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords)
 {
     if (!IsInBounds(startCoords) || !IsInBounds(endCoords))
         return {};
@@ -42,7 +31,6 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
     auto startNode = GetCell(startCoords);
     auto endNode = GetCell(endCoords);
 
-    //std::priority_queue<Ref<Cell>, std::vector<Ref<Cell>>, std::greater<Ref<Cell>>> q;
     typedef std::pair<uint32, Ref<Cell>> QElement;
     std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
     std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
@@ -77,10 +65,10 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
         }
     }
 
-    std::vector<Cell> path;
+    std::vector<glm::uvec2> path;
     while (endNode)
     {
-        path.push_back(Cell(endNode->coords, endNode->cost));
+        path.push_back(endNode->coords);
         endNode = comeFrom[endNode];
     }
 

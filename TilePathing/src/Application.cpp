@@ -142,16 +142,6 @@ bool Application::Init()
 
     mTileMapTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f));
 
-    for (int i = 0; i < std::size(startPaths); ++i)
-    {
-        const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
-        LOG_INFO("Tile Path {0}:", i);
-        for (const auto& p : path)
-        {
-            LOG_INFO("  row={0}, col={1}", p.coords.y, p.coords.x);
-        }
-    }
-
     return true;
 }
 
@@ -203,9 +193,9 @@ void Application::RenderTilePaths()
     for (int i = 0; i < std::size(startPaths); ++i)
     {
         const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
-        for (const TilePathing::Cell cell : path)
+        for (const glm::uvec2 cell : path)
         {
-            const auto transform = GetTileTransform(cell.coords);
+            const auto transform = GetTileTransform(cell);
             mColorShader->SetMat4("u_Transform", transform);
             mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
             mColorShader->SetFloat4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
