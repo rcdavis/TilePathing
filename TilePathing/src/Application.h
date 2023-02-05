@@ -51,7 +51,10 @@ private:
     void CreateColoredTileMesh();
     void RenderTilePaths();
 
+    void HandleInput();
+
     glm::mat4 GetTileTransform(glm::uvec2 coords);
+    glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
 
     static void GlfwErrorCallback(int error, const char* description);
 
@@ -62,6 +65,9 @@ private:
     TimeStep mLastFrameTime;
 
     glm::mat4 mTileMapTransform;
+
+    glm::uvec2 mStartCoords{ 65, 28 };
+    glm::uvec2 mEndCoords{ 58, 21 };
 
     Ref<GLVertexArray> mVAO;
     Ref<GLTexture> mTestTexture;

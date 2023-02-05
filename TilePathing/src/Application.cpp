@@ -1,6 +1,8 @@
 #include "Application.h"
 
 #include "Log.h"
+#include "Input/Input.h"
+
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLVertexBuffer.h"
@@ -26,16 +28,6 @@
 static constexpr uint32 WindowWidth = 1280;
 static constexpr uint32 WindowHeight = 738;
 //static constexpr uint32 WindowHeight = 720;
-
-static constexpr std::array startPaths = {
-    glm::uvec2 { 65, 28 }
-};
-
-static constexpr std::array endPaths = {
-    glm::uvec2 { 58, 21 }
-};
-
-static_assert(std::size(startPaths) == std::size(endPaths));
 
 Application::Application() :
     mTileMapPropertiesWindow(),
@@ -68,6 +60,8 @@ void Application::Run()
         mLastFrameTime = time;
 
         glfwPollEvents();
+
+        HandleInput();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -183,34 +177,31 @@ void Application::RenderTilePaths()
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
-    for (int i = 0; i < std::size(startPaths); ++i)
+    const auto path = mTilePathing.FindPath(mStartCoords, mEndCoords);
+    for (const glm::uvec2 cell : path)
     {
-        const auto path = mTilePathing.FindPath(startPaths[i], endPaths[i]);
-        for (const glm::uvec2 cell : path)
-        {
-            glm::vec4 color;
-            if (cell == startPaths[i])
-                color = mTileMapPropertiesWindow.GetStartColor();
-            else if (cell == endPaths[i])
-                color = mTileMapPropertiesWindow.GetEndColor();
-            else
-                color = mTileMapPropertiesWindow.GetPathColor();
+        glm::vec4 color;
+        if (cell == mStartCoords)
+            color = mTileMapPropertiesWindow.GetStartColor();
+        else if (cell == mEndCoords)
+            color = mTileMapPropertiesWindow.GetEndColor();
+        else
+            color = mTileMapPropertiesWindow.GetPathColor();
 
-            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-            mColorShader->SetFloat4("u_Color", color);
+        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+        mColorShader->SetFloat4("u_Color", color);
 
-            const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
-        }
+        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+    }
 
-        for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
-        {
-            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-            mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
+    for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+    {
+        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+        mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
 
-            const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
-        }
+        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
     }
 
     glDisable(GL_BLEND);
@@ -377,6 +368,18 @@ void Application::CreateColoredTileMesh()
     mColoredRectVao->Unbind();
 }
 
+void Application::HandleInput()
+{
+    if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+    {
+        mStartCoords = GetTileCoords(Input::GetMousePosition());
+    }
+    else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+    {
+        mEndCoords = GetTileCoords(Input::GetMousePosition());
+    }
+}
+
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords)
 {
     const uint32 tileWidth = mTileMap->GetTileWidth();
@@ -388,6 +391,14 @@ glm::mat4 Application::GetTileTransform(glm::uvec2 coords)
     const int32 yPos = -((int32)coords.y * (int32)tileHeight);
 
     return glm::translate(glm::mat4(1.0f), glm::vec3((f32)xPos, (f32)yPos, 0.5f));
+}
+
+glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos)
+{
+    const uint32 tileWidth = mTileMap->GetTileWidth();
+    const uint32 tileHeight = mTileMap->GetTileHeight();
+
+    return { mousePos.x / tileWidth, mousePos.y / tileHeight };
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)
