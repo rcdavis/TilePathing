@@ -23,6 +23,12 @@ std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32 tileId)
     return texCoords;
 }
 
+const TileSet::Terrain& TileSet::GetTerrain(const uint32 tileId)
+{
+    assert(tileId - mFirstGid >= 0 && tileId - mFirstGid < std::size(mTerrains) && "Invalid tileId");
+    return mTerrains[tileId - mFirstGid];
+}
+
 Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
 {
     const std::filesystem::path filepath = std::filesystem::path("assets/tilemaps") / node.attribute("source").as_string();
@@ -49,12 +55,15 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
     const std::filesystem::path imagePath = imageNode.attribute("source").as_string();
     tileSet->mTexture = GLTexture::Load("assets/textures" / imagePath.filename());
 
+    tileSet->mTerrains.resize(tileSet->mTileCount);
+    for (int i = 0; i < std::size(tileSet->mTerrains); ++i)
+        tileSet->mTerrains[i].mTileId = i;
+
     for (auto tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile"))
     {
-        TileSet::Terrain terrain;
-        terrain.mTileId = tileNode.attribute("id").as_uint();
-        terrain.mProperties = Property::LoadList(tileNode.child("properties"));
-        tileSet->mTerrains.push_back(terrain);
+        const uint32 tileId = tileNode.attribute("id").as_uint();
+        tileSet->mTerrains[tileId].mTileId = tileId;
+        tileSet->mTerrains[tileId].mProperties = Property::LoadList(tileNode.child("properties"));
     }
 
     return tileSet;

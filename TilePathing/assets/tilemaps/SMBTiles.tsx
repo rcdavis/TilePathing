@@ -4,6 +4,17 @@
  <tile id="0">
   <properties>
    <property name="isGround" type="bool" value="true"/>
+   <property name="movementCost" type="int" value="9000"/>
+  </properties>
+ </tile>
+ <tile id="25">
+  <properties>
+   <property name="movementCost" type="int" value="5"/>
+  </properties>
+ </tile>
+ <tile id="26">
+  <properties>
+   <property name="movementCost" type="int" value="1"/>
   </properties>
  </tile>
 </tileset>

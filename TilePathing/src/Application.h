@@ -5,6 +5,7 @@
 #include "Camera.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
+#include "TileMap/TilePathing.h"
 
 #include <glm/glm.hpp>
 
@@ -47,10 +48,16 @@ private:
     std::vector<Vertex> CreateTileMapVertices();
     void CreateTileMapMesh();
 
+    void CreateColoredTileMesh();
+    void RenderTilePaths();
+
+    glm::mat4 GetTileTransform(glm::uvec2 coords);
+
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
     TileMapPropertiesWindow mTileMapPropertiesWindow;
+    TilePathing mTilePathing;
     Camera mCamera;
     TimeStep mLastFrameTime;
 
@@ -60,6 +67,9 @@ private:
     Ref<GLTexture> mTestTexture;
     Ref<TileMap> mTileMap;
     Ref<GLShader> mShader;
+
+    Ref<GLVertexArray> mColoredRectVao;
+    Ref<GLShader> mColorShader;
 
     GLFWwindow* mWindow = nullptr;
 

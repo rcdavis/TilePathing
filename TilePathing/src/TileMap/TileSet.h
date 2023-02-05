@@ -41,6 +41,7 @@ public:
     uint32 GetColumnCount() const { return mColumnCount; }
 
     std::array<glm::vec2, 4> GetTexCoords(const uint32 tileId);
+    const Terrain& GetTerrain(const uint32 tileId);
 
     static Ref<TileSet> Load(const pugi::xml_node& node);
 
