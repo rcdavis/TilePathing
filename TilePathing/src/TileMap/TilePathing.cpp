@@ -1,8 +1,7 @@
 #include "TilePathing.h"
 
 #include <queue>
-#include <unordered_set>
-#include <set>
+#include <map>
 #include <array>
 
 #include "TileMap/TileMap.h"
@@ -35,44 +34,53 @@ std::vector<TilePathing::Cell> TilePathing::FindPath(glm::uvec2 startCoords, glm
         glm::uvec2 { 1, 0 }
     };
 
-    std::queue<glm::uvec2> q;
-    std::unordered_set<glm::uvec2> visited;
-    q.push(startCoords);
-    visited.insert(startCoords);
+    auto startNode = GetCell(startCoords);
+    auto endNode = GetCell(endCoords);
+
+    std::queue<Ref<Cell>> q;
+    std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
+    q.push(startNode);
+    comeFrom.insert(std::make_pair(startNode, nullptr));
 
     while (!std::empty(q))
     {
-        const glm::uvec2 coords = q.front();
+        Ref<Cell> curNode = q.front();
         q.pop();
 
-        if (coords == endCoords)
+        if (curNode == endNode)
             break;
 
         for (int i = 0; i < std::size(neighbors); ++i)
         {
-            const glm::uvec2 newCoords = coords + neighbors[i];
+            const glm::uvec2 newCoords = curNode->coords + neighbors[i];
             if (newCoords.x >= 0 && newCoords.y >= 0 &&
-                newCoords.x < mNumCols && newCoords.y < mNumRows && !visited.count(newCoords))
+                newCoords.x < mNumCols && newCoords.y < mNumRows)
             {
-                q.push(newCoords);
-                visited.insert(newCoords);
-                auto newCell = GetCell(newCoords);
-                newCell->parent = GetCell(coords);
+                Ref<Cell> newNode = GetCell(newCoords);
+                if (comeFrom.find(newNode) == std::end(comeFrom))
+                {
+                    q.push(newNode);
+                    comeFrom.insert(std::make_pair(newNode, curNode));
+                }
             }
         }
     }
 
-    auto curCell = GetCell(endCoords);
     std::vector<Cell> path;
-    while (curCell)
+    while (endNode)
     {
-        path.push_back(Cell(curCell->coords, curCell->cost));
-        curCell = curCell->parent;
+        path.push_back(Cell(endNode->coords, endNode->cost));
+        endNode = comeFrom[endNode];
     }
 
     std::reverse(std::begin(path), std::end(path));
 
     return path;
+}
+
+void TilePathing::SetHeuristicFunc(HeuristicFunc func)
+{
+    mHeuristicFunc = std::bind(func, std::placeholders::_1, std::placeholders::_2);
 }
 
 void TilePathing::CreateMap(Ref<TileMap> tileMap)

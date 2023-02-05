@@ -124,6 +124,13 @@ bool Application::Init()
 
     mTileMapTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f));
 
+    const auto path = mTilePathing.FindPath({ 2, 3 }, { 6, 5 });
+    LOG_INFO("Tile Path:");
+    for (const auto& p : path)
+    {
+        LOG_INFO("  row={0}, col={1}", p.coords.y, p.coords.x);
+    }
+
     return true;
 }
 
