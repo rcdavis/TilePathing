@@ -4,7 +4,6 @@
 #include "TimeStep.h"
 #include "Camera.h"
 
-#include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "TileMap/TilePathing.h"
 
 #include <glm/glm.hpp>
@@ -14,6 +13,7 @@ class GLTexture;
 class GLVertexArray;
 class GLShader;
 class TileMap;
+class ImGuiWindow;
 
 class Application
 {
@@ -61,9 +61,11 @@ private:
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
-    TileMapPropertiesWindow mTileMapPropertiesWindow;
     TilePathing mTilePathing;
     Camera mCamera;
+
+    std::vector<Ref<ImGuiWindow>> mImGuiWindows;
+
     TimeStep mLastFrameTime;
 
     glm::uvec2 mStartCoords{ 65, 28 };

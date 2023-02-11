@@ -9,15 +9,11 @@ TileMapPropertiesWindow::TileMapPropertiesWindow(bool isOpen) :
     ImGuiWindow("Tile Map Properties", isOpen)
 {}
 
-void TileMapPropertiesWindow::Render()
+void TileMapPropertiesWindow::OnRender()
 {
-    if (mIsOpen)
-    {
-        ImGui::Begin(std::data(mTitle), &mIsOpen);
-        ImGui::ColorEdit3("Start Color", glm::value_ptr(mStartColor));
-        ImGui::ColorEdit3("End Color", glm::value_ptr(mEndColor));
-        ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
-        ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
-        ImGui::End();
-    }
+    ImGui::ColorEdit3("Start Color", glm::value_ptr(mStartColor));
+    ImGui::ColorEdit3("End Color", glm::value_ptr(mEndColor));
+    ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
+    ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
+    ImGui::DragInt("Max Steps", &mMaxSteps, 1.0f, -1, 100);
 }

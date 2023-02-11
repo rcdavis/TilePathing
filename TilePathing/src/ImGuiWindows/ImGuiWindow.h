@@ -17,7 +17,10 @@ public:
     void Open(bool isOpen) { mIsOpen = isOpen; }
 
     virtual void RenderMenuItem(std::function<void()> onClick = nullptr);
-    virtual void Render() = 0;
+    void Render();
+
+protected:
+    virtual void OnRender() = 0;
 
 protected:
     std::string mTitle;

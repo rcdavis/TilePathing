@@ -14,22 +14,15 @@ void ConsoleWindow::AddLine(ConsoleItem item)
     mItems.push_back(item);
 }
 
-void ConsoleWindow::Render()
+void ConsoleWindow::OnRender()
 {
-    if (mIsOpen)
+    if (ImGui::BeginChild("ConsoleLines"))
     {
-        ImGui::Begin(std::data(mTitle), &mIsOpen);
-
-        if (ImGui::BeginChild("ConsoleLines"))
+        for (const ConsoleItem& item : mItems)
         {
-            for (const ConsoleItem& item : mItems)
-            {
-                const ImVec4 color(item.color.r, item.color.g, item.color.b, 1.0f);
-                ImGui::TextColored(color, "[%s] %s", std::data(item.tag), std::data(item.text));
-            }
+            const ImVec4 color(item.color.r, item.color.g, item.color.b, 1.0f);
+            ImGui::TextColored(color, "[%s] %s", std::data(item.tag), std::data(item.text));
         }
-        ImGui::EndChild();
-
-        ImGui::End();
     }
+    ImGui::EndChild();
 }

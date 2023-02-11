@@ -14,6 +14,9 @@
 #include "TileMap/TileLayer.h"
 #include "TileMap/TileSet.h"
 
+#include "ImGuiWindows/TileMapPropertiesWindow.h"
+#include "ImGuiWindows/TileMapPathsWindow.h"
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -30,8 +33,9 @@ static constexpr uint32 WindowHeight = 738;
 //static constexpr uint32 WindowHeight = 720;
 
 Application::Application() :
-    mTileMapPropertiesWindow(),
+    mTilePathing(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
+    mImGuiWindows(),
     mTileMap(),
     mLastFrameTime(0.0f),
     mTestTexture(),
@@ -125,6 +129,9 @@ bool Application::Init()
     CreateTileMapMesh();
     CreateColoredTileMesh();
 
+    mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>());
+    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>());
+
     return true;
 }
 
@@ -173,16 +180,18 @@ void Application::RenderTilePaths()
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
-    const auto path = mTilePathing.FindPathAStar(mStartCoords, mEndCoords);
+    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+
+    const auto path = mTilePathing.FindPath(mStartCoords, mEndCoords);
     for (const glm::uvec2 cell : path)
     {
         glm::vec4 color;
         if (cell == mStartCoords)
-            color = mTileMapPropertiesWindow.GetStartColor();
+            color = tileMapPropertiesWindow->GetStartColor();
         else if (cell == mEndCoords)
-            color = mTileMapPropertiesWindow.GetEndColor();
+            color = tileMapPropertiesWindow->GetEndColor();
         else
-            color = mTileMapPropertiesWindow.GetPathColor();
+            color = tileMapPropertiesWindow->GetPathColor();
 
         mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
         mColorShader->SetFloat4("u_Color", color);
@@ -193,7 +202,7 @@ void Application::RenderTilePaths()
     for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
     {
         mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-        mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
+        mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
 
         Render(mColoredRectVao);
     }
@@ -211,7 +220,8 @@ void Application::RenderImGuiPanels()
     {
         if (ImGui::BeginMenu("Windows"))
         {
-            mTileMapPropertiesWindow.RenderMenuItem();
+            for (auto& window : mImGuiWindows)
+                window->RenderMenuItem();
 
             ImGui::EndMenu();
         }
@@ -219,7 +229,8 @@ void Application::RenderImGuiPanels()
         ImGui::EndMainMenuBar();
     }
 
-    mTileMapPropertiesWindow.Render();
+    for (auto& window : mImGuiWindows)
+        window->Render();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

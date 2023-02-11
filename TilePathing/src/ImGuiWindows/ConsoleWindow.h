@@ -24,7 +24,7 @@ public:
     void AddLine(ConsoleItem item);
     void Clear() { mItems.clear(); }
 
-    void Render() override;
+    void OnRender() override;
 
 private:
     std::deque<ConsoleItem> mItems;
