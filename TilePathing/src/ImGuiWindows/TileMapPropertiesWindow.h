@@ -32,7 +32,7 @@ public:
     void OnRender() override;
 
 private:
-    glm::vec4 mStartColor{ 0.0f, 1.0f, 0.0f, 0.5f };
+    glm::vec4 mStartColor{ 0.0f, 0.0f, 1.0f, 0.5f };
     glm::vec4 mEndColor{ 1.0f, 0.0f, 0.0f, 0.5f };
     glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };

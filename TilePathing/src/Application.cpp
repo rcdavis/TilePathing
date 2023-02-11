@@ -17,6 +17,7 @@
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
+#include "ImGuiWindows/ContentBrowserWindow.h"
 
 #include "Utils/MeshUtils.h"
 
@@ -133,6 +134,7 @@ bool Application::Init()
 
     mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
     mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
+    mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 
     FramebufferSpecs specs;
     specs.attachments = {
