@@ -191,14 +191,16 @@ void Application::RenderScene()
 
 void Application::RenderTilePaths()
 {
+    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
+    if (!tileMapPropertiesWindow || !tileMapPathsWindow)
+        return;
+
     glEnable(GL_BLEND);
 
     mColoredRectVao->Bind();
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-
-    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
-    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
 
     for (const auto& p : tileMapPathsWindow->GetPaths())
     {
