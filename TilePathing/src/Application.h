@@ -11,6 +11,7 @@
 struct GLFWwindow;
 class GLTexture;
 class GLVertexArray;
+class GLFramebuffer;
 class GLShader;
 class TileMap;
 class ImGuiWindow;
@@ -35,9 +36,9 @@ private:
     bool Init();
     void Shutdown();
 
+    void Render();
     void RenderScene();
-    void RenderImGuiPanels();
-
+    void RenderMainMenu();
     void RenderTilePaths();
 
     void HandleInput();
@@ -56,6 +57,8 @@ private:
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
 
     TimeStep mLastFrameTime;
+
+    Ref<GLFramebuffer> mFramebuffer;
 
     Ref<GLVertexArray> mVAO;
     Ref<GLTexture> mTestTexture;

@@ -8,6 +8,7 @@
 #include "OpenGL/GLVertexBuffer.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
+#include "OpenGL/GLFramebuffer.h"
 
 #include "TileMap/TileMap.h"
 #include "TileMap/TileMapLayer.h"
@@ -29,8 +30,7 @@
 #include <imgui_impl_opengl3.h>
 
 static constexpr uint32 WindowWidth = 1280;
-static constexpr uint32 WindowHeight = 738;
-//static constexpr uint32 WindowHeight = 720;
+static constexpr uint32 WindowHeight = 720;
 
 Application::Application() :
     mTilePathing(),
@@ -68,9 +68,7 @@ void Application::Run()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        RenderScene();
-
-        RenderImGuiPanels();
+        Render();
 
         glfwSwapBuffers(mWindow);
     }
@@ -108,6 +106,10 @@ bool Application::Init()
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
     ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
     ImGui_ImplOpenGL3_Init("#version 460 core");
 
@@ -130,7 +132,16 @@ bool Application::Init()
     mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
     mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>());
-    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
+    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>());
+
+    FramebufferSpecs specs;
+    specs.attachments = {
+        FramebufferTextureFormat::RGBA8,
+        FramebufferTextureFormat::Depth
+    };
+    specs.width = WindowWidth;
+    specs.height = WindowHeight;
+    mFramebuffer = GLFramebuffer::Create(specs);
 
     return true;
 }
@@ -144,6 +155,8 @@ void Application::Shutdown()
 
     mColoredRectVao = nullptr;
     mColorShader = nullptr;
+
+    mFramebuffer = nullptr;
 
     if (mInitializedImGui)
     {
@@ -160,6 +173,9 @@ void Application::Shutdown()
 
 void Application::RenderScene()
 {
+    mFramebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     mTestTexture->Bind();
 
     mShader->Bind();
@@ -170,6 +186,7 @@ void Application::RenderScene()
     Render(mVAO);
 
     RenderTilePaths();
+    mFramebuffer->Unbind();
 }
 
 void Application::RenderTilePaths()
@@ -214,12 +231,76 @@ void Application::RenderTilePaths()
     glDisable(GL_BLEND);
 }
 
-void Application::RenderImGuiPanels()
+void Application::Render()
 {
+    RenderScene();
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    static bool dockspaceOpen = true;
+    static constexpr bool optFullscreen = true;
+    static constexpr ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+    if constexpr (optFullscreen)
+    {
+        const ImGuiViewport* const viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    }
+
+    if constexpr (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+        windowFlags |= ImGuiWindowFlags_NoBackground;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &dockspaceOpen, windowFlags);
+    ImGui::PopStyleVar();
+
+    if constexpr (optFullscreen)
+        ImGui::PopStyleVar(2);
+
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        ImGui::DockSpace(ImGui::GetID("MyDockSpace"), ImVec2(0.0f, 0.0f), dockspaceFlags);
+
+    RenderMainMenu();
+
+    for (auto& window : mImGuiWindows)
+        window->Render();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("Viewport");
+
+    const ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    const uint64 texId = (uint64)mFramebuffer->GetColorAttachment();
+    ImGui::Image((ImTextureID)texId, viewportPanelSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* const backupCurrentContext = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backupCurrentContext);
+    }
+}
+
+void Application::RenderMainMenu()
+{
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Windows"))
@@ -232,12 +313,6 @@ void Application::RenderImGuiPanels()
 
         ImGui::EndMainMenuBar();
     }
-
-    for (auto& window : mImGuiWindows)
-        window->Render();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Application::HandleInput()
