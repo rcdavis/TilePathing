@@ -17,7 +17,7 @@ TilePathing::TilePathing(Ref<TileMap> tileMap) :
     CreateMap(tileMap);
 }
 
-std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords)
+std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords, uint32 maxSteps)
 {
     if (!IsInBounds(startCoords) || !IsInBounds(endCoords))
         return {};
@@ -124,7 +124,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
             const auto& props = tileSet->GetTerrain(tile.mId).mProperties;
             auto iter = std::find_if(std::cbegin(props), std::cend(props), [](const Property& p)
                 {
-                    return p.GetName() == "movementCost";
+                    return strcmp(std::data(p.GetName()), "movementCost") == 0;
                 });
             const uint32 movementCost = (iter != std::cend(props)) ? (uint32)iter->AsInt32() : 1;
 
