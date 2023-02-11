@@ -56,6 +56,8 @@ private:
 
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
 
+    glm::uvec2 mStartPos{ 0, 0 };
+
     TimeStep mLastFrameTime;
 
     Ref<GLFramebuffer> mFramebuffer;
@@ -71,4 +73,5 @@ private:
     GLFWwindow* mWindow = nullptr;
 
     bool mInitializedImGui = false;
+    bool mViewportClickable = false;
 };

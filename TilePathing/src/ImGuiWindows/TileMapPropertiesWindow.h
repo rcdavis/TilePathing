@@ -26,6 +26,9 @@ public:
     int32 GetMaxSteps() const { return mMaxSteps; }
     void SetMaxSteps(int32 maxSteps) { mMaxSteps = maxSteps; }
 
+    bool GetShowVisitedTiles() const { return mShowVisitedTiles; }
+    void SetShowVisitedTiles(const bool b) { mShowVisitedTiles = b; }
+
     void OnRender() override;
 
 private:
@@ -35,4 +38,6 @@ private:
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
 
     int32 mMaxSteps = -1;
+
+    bool mShowVisitedTiles = false;
 };

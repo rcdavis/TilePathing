@@ -53,7 +53,7 @@ void TileMapPathsWindow::OnRender()
         mCurSelected = (uint32)std::size(mPaths) - 1;
     }
 
-    if (ImGui::Button("Remove Path") && mCurSelected < std::size(mPaths))
+    if (mCurSelected < std::size(mPaths) && ImGui::Button("Remove Path"))
     {
         mPaths.erase(std::begin(mPaths) + mCurSelected);
         mCurSelected = std::max(0, (int32)mCurSelected - 1);

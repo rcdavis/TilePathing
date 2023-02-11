@@ -221,12 +221,15 @@ void Application::RenderTilePaths()
             Render(mColoredRectVao);
         }
 
-        for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+        if (tileMapPropertiesWindow->GetShowVisitedTiles())
         {
-            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-            mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
+            for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+            {
+                mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+                mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
 
-            Render(mColoredRectVao);
+                Render(mColoredRectVao);
+            }
         }
     }
 
@@ -280,9 +283,9 @@ void Application::Render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Viewport");
 
-    const ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    mViewportClickable = ImGui::IsWindowFocused() && ImGui::IsWindowHovered();
     const uint64 texId = (uint64)mFramebuffer->GetColorAttachment();
-    ImGui::Image((ImTextureID)texId, viewportPanelSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+    ImGui::Image((ImTextureID)texId, ImGui::GetContentRegionAvail(), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -319,14 +322,10 @@ void Application::RenderMainMenu()
 
 void Application::HandleInput()
 {
-    /*if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+    if (mViewportClickable && Input::IsMouseButtonPressed(Mouse::ButtonLeft))
     {
-        mStartCoords = GetTileCoords(Input::GetMousePosition());
+        mStartPos = GetTileCoords(Input::GetMousePosition());
     }
-    else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
-    {
-        mEndCoords = GetTileCoords(Input::GetMousePosition());
-    }*/
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords)
