@@ -18,13 +18,6 @@ class ImGuiWindow;
 class Application
 {
 public:
-    struct Vertex
-    {
-        glm::vec3 position{ 0.0f };
-        glm::vec2 texCoord{ 0.0f };
-    };
-
-public:
     Application();
     ~Application();
 
@@ -45,10 +38,6 @@ private:
     void RenderScene();
     void RenderImGuiPanels();
 
-    std::vector<Vertex> CreateTileMapVertices();
-    void CreateTileMapMesh();
-
-    void CreateColoredTileMesh();
     void RenderTilePaths();
 
     void HandleInput();

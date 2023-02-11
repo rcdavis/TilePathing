@@ -17,6 +17,8 @@
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
 
+#include "Utils/MeshUtils.h"
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -25,8 +27,6 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-
-#include <cassert>
 
 static constexpr uint32 WindowWidth = 1280;
 static constexpr uint32 WindowHeight = 738;
@@ -126,8 +126,8 @@ bool Application::Init()
 
     mTilePathing.SetTileMap(mTileMap);
 
-    CreateTileMapMesh();
-    CreateColoredTileMesh();
+    mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
+    mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
     mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>());
     mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>());
@@ -234,143 +234,6 @@ void Application::RenderImGuiPanels()
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-std::vector<Application::Vertex> Application::CreateTileMapVertices()
-{
-    assert(mTileMap && "Passing in a null tile map");
-    assert(!std::empty(mTileMap->GetTileSets()) && "Tile map does not have a tile set");
-
-    std::vector<Application::Vertex> vertices;
-
-    for (const Ref<TileMapLayer>& layer : mTileMap->GetLayers())
-    {
-        if (layer->GetType() != TileMapLayer::Type::Tile)
-            continue;
-
-        const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
-        const auto& tiles = tileLayer->GetTiles();
-        for (uint32 i = 0; i < std::size(tiles); ++i)
-        {
-            const auto& tile = tiles[i];
-            Ref<TileSet> tileSet;
-            for (const auto& ts : mTileMap->GetTileSets())
-            {
-                if (tile.mId >= ts->GetFirstGid())
-                {
-                    tileSet = ts;
-                    break;
-                }
-            }
-
-            assert(tileSet && "Tile Layer does not have a tile set");
-
-            const uint32 tileWidth = tileSet->GetTileWidth();
-            const uint32 tileHeight = tileSet->GetTileHeight();
-            const uint32 numTilesWidth = tileLayer->GetWidth();
-            const uint32 numTilesHeight = tileLayer->GetHeight();
-
-            const uint32 xPos = ((i % numTilesWidth) * tileWidth);
-            const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
-
-            const std::array<glm::vec4, 4> vertPositions = {
-                glm::vec4 { xPos, yPos, 0.0f, 1.0f },
-                glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
-                glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
-                glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
-            };
-
-            const std::array<glm::vec2, 4> texCoords = tileSet->GetTexCoords(tile.mId);
-
-            for (int i = 0; i < 4; ++i)
-                vertices.push_back({ vertPositions[i], texCoords[i] });
-        }
-    }
-
-    return vertices;
-}
-
-void Application::CreateTileMapMesh()
-{
-    const auto vertices = CreateTileMapVertices();
-
-    mVAO = GLVertexArray::Create();
-    mVAO->Bind();
-
-    auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetLayout({
-        { ShaderDataType::Float3, "a_Position" },
-        { ShaderDataType::Float2, "a_TexCoord" }
-    });
-    mVAO->AddVertexBuffer(vb);
-
-    std::vector<uint16> quadIndices(std::size(vertices) * 6);
-
-    uint16 offset = 0;
-    for (size_t i = 0; i < std::size(quadIndices); i += 6)
-    {
-        quadIndices[i] = offset;
-        quadIndices[i + 1] = offset + 1;
-        quadIndices[i + 2] = offset + 2;
-
-        quadIndices[i + 3] = offset + 2;
-        quadIndices[i + 4] = offset + 3;
-        quadIndices[i + 5] = offset;
-
-        offset += 4;
-    }
-
-    auto quadIB = GLIndexBuffer::Create(std::data(quadIndices), (uint32)std::size(quadIndices));
-    mVAO->SetIndexBuffer(quadIB);
-
-    mVAO->Unbind();
-}
-
-void Application::CreateColoredTileMesh()
-{
-    assert(mTileMap && "Passing in a null tile map");
-
-    mColoredRectVao = GLVertexArray::Create();
-    mColoredRectVao->Bind();
-
-    const uint32 numTilesHeight = mTileMap->GetHeight();
-    const uint32 tileWidth = mTileMap->GetTileWidth();
-    const uint32 tileHeight = mTileMap->GetTileHeight();
-
-    constexpr f32 xPos = 0.0f;
-    const uint32 yPos = (numTilesHeight * tileHeight);
-
-    const std::array<glm::vec4, 4> vertPositions = {
-        glm::vec4 { xPos, yPos, 0.0f, 1.0f },
-        glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
-        glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
-        glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
-    };
-
-    const std::array<Vertex, 4> vertices = {
-        Vertex { vertPositions[0], glm::vec2(0.0f) },
-        Vertex { vertPositions[1], glm::vec2(0.0f) },
-        Vertex { vertPositions[2], glm::vec2(0.0f) },
-        Vertex { vertPositions[3], glm::vec2(0.0f) }
-    };
-
-    auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetLayout({
-        { ShaderDataType::Float3, "a_Position" },
-        { ShaderDataType::Float2, "a_TexCoord" }
-    });
-    mColoredRectVao->AddVertexBuffer(vb);
-
-    constexpr std::array<uint16, 6> indices = {
-        0, 1, 2, 2, 3, 0
-    };
-
-    auto quadIB = GLIndexBuffer::Create(std::data(indices), (uint32)std::size(indices));
-    mColoredRectVao->SetIndexBuffer(quadIB);
-
-    mColoredRectVao->Unbind();
 }
 
 void Application::HandleInput()
