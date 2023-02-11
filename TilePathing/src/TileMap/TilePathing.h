@@ -39,7 +39,7 @@ public:
     void SetTileMap(Ref<TileMap> tileMap) { CreateMap(tileMap); }
     std::unordered_set<glm::uvec2> GetVisitedCoords() { return mVisitedCoords; }
 
-    std::vector<glm::uvec2> FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords, uint32 maxSteps = -1);
+    std::vector<glm::uvec2> FindPathAStar(glm::uvec2 startCoords, glm::uvec2 endCoords, uint32 maxSteps = -1);
 
 private:
     Ref<Cell> GetCell(glm::uvec2 coords) { return mMap[((size_t)coords.y * mNumCols) + coords.x]; }

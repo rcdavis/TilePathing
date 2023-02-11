@@ -34,7 +34,6 @@ Application::Application() :
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
     mTileMap(),
     mLastFrameTime(0.0f),
-    mTileMapTransform(1.0f),
     mTestTexture(),
     mWindow(nullptr),
     mInitializedImGui(false)
@@ -126,8 +125,6 @@ bool Application::Init()
     CreateTileMapMesh();
     CreateColoredTileMesh();
 
-    mTileMapTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f));
-
     return true;
 }
 
@@ -163,8 +160,7 @@ void Application::RenderScene()
 
     mVAO->Bind();
 
-    const uint32 count = mVAO->GetIndexBuffer()->GetCount();
-    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+    Render(mVAO);
 
     RenderTilePaths();
 }
@@ -177,7 +173,7 @@ void Application::RenderTilePaths()
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
-    const auto path = mTilePathing.FindPath(mStartCoords, mEndCoords);
+    const auto path = mTilePathing.FindPathAStar(mStartCoords, mEndCoords);
     for (const glm::uvec2 cell : path)
     {
         glm::vec4 color;
@@ -191,8 +187,7 @@ void Application::RenderTilePaths()
         mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
         mColorShader->SetFloat4("u_Color", color);
 
-        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        Render(mColoredRectVao);
     }
 
     for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
@@ -200,8 +195,7 @@ void Application::RenderTilePaths()
         mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
         mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
 
-        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        Render(mColoredRectVao);
     }
 
     glDisable(GL_BLEND);
@@ -297,7 +291,7 @@ void Application::CreateTileMapMesh()
     vb->SetLayout({
         { ShaderDataType::Float3, "a_Position" },
         { ShaderDataType::Float2, "a_TexCoord" }
-        });
+    });
     mVAO->AddVertexBuffer(vb);
 
     std::vector<uint16> quadIndices(std::size(vertices) * 6);
@@ -355,7 +349,7 @@ void Application::CreateColoredTileMesh()
     vb->SetLayout({
         { ShaderDataType::Float3, "a_Position" },
         { ShaderDataType::Float2, "a_TexCoord" }
-        });
+    });
     mColoredRectVao->AddVertexBuffer(vb);
 
     constexpr std::array<uint16, 6> indices = {
@@ -398,7 +392,13 @@ glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos)
     const uint32 tileWidth = mTileMap->GetTileWidth();
     const uint32 tileHeight = mTileMap->GetTileHeight();
 
-    return { mousePos.x / tileWidth, mousePos.y / tileHeight };
+    return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
+}
+
+void Application::Render(const Ref<GLVertexArray>& vao)
+{
+    const uint32 count = vao->GetIndexBuffer()->GetCount();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)

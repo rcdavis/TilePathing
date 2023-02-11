@@ -56,6 +56,8 @@ private:
     glm::mat4 GetTileTransform(glm::uvec2 coords);
     glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
 
+    void Render(const Ref<GLVertexArray>& vao);
+
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
@@ -63,8 +65,6 @@ private:
     TilePathing mTilePathing;
     Camera mCamera;
     TimeStep mLastFrameTime;
-
-    glm::mat4 mTileMapTransform;
 
     glm::uvec2 mStartCoords{ 65, 28 };
     glm::uvec2 mEndCoords{ 58, 21 };

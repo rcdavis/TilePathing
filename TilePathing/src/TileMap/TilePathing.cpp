@@ -17,7 +17,7 @@ TilePathing::TilePathing(Ref<TileMap> tileMap) :
     CreateMap(tileMap);
 }
 
-std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords, uint32 maxSteps)
+std::vector<glm::uvec2> TilePathing::FindPathAStar(glm::uvec2 startCoords, glm::uvec2 endCoords, uint32 maxSteps)
 {
     if (!IsInBounds(startCoords) || !IsInBounds(endCoords))
         return {};
