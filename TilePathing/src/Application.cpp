@@ -131,8 +131,8 @@ bool Application::Init()
     mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
     mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
-    mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>());
-    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>());
+    mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
+    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
 
     FramebufferSpecs specs;
     specs.attachments = {
