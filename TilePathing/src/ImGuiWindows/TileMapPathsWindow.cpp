@@ -30,21 +30,21 @@ void TileMapPathsWindow::OnRender()
 
     if (mCurSelected < std::size(mPaths))
     {
-        int32 startRow = mPaths[mCurSelected].start.x;
+        int32 startRow = mPaths[mCurSelected].start.y;
         if (ImGui::InputInt("Start Row", &startRow))
-            mPaths[mCurSelected].start.x = startRow;
+            mPaths[mCurSelected].start.y = startRow;
 
-        int32 startCol = mPaths[mCurSelected].start.y;
+        int32 startCol = mPaths[mCurSelected].start.x;
         if (ImGui::InputInt("Start Column", &startCol))
-            mPaths[mCurSelected].start.y = startCol;
+            mPaths[mCurSelected].start.x = startCol;
 
-        int32 endRow = mPaths[mCurSelected].end.x;
+        int32 endRow = mPaths[mCurSelected].end.y;
         if (ImGui::InputInt("End Row", &endRow))
-            mPaths[mCurSelected].end.x = endRow;
+            mPaths[mCurSelected].end.y = endRow;
 
-        int32 endCol = mPaths[mCurSelected].end.y;
+        int32 endCol = mPaths[mCurSelected].end.x;
         if (ImGui::InputInt("End Column", &endCol))
-            mPaths[mCurSelected].end.y = endCol;
+            mPaths[mCurSelected].end.x = endCol;
     }
 
     if (ImGui::Button("Add Path"))

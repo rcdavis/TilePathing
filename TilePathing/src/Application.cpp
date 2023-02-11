@@ -130,7 +130,7 @@ bool Application::Init()
     mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
     mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>());
-    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>());
+    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
 
     return true;
 }
@@ -181,30 +181,34 @@ void Application::RenderTilePaths()
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
     auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
 
-    const auto path = mTilePathing.FindPath(mStartCoords, mEndCoords);
-    for (const glm::uvec2 cell : path)
+    for (const auto& p : tileMapPathsWindow->GetPaths())
     {
-        glm::vec4 color;
-        if (cell == mStartCoords)
-            color = tileMapPropertiesWindow->GetStartColor();
-        else if (cell == mEndCoords)
-            color = tileMapPropertiesWindow->GetEndColor();
-        else
-            color = tileMapPropertiesWindow->GetPathColor();
+        const auto path = mTilePathing.FindPath(p.start, p.end);
+        for (const glm::uvec2 cell : path)
+        {
+            glm::vec4 color;
+            if (cell == p.start)
+                color = tileMapPropertiesWindow->GetStartColor();
+            else if (cell == p.end)
+                color = tileMapPropertiesWindow->GetEndColor();
+            else
+                color = tileMapPropertiesWindow->GetPathColor();
 
-        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-        mColorShader->SetFloat4("u_Color", color);
+            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+            mColorShader->SetFloat4("u_Color", color);
 
-        Render(mColoredRectVao);
-    }
+            Render(mColoredRectVao);
+        }
 
-    for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
-    {
-        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-        mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
+        for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+        {
+            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+            mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
 
-        Render(mColoredRectVao);
+            Render(mColoredRectVao);
+        }
     }
 
     glDisable(GL_BLEND);
@@ -238,14 +242,14 @@ void Application::RenderImGuiPanels()
 
 void Application::HandleInput()
 {
-    if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+    /*if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
     {
         mStartCoords = GetTileCoords(Input::GetMousePosition());
     }
     else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
     {
         mEndCoords = GetTileCoords(Input::GetMousePosition());
-    }
+    }*/
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords)

@@ -57,9 +57,6 @@ private:
 
     TimeStep mLastFrameTime;
 
-    glm::uvec2 mStartCoords{ 65, 28 };
-    glm::uvec2 mEndCoords{ 58, 21 };
-
     Ref<GLVertexArray> mVAO;
     Ref<GLTexture> mTestTexture;
     Ref<TileMap> mTileMap;

@@ -4,7 +4,7 @@
 
 ImGuiWindow::ImGuiWindow(const std::string& title, bool isOpen) :
     mTitle(title),
-    mIsOpen(false)
+    mIsOpen(isOpen)
 {}
 
 void ImGuiWindow::RenderMenuItem(std::function<void()> onClick)
