@@ -39,6 +39,7 @@ Application::Application() :
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
     mImGuiWindows(),
     mCharacters(),
+    mPlayer(),
     mTileMap(),
     mLastFrameTime(0.0f),
     mTestTexture(),
@@ -64,6 +65,8 @@ void Application::Run()
         const TimeStep time((f32)glfwGetTime());
         const TimeStep timestep = time - mLastFrameTime;
         mLastFrameTime = time;
+
+        Input::Poll(timestep);
 
         glfwPollEvents();
 
@@ -138,10 +141,10 @@ bool Application::Init()
     mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
     mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 
-    Ref<Character> character = CreateRef<Character>();
-    character->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
-    character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-    mCharacters.push_back(character);
+    mPlayer = CreateRef<Character>();
+    mPlayer->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
+    mPlayer->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
+    mCharacters.push_back(mPlayer);
 
     FramebufferSpecs specs;
     specs.attachments = {
@@ -359,9 +362,32 @@ void Application::RenderMainMenu()
 
 void Application::HandleInput()
 {
-    if (mViewportClickable)
+    if (mViewportClickable && mPlayer && mTileMap)
     {
+        constexpr TimeStep ts(0.1f);
+        const auto coords = mPlayer->GetTileCoords();
 
+        if (Input::IsKeyDown(Key::Left, ts))
+        {
+            if (coords.x > 0)
+                mPlayer->MoveLeft(1);
+        }
+        else if (Input::IsKeyDown(Key::Right, ts))
+        {
+            if (coords.x < mTileMap->GetWidth() - 1)
+                mPlayer->MoveRight(1);
+        }
+
+        if (Input::IsKeyDown(Key::Up, ts))
+        {
+            if (coords.y > 0)
+                mPlayer->MoveUp(1);
+        }
+        else if (Input::IsKeyDown(Key::Down, ts))
+        {
+            if (coords.y < mTileMap->GetHeight() - 1)
+                mPlayer->MoveDown(1);
+        }
     }
 }
 

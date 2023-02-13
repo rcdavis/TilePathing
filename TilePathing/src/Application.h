@@ -59,6 +59,7 @@ private:
 
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
     std::vector<Ref<Character>> mCharacters;
+    Ref<Character> mPlayer;
 
     glm::uvec2 mStartPos{ 0, 0 };
 

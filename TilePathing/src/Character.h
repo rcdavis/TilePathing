@@ -15,6 +15,11 @@ public:
     glm::uvec2 GetTileCoords() const { return mTileCoords; }
     void SetTileCoords(glm::uvec2 coords) { mTileCoords = coords; }
 
+    void MoveUp(const uint32 numRows) { mTileCoords.y -= numRows; }
+    void MoveDown(const uint32 numRows) { mTileCoords.y += numRows; }
+    void MoveRight(const uint32 numCol) { mTileCoords.x += numCol; }
+    void MoveLeft(const uint32 numCol) { mTileCoords.x -= numCol; }
+
     Ref<GLTexture> GetTexture() { return mTexture; }
     void SetTexture(Ref<GLTexture> texture) { mTexture = texture; }
 
