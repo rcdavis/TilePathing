@@ -114,21 +114,9 @@ namespace MeshUtils
         const uint32 tileHeight = tileMap->GetTileHeight();
 
         constexpr f32 xPos = 0.0f;
-        const uint32 yPos = (numTilesHeight * tileHeight);
+        const f32 yPos = (f32)(numTilesHeight * tileHeight);
 
-        const std::array<glm::vec4, 4> vertPositions = {
-            glm::vec4 { xPos, yPos, 0.0f, 1.0f },
-            glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
-            glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
-            glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
-        };
-
-        const std::array<Vertex, 4> vertices = {
-            Vertex { vertPositions[0], glm::vec2(0.0f) },
-            Vertex { vertPositions[1], glm::vec2(0.0f) },
-            Vertex { vertPositions[2], glm::vec2(0.0f) },
-            Vertex { vertPositions[3], glm::vec2(0.0f) }
-        };
+        const auto vertices = CreateQuad(xPos, yPos, (f32)tileWidth, (f32)tileHeight);
 
         auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
         vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
@@ -147,5 +135,27 @@ namespace MeshUtils
 
         vao->Unbind();
         return vao;
+    }
+
+    std::array<Vertex, 4> CreateQuad(f32 xPos, f32 yPos, f32 width, f32 height)
+    {
+        const std::array<glm::vec3, 4> vertPositions = {
+            glm::vec3 { xPos, yPos, 0.0f },
+            glm::vec3 { xPos + width, yPos, 0.0f },
+            glm::vec3 { xPos + width, yPos - height, 0.0f },
+            glm::vec3 { xPos, yPos - height, 0.0f }
+        };
+
+        constexpr std::array<glm::vec2, 4> texCoords = {
+            glm::vec2 { 0.0f, 0.0f }, glm::vec2 { 1.0f, 0.0f },
+            glm::vec2 { 1.0f, 1.0f }, glm::vec2 { 0.0f, 1.0f }
+        };
+
+        return std::array<Vertex, 4> {
+            Vertex { vertPositions[0], texCoords[0] },
+            Vertex { vertPositions[1], texCoords[1] },
+            Vertex { vertPositions[2], texCoords[2] },
+            Vertex { vertPositions[3], texCoords[3] }
+        };
     }
 }

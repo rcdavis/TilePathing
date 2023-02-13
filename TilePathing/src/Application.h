@@ -6,6 +6,8 @@
 
 #include "TileMap/TilePathing.h"
 
+#include <array>
+
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
@@ -15,6 +17,7 @@ class GLFramebuffer;
 class GLShader;
 class TileMap;
 class ImGuiWindow;
+class Character;
 
 class Application
 {
@@ -55,8 +58,16 @@ private:
     Camera mCamera;
 
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
+    std::vector<Ref<Character>> mCharacters;
 
     glm::uvec2 mStartPos{ 0, 0 };
+
+    glm::vec2 mMousePos{ 0.0f, 0.0f };
+    glm::vec2 mViewportSize{ 0.0f, 0.0f };
+    std::array<glm::vec2, 2> mViewportBounds = {
+        glm::vec2 { 0.0f, 0.0f },
+        glm::vec2 { 0.0f, 0.0f }
+    };
 
     TimeStep mLastFrameTime;
 

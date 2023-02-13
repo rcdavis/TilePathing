@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include "Log.h"
+#include "Character.h"
 #include "Input/Input.h"
 
 #include "OpenGL/GLTexture.h"
@@ -37,6 +38,7 @@ Application::Application() :
     mTilePathing(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
     mImGuiWindows(),
+    mCharacters(),
     mTileMap(),
     mLastFrameTime(0.0f),
     mTestTexture(),
@@ -136,6 +138,11 @@ bool Application::Init()
     mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
     mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 
+    Ref<Character> character = CreateRef<Character>();
+    character->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
+    character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
+    mCharacters.push_back(character);
+
     FramebufferSpecs specs;
     specs.attachments = {
         FramebufferTextureFormat::RGBA8,
@@ -182,12 +189,29 @@ void Application::RenderScene()
 
     mShader->Bind();
     mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+    mShader->SetMat4("u_Transform", glm::mat4(1.0f));
 
     mVAO->Bind();
-
     Render(mVAO);
 
+    for (const auto& c : mCharacters)
+    {
+        c->GetVertexArray()->Bind();
+        c->GetTexture()->Bind();
+        mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
+        Render(c->GetVertexArray());
+    }
+
     RenderTilePaths();
+
+    auto mousePos = ImGui::GetMousePos();
+    mousePos.x -= mViewportBounds[0].x;
+    mousePos.y -= mViewportBounds[0].y;
+
+    const glm::vec2 viewportSize = mViewportBounds[1] - mViewportBounds[0];
+    mousePos.y = viewportSize.y - mousePos.y;
+    mMousePos = glm::vec2((f32)mousePos.x, (f32)mousePos.y);
+
     mFramebuffer->Unbind();
 }
 
@@ -259,7 +283,8 @@ void Application::Render()
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse;
+        windowFlags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
         windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
     }
 
@@ -285,9 +310,19 @@ void Application::Render()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Viewport");
 
+    const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+    const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+    const auto viewportOffset = ImGui::GetWindowPos();
+    mViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+    mViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
+    const auto viewportPanelSize = ImGui::GetContentRegionAvail();
+    mViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
     mViewportClickable = ImGui::IsWindowFocused() && ImGui::IsWindowHovered();
+
     const uint64 texId = (uint64)mFramebuffer->GetColorAttachment();
-    ImGui::Image((ImTextureID)texId, ImGui::GetContentRegionAvail(), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+    ImGui::Image((ImTextureID)texId, viewportPanelSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -324,9 +359,9 @@ void Application::RenderMainMenu()
 
 void Application::HandleInput()
 {
-    if (mViewportClickable && Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+    if (mViewportClickable)
     {
-        mStartPos = GetTileCoords(Input::GetMousePosition());
+
     }
 }
 

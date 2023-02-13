@@ -2,6 +2,7 @@
 
 #include "Core.h"
 
+#include <array>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -21,4 +22,6 @@ namespace MeshUtils
     Ref<GLVertexArray> CreateTileMapMesh(Ref<TileMap> tileMap);
 
     Ref<GLVertexArray> CreateColoredTileMesh(Ref<TileMap> tileMap);
+
+    std::array<Vertex, 4> CreateQuad(f32 xPos, f32 yPos, f32 width, f32 height);
 }

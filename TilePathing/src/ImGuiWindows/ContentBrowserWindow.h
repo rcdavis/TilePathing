@@ -10,9 +10,10 @@ class GLTexture;
 class ContentBrowserWindow : public ImGuiWindow
 {
 public:
-    ContentBrowserWindow(const bool isOpen = false);
+    static constexpr auto ContentBrowserItemType = "ContentBrowserItemType";
 
-    constexpr const char* GetContentBrowserItemType() const { return "ContentBrowserItemType"; }
+public:
+    ContentBrowserWindow(const bool isOpen = false);
 
     void OnRender() override;
 

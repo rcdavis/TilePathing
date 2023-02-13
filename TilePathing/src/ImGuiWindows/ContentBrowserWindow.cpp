@@ -40,7 +40,7 @@ void ContentBrowserWindow::OnRender()
         if (ImGui::BeginDragDropSource())
         {
             const wchar_t* const itemPath = relativePath.c_str();
-            ImGui::SetDragDropPayload(GetContentBrowserItemType(), itemPath,
+            ImGui::SetDragDropPayload(ContentBrowserItemType, itemPath,
                 (wcslen(itemPath) + 1) * sizeof(wchar_t));
 
             ImGui::EndDragDropSource();
