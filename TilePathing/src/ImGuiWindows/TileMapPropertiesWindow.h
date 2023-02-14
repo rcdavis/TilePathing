@@ -23,9 +23,6 @@ public:
     glm::vec4 GetCheckedColor() const { return mCheckedColor; }
     void SetCheckedColor(glm::vec4 color) { mCheckedColor = color; }
 
-    int32 GetMaxSteps() const { return mMaxSteps; }
-    void SetMaxSteps(int32 maxSteps) { mMaxSteps = maxSteps; }
-
     bool GetShowVisitedTiles() const { return mShowVisitedTiles; }
     void SetShowVisitedTiles(const bool b) { mShowVisitedTiles = b; }
 
@@ -36,8 +33,6 @@ private:
     glm::vec4 mEndColor{ 1.0f, 0.0f, 0.0f, 0.5f };
     glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
-
-    int32 mMaxSteps = -1;
 
     bool mShowVisitedTiles = false;
 };

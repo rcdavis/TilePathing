@@ -15,6 +15,5 @@ void TileMapPropertiesWindow::OnRender()
     ImGui::ColorEdit3("End Color", glm::value_ptr(mEndColor));
     ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
     ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
-    ImGui::DragInt("Max Steps", &mMaxSteps, 1.0f, -1, 100);
     ImGui::Checkbox("Show Visited Tiles?", &mShowVisitedTiles);
 }
