@@ -225,7 +225,7 @@ void Application::RenderScene()
         mSelectionTexture->Bind();
         mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
         auto transform = GetTileTransform(mSelectionCoords);
-        transform[3].z = 1.0f;
+        transform[3].z = 0.7f;
         mShader->SetMat4("u_Transform", transform);
         mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
         Render(mColoredRectVao);
@@ -261,6 +261,17 @@ void Application::RenderTilePaths()
         for (auto& tile : zone.mTiles)
         {
             mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
+            mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetMovementZoneColor());
+
+            Render(mColoredRectVao);
+        }
+
+        auto path = mTilePathing.FindPath(mSelectedCharacter->GetTileCoords(), mSelectionCoords);
+        for (const glm::uvec2 cell : path)
+        {
+            auto transform = GetTileTransform(cell);
+            transform[3].z = 0.6f;
+            mColorShader->SetMat4("u_Transform", transform);
             mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
 
             Render(mColoredRectVao);

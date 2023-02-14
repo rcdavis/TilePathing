@@ -26,6 +26,9 @@ public:
     glm::vec4 GetSelectionColor() const { return mSelectionColor; }
     void SetSelectionColor(glm::vec4 color) { mSelectionColor = color; }
 
+    glm::vec4 GetMovementZoneColor() const { return mMovementZoneColor; }
+    void SetMovementZoneColor(glm::vec4 color) { mMovementZoneColor = color; }
+
     bool GetShowVisitedTiles() const { return mShowVisitedTiles; }
     void SetShowVisitedTiles(const bool b) { mShowVisitedTiles = b; }
 
@@ -34,9 +37,11 @@ public:
 private:
     glm::vec4 mStartColor{ 0.0f, 0.0f, 1.0f, 0.5f };
     glm::vec4 mEndColor{ 1.0f, 0.0f, 0.0f, 0.5f };
-    glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
+    glm::vec4 mPathColor{ 0.0f, 1.0f, 1.0f, 0.5f };
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
-    glm::vec4 mSelectionColor{ 0.0f, 0.0f, 1.0f, 1.0f };
+
+    glm::vec4 mSelectionColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+    glm::vec4 mMovementZoneColor{ 0.0f, 0.0f, 1.0f, 0.5f };
 
     bool mShowVisitedTiles = false;
 };
