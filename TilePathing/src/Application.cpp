@@ -39,7 +39,7 @@ Application::Application() :
     mTilePathing(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
     mImGuiWindows(),
-    mPlayer(),
+    mSelectedCharacter(),
     mTileMap(),
     mLastFrameTime(0.0f),
     mTestTexture(),
@@ -143,12 +143,14 @@ bool Application::Init()
     mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
     mImGuiWindows.push_back(charWindow);
 
-    mPlayer = CreateRef<Character>();
-    mPlayer->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
-    mPlayer->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-    mPlayer->SetTileCoords({ 7, 20 });
-    mPlayer->SetMovementSteps(8);
-    charWindow->AddCharacter(mPlayer);
+    auto character = CreateRef<Character>();
+    character->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
+    character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
+    character->SetTileCoords({ 7, 20 });
+    character->SetMovementSteps(8);
+    charWindow->AddCharacter(character);
+
+    mSelectionTexture = GLTexture::Load("assets/textures/SelectionRing.png");
 
     FramebufferSpecs specs;
     specs.attachments = {
@@ -197,6 +199,7 @@ void Application::RenderScene()
     mShader->Bind();
     mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
     mShader->SetMat4("u_Transform", glm::mat4(1.0f));
+    mShader->SetFloat4("u_Color", glm::vec4(1.0f));
 
     mVAO->Bind();
     Render(mVAO);
@@ -207,12 +210,28 @@ void Application::RenderScene()
         {
             c->GetVertexArray()->Bind();
             c->GetTexture()->Bind();
-            mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
+            auto transform = GetTileTransform(c->GetTileCoords());
+            transform[3].z = 0.8f;
+            mShader->SetMat4("u_Transform", transform);
             Render(c->GetVertexArray());
         }
     }
 
     RenderTilePaths();
+
+    auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    if (mSelectionTexture && tilePropsWindow)
+    {
+        mColoredRectVao->Bind();
+        mShader->Bind();
+        mSelectionTexture->Bind();
+        mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+        auto transform = GetTileTransform(mSelectionCoords);
+        transform[3].z = 0.7f;
+        mShader->SetMat4("u_Transform", transform);
+        mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
+        Render(mColoredRectVao);
+    }
 
     auto mousePos = ImGui::GetMousePos();
     mousePos.x -= mViewportBounds[0].x;
@@ -238,13 +257,30 @@ void Application::RenderTilePaths()
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
-    auto zone = mTilePathing.FindMovementZone(mPlayer->GetTileCoords(), mPlayer->GetMovementSteps());
-    for (auto& tile : zone.mTiles)
+    if (mSelectedCharacter)
     {
-        mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-        mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
+        auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
+        for (auto& tile : zone.mTiles)
+        {
+            mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
+            mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetMovementZoneColor());
 
-        Render(mColoredRectVao);
+            Render(mColoredRectVao);
+        }
+
+        auto path = mTilePathing.FindPath(mSelectedCharacter->GetTileCoords(), mSelectionCoords);
+        for (const glm::uvec2 cell : path)
+        {
+            if (std::find(std::cbegin(zone.mTiles), std::cend(zone.mTiles), cell) == std::cend(zone.mTiles))
+                continue;
+
+            auto transform = GetTileTransform(cell);
+            transform[3].z = 0.6f;
+            mColorShader->SetMat4("u_Transform", transform);
+            mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
+
+            Render(mColoredRectVao);
+        }
     }
 
     for (const auto& p : tileMapPathsWindow->GetPaths())
@@ -378,31 +414,52 @@ void Application::RenderMainMenu()
 
 void Application::HandleInput()
 {
-    if (mViewportClickable && mPlayer && mTileMap)
+    if (mViewportClickable && mTileMap)
     {
         constexpr TimeStep ts(0.1f);
-        const auto coords = mPlayer->GetTileCoords();
 
         if (Input::IsKeyDown(Key::Left, ts))
         {
-            if (coords.x > 0)
-                mPlayer->MoveLeft(1);
+            if (mSelectionCoords.x > 0)
+                mSelectionCoords.x--;
         }
         else if (Input::IsKeyDown(Key::Right, ts))
         {
-            if (coords.x < mTileMap->GetWidth() - 1)
-                mPlayer->MoveRight(1);
+            if (mSelectionCoords.x < mTileMap->GetWidth() - 1)
+                mSelectionCoords.x++;
         }
 
         if (Input::IsKeyDown(Key::Up, ts))
         {
-            if (coords.y > 0)
-                mPlayer->MoveUp(1);
+            if (mSelectionCoords.y > 0)
+                mSelectionCoords.y--;
         }
         else if (Input::IsKeyDown(Key::Down, ts))
         {
-            if (coords.y < mTileMap->GetHeight() - 1)
-                mPlayer->MoveDown(1);
+            if (mSelectionCoords.y < mTileMap->GetHeight() - 1)
+                mSelectionCoords.y++;
+        }
+
+        if (Input::IsKeyDown(Key::Enter, ts))
+        {
+            if (mSelectedCharacter)
+            {
+                if (mSelectedCharacter->GetTileCoords() != mSelectionCoords)
+                {
+                    auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
+                    auto iter = std::find(std::cbegin(zone.mTiles), std::cend(zone.mTiles), mSelectionCoords);
+                    if (iter != std::cend(zone.mTiles))
+                        mSelectedCharacter->SetTileCoords(*iter);
+                }
+
+                mSelectedCharacter = nullptr;
+            }
+            else
+            {
+                auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]);
+                if (charWindow)
+                    mSelectedCharacter = charWindow->GetCharacter(mSelectionCoords);
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ private:
     Camera mCamera;
 
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
-    Ref<Character> mPlayer;
+    Ref<Character> mSelectedCharacter;
 
     glm::uvec2 mStartPos{ 0, 0 };
 
@@ -80,6 +80,9 @@ private:
 
     Ref<GLVertexArray> mColoredRectVao;
     Ref<GLShader> mColorShader;
+
+    Ref<GLTexture> mSelectionTexture;
+    glm::uvec2 mSelectionCoords{ 0, 0 };
 
     GLFWwindow* mWindow = nullptr;
 

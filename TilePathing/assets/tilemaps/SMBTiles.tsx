@@ -9,7 +9,7 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="movementCost" type="int" value="5"/>
+   <property name="movementCost" type="int" value="3"/>
   </properties>
  </tile>
  <tile id="26">
