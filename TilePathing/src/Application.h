@@ -60,8 +60,6 @@ private:
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
     Ref<Character> mSelectedCharacter;
 
-    glm::uvec2 mStartPos{ 0, 0 };
-
     glm::vec2 mMousePos{ 0.0f, 0.0f };
     glm::vec2 mViewportSize{ 0.0f, 0.0f };
     std::array<glm::vec2, 2> mViewportBounds = {

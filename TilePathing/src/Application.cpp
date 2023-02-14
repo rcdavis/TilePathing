@@ -147,7 +147,7 @@ bool Application::Init()
     character->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
     character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
     character->SetTileCoords({ 7, 20 });
-    character->SetMovementSteps(8);
+    character->SetMovementSteps(6);
     charWindow->AddCharacter(character);
 
     mSelectionTexture = GLTexture::Load("assets/textures/SelectionRing.png");
