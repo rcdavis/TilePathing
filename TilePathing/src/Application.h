@@ -58,7 +58,7 @@ private:
     Camera mCamera;
 
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
-    Ref<Character> mPlayer;
+    Ref<Character> mSelectedCharacter;
 
     glm::uvec2 mStartPos{ 0, 0 };
 

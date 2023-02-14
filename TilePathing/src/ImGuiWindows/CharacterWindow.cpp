@@ -68,3 +68,14 @@ void CharacterWindow::AddCharacter(Ref<Character> character)
     mCharacters.push_back(character);
     mCurSelected = (uint32)std::size(mCharacters) - 1;
 }
+
+Ref<Character> CharacterWindow::GetCharacter(glm::uvec2 coords)
+{
+    for (const auto& c : mCharacters)
+    {
+        if (c->GetTileCoords() == coords)
+            return c;
+    }
+
+    return nullptr;
+}

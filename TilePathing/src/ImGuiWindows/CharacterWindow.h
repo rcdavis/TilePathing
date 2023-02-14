@@ -3,6 +3,8 @@
 #include "Core.h"
 #include "ImGuiWindow.h"
 
+#include <glm/glm.hpp>
+
 #include <vector>
 
 class Character;
@@ -14,6 +16,7 @@ public:
     CharacterWindow(const bool isOpen, Ref<TileMap> tileMap);
 
     const std::vector<Ref<Character>>& GetCharacters() const { return mCharacters; }
+    Ref<Character> GetCharacter(glm::uvec2 coords);
 
     void OnRender() override;
 
