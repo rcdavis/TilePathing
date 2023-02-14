@@ -210,7 +210,9 @@ void Application::RenderScene()
         {
             c->GetVertexArray()->Bind();
             c->GetTexture()->Bind();
-            mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
+            auto transform = GetTileTransform(c->GetTileCoords());
+            transform[3].z = 0.8f;
+            mShader->SetMat4("u_Transform", transform);
             Render(c->GetVertexArray());
         }
     }
@@ -269,6 +271,9 @@ void Application::RenderTilePaths()
         auto path = mTilePathing.FindPath(mSelectedCharacter->GetTileCoords(), mSelectionCoords);
         for (const glm::uvec2 cell : path)
         {
+            if (std::find(std::cbegin(zone.mTiles), std::cend(zone.mTiles), cell) == std::cend(zone.mTiles))
+                continue;
+
             auto transform = GetTileTransform(cell);
             transform[3].z = 0.6f;
             mColorShader->SetMat4("u_Transform", transform);
