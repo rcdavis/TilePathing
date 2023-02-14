@@ -46,6 +46,7 @@ public:
     std::unordered_set<glm::uvec2> GetVisitedCoords() { return mVisitedCoords; }
 
     std::vector<glm::uvec2> FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords);
+    Zone FindMovementZone(glm::uvec2 coords, uint32 movementSteps);
 
 private:
     Ref<Cell> GetCell(glm::uvec2 coords) { return mMap[((size_t)coords.y * mNumCols) + coords.x]; }

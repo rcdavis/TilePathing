@@ -26,8 +26,12 @@ public:
     Ref<GLVertexArray> GetVertexArray() { return mVAO; }
     void SetVertexArray(Ref<GLVertexArray> vao) { mVAO = vao; }
 
+    uint32 GetMovementSteps() const { return mMovementSteps; }
+    void SetMovementSteps(const uint32 steps) { mMovementSteps = steps; }
+
 private:
     glm::uvec2 mTileCoords{ 0.0f, 0.0f };
     Ref<GLTexture> mTexture;
     Ref<GLVertexArray> mVAO;
+    uint32 mMovementSteps = 0;
 };

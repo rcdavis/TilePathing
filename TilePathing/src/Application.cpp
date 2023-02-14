@@ -147,6 +147,7 @@ bool Application::Init()
     mPlayer->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
     mPlayer->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
     mPlayer->SetTileCoords({ 7, 20 });
+    mPlayer->SetMovementSteps(8);
     charWindow->AddCharacter(mPlayer);
 
     FramebufferSpecs specs;
@@ -236,6 +237,15 @@ void Application::RenderTilePaths()
     mColoredRectVao->Bind();
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+
+    auto zone = mTilePathing.FindMovementZone(mPlayer->GetTileCoords(), mPlayer->GetMovementSteps());
+    for (auto& tile : zone.mTiles)
+    {
+        mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
+        mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
+
+        Render(mColoredRectVao);
+    }
 
     for (const auto& p : tileMapPathsWindow->GetPaths())
     {

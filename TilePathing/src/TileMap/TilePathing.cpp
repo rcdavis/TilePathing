@@ -81,6 +81,61 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
     return path;
 }
 
+TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32 movementSteps)
+{
+    if (!IsInBounds(coords))
+        return {};
+
+    constexpr std::array<glm::uvec2, 4> neighbors = {
+        glm::uvec2 { 0, -1 },
+        glm::uvec2 { 0, 1 },
+        glm::uvec2 { -1, 0 },
+        glm::uvec2 { 1, 0 }
+    };
+
+    auto startNode = GetCell(coords);
+
+    typedef std::pair<uint32, Ref<Cell>> QElement;
+    std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
+    std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
+    std::unordered_map<Ref<Cell>, uint32> costSoFar;
+    mVisitedCoords.clear();
+    mVisitedCoords.insert(coords);
+
+    q.emplace(0, startNode);
+    comeFrom[startNode] = nullptr;
+    costSoFar[startNode] = 0;
+
+    while (!std::empty(q))
+    {
+        Ref<Cell> curNode = q.top().second;
+        q.pop();
+
+        for (int i = 0; i < std::size(neighbors); ++i)
+        {
+            const glm::uvec2 newCoords = curNode->coords + neighbors[i];
+            if (IsInBounds(newCoords))
+            {
+                Ref<Cell> newNode = GetCell(newCoords);
+                const uint32 cost = costSoFar[curNode] + newNode->cost;
+                if (cost < movementSteps + 1 && (costSoFar.find(newNode) == std::end(costSoFar) || cost < costSoFar[newNode]))
+                {
+                    q.emplace(cost + Heuristic(coords, newCoords), newNode);
+                    costSoFar[newNode] = cost;
+                    comeFrom[newNode] = curNode;
+                    mVisitedCoords.insert(newNode->coords);
+                }
+            }
+        }
+    }
+
+    Zone zone;
+    for (auto& coords : mVisitedCoords)
+        zone.mTiles.push_back(coords);
+
+    return zone;
+}
+
 uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const
 {
     return std::abs((long)end.x - (long)start.x) + std::abs((long)end.y - (long)start.y);

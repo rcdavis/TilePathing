@@ -41,6 +41,10 @@ void CharacterWindow::OnRender()
         ImGui::InputInt("Row", &coords.y);
         ImGui::InputInt("Columns", &coords.x);
         mCharacters[mCurSelected]->SetTileCoords(coords);
+
+        int32 steps = (int32)mCharacters[mCurSelected]->GetMovementSteps();
+        ImGui::InputInt("Movement", &steps);
+        mCharacters[mCurSelected]->SetMovementSteps((uint32)steps);
     }
 
     if (ImGui::Button("Add Character"))
@@ -48,7 +52,7 @@ void CharacterWindow::OnRender()
         Ref<Character> c = CreateRef<Character>();
         c->SetTexture(GLTexture::Load("assets/textures/DirectoryIcon.png"));
         c->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-        c->SetTileCoords({ 7, 20 });
+        c->SetMovementSteps(6);
         AddCharacter(c);
     }
 
