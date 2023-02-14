@@ -19,6 +19,7 @@
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
 #include "ImGuiWindows/ContentBrowserWindow.h"
+#include "ImGuiWindows/CharacterWindow.h"
 
 #include "Utils/MeshUtils.h"
 
@@ -38,7 +39,6 @@ Application::Application() :
     mTilePathing(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
     mImGuiWindows(),
-    mCharacters(),
     mPlayer(),
     mTileMap(),
     mLastFrameTime(0.0f),
@@ -137,14 +137,17 @@ bool Application::Init()
     mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
     mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
+    auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
     mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
     mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
     mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
+    mImGuiWindows.push_back(charWindow);
 
     mPlayer = CreateRef<Character>();
     mPlayer->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
     mPlayer->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-    mCharacters.push_back(mPlayer);
+    mPlayer->SetTileCoords({ 7, 20 });
+    charWindow->AddCharacter(mPlayer);
 
     FramebufferSpecs specs;
     specs.attachments = {
@@ -197,12 +200,15 @@ void Application::RenderScene()
     mVAO->Bind();
     Render(mVAO);
 
-    for (const auto& c : mCharacters)
+    if (auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]); charWindow)
     {
-        c->GetVertexArray()->Bind();
-        c->GetTexture()->Bind();
-        mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
-        Render(c->GetVertexArray());
+        for (const auto& c : charWindow->GetCharacters())
+        {
+            c->GetVertexArray()->Bind();
+            c->GetTexture()->Bind();
+            mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
+            Render(c->GetVertexArray());
+        }
     }
 
     RenderTilePaths();
