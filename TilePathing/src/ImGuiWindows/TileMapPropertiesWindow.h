@@ -23,6 +23,9 @@ public:
     glm::vec4 GetCheckedColor() const { return mCheckedColor; }
     void SetCheckedColor(glm::vec4 color) { mCheckedColor = color; }
 
+    glm::vec4 GetSelectionColor() const { return mSelectionColor; }
+    void SetSelectionColor(glm::vec4 color) { mSelectionColor = color; }
+
     bool GetShowVisitedTiles() const { return mShowVisitedTiles; }
     void SetShowVisitedTiles(const bool b) { mShowVisitedTiles = b; }
 
@@ -33,6 +36,7 @@ private:
     glm::vec4 mEndColor{ 1.0f, 0.0f, 0.0f, 0.5f };
     glm::vec4 mPathColor{ 1.0f, 1.0f, 1.0f, 0.5f };
     glm::vec4 mCheckedColor{ 0.5f, 0.5f, 0.5f, 0.5f };
+    glm::vec4 mSelectionColor{ 0.0f, 0.0f, 1.0f, 1.0f };
 
     bool mShowVisitedTiles = false;
 };

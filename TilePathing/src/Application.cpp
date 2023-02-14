@@ -199,6 +199,7 @@ void Application::RenderScene()
     mShader->Bind();
     mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
     mShader->SetMat4("u_Transform", glm::mat4(1.0f));
+    mShader->SetFloat4("u_Color", glm::vec4(1.0f));
 
     mVAO->Bind();
     Render(mVAO);
@@ -216,7 +217,8 @@ void Application::RenderScene()
 
     RenderTilePaths();
 
-    if (mSelectionTexture)
+    auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    if (mSelectionTexture && tilePropsWindow)
     {
         mColoredRectVao->Bind();
         mShader->Bind();
@@ -225,6 +227,7 @@ void Application::RenderScene()
         auto transform = GetTileTransform(mSelectionCoords);
         transform[3].z = 1.0f;
         mShader->SetMat4("u_Transform", transform);
+        mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
         Render(mColoredRectVao);
     }
 
