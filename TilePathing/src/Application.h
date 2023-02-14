@@ -81,6 +81,9 @@ private:
     Ref<GLVertexArray> mColoredRectVao;
     Ref<GLShader> mColorShader;
 
+    Ref<GLTexture> mSelectionTexture;
+    glm::uvec2 mSelectionCoords{ 0, 0 };
+
     GLFWwindow* mWindow = nullptr;
 
     bool mInitializedImGui = false;

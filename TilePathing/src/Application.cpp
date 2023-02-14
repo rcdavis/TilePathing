@@ -150,6 +150,8 @@ bool Application::Init()
     mPlayer->SetMovementSteps(8);
     charWindow->AddCharacter(mPlayer);
 
+    mSelectionTexture = GLTexture::Load("assets/textures/SelectionRing.png");
+
     FramebufferSpecs specs;
     specs.attachments = {
         FramebufferTextureFormat::RGBA8,
@@ -213,6 +215,18 @@ void Application::RenderScene()
     }
 
     RenderTilePaths();
+
+    if (mSelectionTexture)
+    {
+        mColoredRectVao->Bind();
+        mShader->Bind();
+        mSelectionTexture->Bind();
+        mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+        auto transform = GetTileTransform(mSelectionCoords);
+        transform[3].z = 1.0f;
+        mShader->SetMat4("u_Transform", transform);
+        Render(mColoredRectVao);
+    }
 
     auto mousePos = ImGui::GetMousePos();
     mousePos.x -= mViewportBounds[0].x;
@@ -378,31 +392,30 @@ void Application::RenderMainMenu()
 
 void Application::HandleInput()
 {
-    if (mViewportClickable && mPlayer && mTileMap)
+    if (mViewportClickable && mTileMap)
     {
         constexpr TimeStep ts(0.1f);
-        const auto coords = mPlayer->GetTileCoords();
 
         if (Input::IsKeyDown(Key::Left, ts))
         {
-            if (coords.x > 0)
-                mPlayer->MoveLeft(1);
+            if (mSelectionCoords.x > 0)
+                mSelectionCoords.x--;
         }
         else if (Input::IsKeyDown(Key::Right, ts))
         {
-            if (coords.x < mTileMap->GetWidth() - 1)
-                mPlayer->MoveRight(1);
+            if (mSelectionCoords.x < mTileMap->GetWidth() - 1)
+                mSelectionCoords.x++;
         }
 
         if (Input::IsKeyDown(Key::Up, ts))
         {
-            if (coords.y > 0)
-                mPlayer->MoveUp(1);
+            if (mSelectionCoords.y > 0)
+                mSelectionCoords.y--;
         }
         else if (Input::IsKeyDown(Key::Down, ts))
         {
-            if (coords.y < mTileMap->GetHeight() - 1)
-                mPlayer->MoveDown(1);
+            if (mSelectionCoords.y < mTileMap->GetHeight() - 1)
+                mSelectionCoords.y++;
         }
     }
 }
