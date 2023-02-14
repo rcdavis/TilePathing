@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include "Log.h"
+#include "Character.h"
 #include "Input/Input.h"
 
 #include "OpenGL/GLTexture.h"
@@ -8,11 +9,19 @@
 #include "OpenGL/GLVertexBuffer.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
+#include "OpenGL/GLFramebuffer.h"
 
 #include "TileMap/TileMap.h"
 #include "TileMap/TileMapLayer.h"
 #include "TileMap/TileLayer.h"
 #include "TileMap/TileSet.h"
+
+#include "ImGuiWindows/TileMapPropertiesWindow.h"
+#include "ImGuiWindows/TileMapPathsWindow.h"
+#include "ImGuiWindows/ContentBrowserWindow.h"
+#include "ImGuiWindows/CharacterWindow.h"
+
+#include "Utils/MeshUtils.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -23,18 +32,16 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <cassert>
-
 static constexpr uint32 WindowWidth = 1280;
-static constexpr uint32 WindowHeight = 738;
-//static constexpr uint32 WindowHeight = 720;
+static constexpr uint32 WindowHeight = 720;
 
 Application::Application() :
-    mTileMapPropertiesWindow(),
+    mTilePathing(),
     mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
+    mImGuiWindows(),
+    mPlayer(),
     mTileMap(),
     mLastFrameTime(0.0f),
-    mTileMapTransform(1.0f),
     mTestTexture(),
     mWindow(nullptr),
     mInitializedImGui(false)
@@ -59,15 +66,15 @@ void Application::Run()
         const TimeStep timestep = time - mLastFrameTime;
         mLastFrameTime = time;
 
+        Input::Poll(timestep);
+
         glfwPollEvents();
 
         HandleInput();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        RenderScene();
-
-        RenderImGuiPanels();
+        Render();
 
         glfwSwapBuffers(mWindow);
     }
@@ -105,6 +112,10 @@ bool Application::Init()
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
     ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
     ImGui_ImplOpenGL3_Init("#version 460 core");
 
@@ -123,10 +134,30 @@ bool Application::Init()
 
     mTilePathing.SetTileMap(mTileMap);
 
-    CreateTileMapMesh();
-    CreateColoredTileMesh();
+    mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
+    mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
-    mTileMapTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f));
+    auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
+    mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
+    mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
+    mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
+    mImGuiWindows.push_back(charWindow);
+
+    mPlayer = CreateRef<Character>();
+    mPlayer->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
+    mPlayer->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
+    mPlayer->SetTileCoords({ 7, 20 });
+    mPlayer->SetMovementSteps(8);
+    charWindow->AddCharacter(mPlayer);
+
+    FramebufferSpecs specs;
+    specs.attachments = {
+        FramebufferTextureFormat::RGBA8,
+        FramebufferTextureFormat::Depth
+    };
+    specs.width = WindowWidth;
+    specs.height = WindowHeight;
+    mFramebuffer = GLFramebuffer::Create(specs);
 
     return true;
 }
@@ -140,6 +171,8 @@ void Application::Shutdown()
 
     mColoredRectVao = nullptr;
     mColorShader = nullptr;
+
+    mFramebuffer = nullptr;
 
     if (mInitializedImGui)
     {
@@ -156,227 +189,221 @@ void Application::Shutdown()
 
 void Application::RenderScene()
 {
+    mFramebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     mTestTexture->Bind();
 
     mShader->Bind();
     mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+    mShader->SetMat4("u_Transform", glm::mat4(1.0f));
 
     mVAO->Bind();
+    Render(mVAO);
 
-    const uint32 count = mVAO->GetIndexBuffer()->GetCount();
-    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+    if (auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]); charWindow)
+    {
+        for (const auto& c : charWindow->GetCharacters())
+        {
+            c->GetVertexArray()->Bind();
+            c->GetTexture()->Bind();
+            mShader->SetMat4("u_Transform", GetTileTransform(c->GetTileCoords()));
+            Render(c->GetVertexArray());
+        }
+    }
 
     RenderTilePaths();
+
+    auto mousePos = ImGui::GetMousePos();
+    mousePos.x -= mViewportBounds[0].x;
+    mousePos.y -= mViewportBounds[0].y;
+
+    const glm::vec2 viewportSize = mViewportBounds[1] - mViewportBounds[0];
+    mousePos.y = viewportSize.y - mousePos.y;
+    mMousePos = glm::vec2((f32)mousePos.x, (f32)mousePos.y);
+
+    mFramebuffer->Unbind();
 }
 
 void Application::RenderTilePaths()
 {
+    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
+    if (!tileMapPropertiesWindow || !tileMapPathsWindow)
+        return;
+
     glEnable(GL_BLEND);
 
     mColoredRectVao->Bind();
     mColorShader->Bind();
     mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
-    const auto path = mTilePathing.FindPath(mStartCoords, mEndCoords);
-    for (const glm::uvec2 cell : path)
+    auto zone = mTilePathing.FindMovementZone(mPlayer->GetTileCoords(), mPlayer->GetMovementSteps());
+    for (auto& tile : zone.mTiles)
     {
-        glm::vec4 color;
-        if (cell == mStartCoords)
-            color = mTileMapPropertiesWindow.GetStartColor();
-        else if (cell == mEndCoords)
-            color = mTileMapPropertiesWindow.GetEndColor();
-        else
-            color = mTileMapPropertiesWindow.GetPathColor();
+        mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
+        mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
 
-        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-        mColorShader->SetFloat4("u_Color", color);
-
-        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+        Render(mColoredRectVao);
     }
 
-    for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+    for (const auto& p : tileMapPathsWindow->GetPaths())
     {
-        mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-        mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.GetCheckedColor());
+        const auto path = mTilePathing.FindPath(p.start, p.end);
+        for (const glm::uvec2 cell : path)
+        {
+            glm::vec4 color;
+            if (cell == p.start)
+                color = tileMapPropertiesWindow->GetStartColor();
+            else if (cell == p.end)
+                color = tileMapPropertiesWindow->GetEndColor();
+            else
+                color = tileMapPropertiesWindow->GetPathColor();
 
-        const uint32 count = mColoredRectVao->GetIndexBuffer()->GetCount();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+            mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+            mColorShader->SetFloat4("u_Color", color);
+
+            Render(mColoredRectVao);
+        }
+
+        if (tileMapPropertiesWindow->GetShowVisitedTiles())
+        {
+            for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords())
+            {
+                mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
+                mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
+
+                Render(mColoredRectVao);
+            }
+        }
     }
 
     glDisable(GL_BLEND);
 }
 
-void Application::RenderImGuiPanels()
+void Application::Render()
 {
+    RenderScene();
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    static bool dockspaceOpen = true;
+    static constexpr bool optFullscreen = true;
+    static constexpr ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+    if constexpr (optFullscreen)
+    {
+        const ImGuiViewport* const viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse;
+        windowFlags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    }
+
+    if constexpr (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+        windowFlags |= ImGuiWindowFlags_NoBackground;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &dockspaceOpen, windowFlags);
+    ImGui::PopStyleVar();
+
+    if constexpr (optFullscreen)
+        ImGui::PopStyleVar(2);
+
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        ImGui::DockSpace(ImGui::GetID("MyDockSpace"), ImVec2(0.0f, 0.0f), dockspaceFlags);
+
+    RenderMainMenu();
+
+    for (auto& window : mImGuiWindows)
+        window->Render();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("Viewport");
+
+    const auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+    const auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+    const auto viewportOffset = ImGui::GetWindowPos();
+    mViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+    mViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
+    const auto viewportPanelSize = ImGui::GetContentRegionAvail();
+    mViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
+    mViewportClickable = ImGui::IsWindowFocused() && ImGui::IsWindowHovered();
+
+    const uint64 texId = (uint64)mFramebuffer->GetColorAttachment();
+    ImGui::Image((ImTextureID)texId, viewportPanelSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* const backupCurrentContext = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backupCurrentContext);
+    }
+}
+
+void Application::RenderMainMenu()
+{
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Windows"))
         {
-            mTileMapPropertiesWindow.RenderMenuItem();
+            for (auto& window : mImGuiWindows)
+                window->RenderMenuItem();
 
             ImGui::EndMenu();
         }
 
         ImGui::EndMainMenuBar();
     }
-
-    mTileMapPropertiesWindow.Render();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-std::vector<Application::Vertex> Application::CreateTileMapVertices()
-{
-    assert(mTileMap && "Passing in a null tile map");
-    assert(!std::empty(mTileMap->GetTileSets()) && "Tile map does not have a tile set");
-
-    std::vector<Application::Vertex> vertices;
-
-    for (const Ref<TileMapLayer>& layer : mTileMap->GetLayers())
-    {
-        if (layer->GetType() != TileMapLayer::Type::Tile)
-            continue;
-
-        const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
-        const auto& tiles = tileLayer->GetTiles();
-        for (uint32 i = 0; i < std::size(tiles); ++i)
-        {
-            const auto& tile = tiles[i];
-            Ref<TileSet> tileSet;
-            for (const auto& ts : mTileMap->GetTileSets())
-            {
-                if (tile.mId >= ts->GetFirstGid())
-                {
-                    tileSet = ts;
-                    break;
-                }
-            }
-
-            assert(tileSet && "Tile Layer does not have a tile set");
-
-            const uint32 tileWidth = tileSet->GetTileWidth();
-            const uint32 tileHeight = tileSet->GetTileHeight();
-            const uint32 numTilesWidth = tileLayer->GetWidth();
-            const uint32 numTilesHeight = tileLayer->GetHeight();
-
-            const uint32 xPos = ((i % numTilesWidth) * tileWidth);
-            const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
-
-            const std::array<glm::vec4, 4> vertPositions = {
-                glm::vec4 { xPos, yPos, 0.0f, 1.0f },
-                glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
-                glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
-                glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
-            };
-
-            const std::array<glm::vec2, 4> texCoords = tileSet->GetTexCoords(tile.mId);
-
-            for (int i = 0; i < 4; ++i)
-                vertices.push_back({ vertPositions[i], texCoords[i] });
-        }
-    }
-
-    return vertices;
-}
-
-void Application::CreateTileMapMesh()
-{
-    const auto vertices = CreateTileMapVertices();
-
-    mVAO = GLVertexArray::Create();
-    mVAO->Bind();
-
-    auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetLayout({
-        { ShaderDataType::Float3, "a_Position" },
-        { ShaderDataType::Float2, "a_TexCoord" }
-        });
-    mVAO->AddVertexBuffer(vb);
-
-    std::vector<uint16> quadIndices(std::size(vertices) * 6);
-
-    uint16 offset = 0;
-    for (size_t i = 0; i < std::size(quadIndices); i += 6)
-    {
-        quadIndices[i] = offset;
-        quadIndices[i + 1] = offset + 1;
-        quadIndices[i + 2] = offset + 2;
-
-        quadIndices[i + 3] = offset + 2;
-        quadIndices[i + 4] = offset + 3;
-        quadIndices[i + 5] = offset;
-
-        offset += 4;
-    }
-
-    auto quadIB = GLIndexBuffer::Create(std::data(quadIndices), (uint32)std::size(quadIndices));
-    mVAO->SetIndexBuffer(quadIB);
-
-    mVAO->Unbind();
-}
-
-void Application::CreateColoredTileMesh()
-{
-    assert(mTileMap && "Passing in a null tile map");
-
-    mColoredRectVao = GLVertexArray::Create();
-    mColoredRectVao->Bind();
-
-    const uint32 numTilesHeight = mTileMap->GetHeight();
-    const uint32 tileWidth = mTileMap->GetTileWidth();
-    const uint32 tileHeight = mTileMap->GetTileHeight();
-
-    constexpr f32 xPos = 0.0f;
-    const uint32 yPos = (numTilesHeight * tileHeight);
-
-    const std::array<glm::vec4, 4> vertPositions = {
-        glm::vec4 { xPos, yPos, 0.0f, 1.0f },
-        glm::vec4 { xPos + tileWidth, yPos, 0.0f, 1.0f },
-        glm::vec4 { xPos + tileWidth, yPos - tileHeight, 0.0f, 1.0f },
-        glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
-    };
-
-    const std::array<Vertex, 4> vertices = {
-        Vertex { vertPositions[0], glm::vec2(0.0f) },
-        Vertex { vertPositions[1], glm::vec2(0.0f) },
-        Vertex { vertPositions[2], glm::vec2(0.0f) },
-        Vertex { vertPositions[3], glm::vec2(0.0f) }
-    };
-
-    auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
-    vb->SetLayout({
-        { ShaderDataType::Float3, "a_Position" },
-        { ShaderDataType::Float2, "a_TexCoord" }
-        });
-    mColoredRectVao->AddVertexBuffer(vb);
-
-    constexpr std::array<uint16, 6> indices = {
-        0, 1, 2, 2, 3, 0
-    };
-
-    auto quadIB = GLIndexBuffer::Create(std::data(indices), (uint32)std::size(indices));
-    mColoredRectVao->SetIndexBuffer(quadIB);
-
-    mColoredRectVao->Unbind();
 }
 
 void Application::HandleInput()
 {
-    if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+    if (mViewportClickable && mPlayer && mTileMap)
     {
-        mStartCoords = GetTileCoords(Input::GetMousePosition());
-    }
-    else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
-    {
-        mEndCoords = GetTileCoords(Input::GetMousePosition());
+        constexpr TimeStep ts(0.1f);
+        const auto coords = mPlayer->GetTileCoords();
+
+        if (Input::IsKeyDown(Key::Left, ts))
+        {
+            if (coords.x > 0)
+                mPlayer->MoveLeft(1);
+        }
+        else if (Input::IsKeyDown(Key::Right, ts))
+        {
+            if (coords.x < mTileMap->GetWidth() - 1)
+                mPlayer->MoveRight(1);
+        }
+
+        if (Input::IsKeyDown(Key::Up, ts))
+        {
+            if (coords.y > 0)
+                mPlayer->MoveUp(1);
+        }
+        else if (Input::IsKeyDown(Key::Down, ts))
+        {
+            if (coords.y < mTileMap->GetHeight() - 1)
+                mPlayer->MoveDown(1);
+        }
     }
 }
 
@@ -398,7 +425,13 @@ glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos)
     const uint32 tileWidth = mTileMap->GetTileWidth();
     const uint32 tileHeight = mTileMap->GetTileHeight();
 
-    return { mousePos.x / tileWidth, mousePos.y / tileHeight };
+    return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
+}
+
+void Application::Render(const Ref<GLVertexArray>& vao)
+{
+    const uint32 count = vao->GetIndexBuffer()->GetCount();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)

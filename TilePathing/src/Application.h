@@ -4,26 +4,23 @@
 #include "TimeStep.h"
 #include "Camera.h"
 
-#include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "TileMap/TilePathing.h"
+
+#include <array>
 
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
 class GLTexture;
 class GLVertexArray;
+class GLFramebuffer;
 class GLShader;
 class TileMap;
+class ImGuiWindow;
+class Character;
 
 class Application
 {
-public:
-    struct Vertex
-    {
-        glm::vec3 position{ 0.0f };
-        glm::vec2 texCoord{ 0.0f };
-    };
-
 public:
     Application();
     ~Application();
@@ -42,13 +39,9 @@ private:
     bool Init();
     void Shutdown();
 
+    void Render();
     void RenderScene();
-    void RenderImGuiPanels();
-
-    std::vector<Vertex> CreateTileMapVertices();
-    void CreateTileMapMesh();
-
-    void CreateColoredTileMesh();
+    void RenderMainMenu();
     void RenderTilePaths();
 
     void HandleInput();
@@ -56,18 +49,29 @@ private:
     glm::mat4 GetTileTransform(glm::uvec2 coords);
     glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
 
+    void Render(const Ref<GLVertexArray>& vao);
+
     static void GlfwErrorCallback(int error, const char* description);
 
 private:
-    TileMapPropertiesWindow mTileMapPropertiesWindow;
     TilePathing mTilePathing;
     Camera mCamera;
+
+    std::vector<Ref<ImGuiWindow>> mImGuiWindows;
+    Ref<Character> mPlayer;
+
+    glm::uvec2 mStartPos{ 0, 0 };
+
+    glm::vec2 mMousePos{ 0.0f, 0.0f };
+    glm::vec2 mViewportSize{ 0.0f, 0.0f };
+    std::array<glm::vec2, 2> mViewportBounds = {
+        glm::vec2 { 0.0f, 0.0f },
+        glm::vec2 { 0.0f, 0.0f }
+    };
+
     TimeStep mLastFrameTime;
 
-    glm::mat4 mTileMapTransform;
-
-    glm::uvec2 mStartCoords{ 65, 28 };
-    glm::uvec2 mEndCoords{ 58, 21 };
+    Ref<GLFramebuffer> mFramebuffer;
 
     Ref<GLVertexArray> mVAO;
     Ref<GLTexture> mTestTexture;
@@ -80,4 +84,5 @@ private:
     GLFWwindow* mWindow = nullptr;
 
     bool mInitializedImGui = false;
+    bool mViewportClickable = false;
 };

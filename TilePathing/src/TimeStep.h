@@ -23,6 +23,12 @@ public:
         return *this;
     }
 
+    constexpr TimeStep& operator+=(const TimeStep& rhs)
+    {
+        mTime += rhs.mTime;
+        return *this;
+    }
+
     constexpr friend TimeStep operator+(TimeStep lhs, const TimeStep& rhs)
     {
         return TimeStep(lhs.mTime + rhs.mTime);
