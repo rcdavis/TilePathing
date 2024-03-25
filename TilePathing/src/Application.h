@@ -48,8 +48,12 @@ private:
 
     glm::mat4 GetTileTransform(glm::uvec2 coords);
     glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
+    glm::vec2 GetPosFromTileCoords(glm::uvec2 coords);
 
     void Render(const Ref<GLVertexArray>& vao);
+
+    template<typename T>
+    Ref<T> GetImGuiWindow();
 
     static void GlfwErrorCallback(int error, const char* description);
 
@@ -57,6 +61,7 @@ private:
     TilePathing mTilePathing;
     Camera mCamera;
 
+    std::vector<glm::uvec2> mMovementPath;
     std::vector<Ref<ImGuiWindow>> mImGuiWindows;
     Ref<Character> mSelectedCharacter;
 
@@ -67,7 +72,12 @@ private:
         glm::vec2 { 0.0f, 0.0f }
     };
 
+    TimeStep mCurFrameTime;
     TimeStep mLastFrameTime;
+    TimeStep mCurMovementTime;
+    TimeStep mMovementTime;
+    f32 mMovementSpeed;
+    uint32 mNumFramesPerMovement;
 
     Ref<GLFramebuffer> mFramebuffer;
 
@@ -82,8 +92,12 @@ private:
     Ref<GLTexture> mSelectionTexture;
     glm::uvec2 mSelectionCoords{ 0, 0 };
 
+    glm::vec2 mCurMovement{ 0.0f, 0.0f };
+    uint32 mCurMovementPath = 0;
+
     GLFWwindow* mWindow = nullptr;
 
     bool mInitializedImGui = false;
     bool mViewportClickable = false;
+    bool mMovingCharacter = false;
 };

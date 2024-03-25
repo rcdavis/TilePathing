@@ -42,6 +42,8 @@ Application::Application() :
     mSelectedCharacter(),
     mTileMap(),
     mLastFrameTime(0.0f),
+    mMovementSpeed(16.0f),
+    mNumFramesPerMovement(8),
     mTestTexture(),
     mWindow(nullptr),
     mInitializedImGui(false)
@@ -63,10 +65,10 @@ void Application::Run()
     while (!glfwWindowShouldClose(mWindow))
     {
         const TimeStep time((f32)glfwGetTime());
-        const TimeStep timestep = time - mLastFrameTime;
+        mCurFrameTime = time - mLastFrameTime;
         mLastFrameTime = time;
 
-        Input::Poll(timestep);
+        Input::Poll(mCurFrameTime);
 
         glfwPollEvents();
 
@@ -161,6 +163,9 @@ bool Application::Init()
     specs.height = WindowHeight;
     mFramebuffer = GLFramebuffer::Create(specs);
 
+    mCurMovementTime = 0.0f;
+    mMovementTime = 0.125f;
+
     return true;
 }
 
@@ -204,7 +209,7 @@ void Application::RenderScene()
     mVAO->Bind();
     Render(mVAO);
 
-    if (auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]); charWindow)
+    if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow)
     {
         for (const auto& c : charWindow->GetCharacters())
         {
@@ -219,18 +224,32 @@ void Application::RenderScene()
 
     RenderTilePaths();
 
-    auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    auto tilePropsWindow = GetImGuiWindow<TileMapPropertiesWindow>();
     if (mSelectionTexture && tilePropsWindow)
     {
-        mColoredRectVao->Bind();
-        mShader->Bind();
-        mSelectionTexture->Bind();
-        mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-        auto transform = GetTileTransform(mSelectionCoords);
-        transform[3].z = 0.7f;
-        mShader->SetMat4("u_Transform", transform);
-        mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
-        Render(mColoredRectVao);
+        if (mCurMovementPath < std::size(mMovementPath))
+        {
+            glm::uvec2 curPos = mSelectedCharacter->GetTileCoords();
+            glm::uvec2 curPath = mMovementPath[mCurMovementPath];
+            auto diffPath = curPath - curPos;
+            mCurMovementTime += mCurFrameTime;
+            if (mCurMovementTime >= mMovementTime)
+            {
+                mCurMovementTime -= mMovementTime;
+            }
+        }
+        else
+        {
+            mColoredRectVao->Bind();
+            mShader->Bind();
+            mSelectionTexture->Bind();
+            mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+            auto transform = GetTileTransform(mSelectionCoords);
+            transform[3].z = 0.7f;
+            mShader->SetMat4("u_Transform", transform);
+            mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
+            Render(mColoredRectVao);
+        }
     }
 
     auto mousePos = ImGui::GetMousePos();
@@ -246,8 +265,8 @@ void Application::RenderScene()
 
 void Application::RenderTilePaths()
 {
-    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
-    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
+    auto tileMapPropertiesWindow = GetImGuiWindow<TileMapPropertiesWindow>();
+    auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
     if (!tileMapPropertiesWindow || !tileMapPathsWindow)
         return;
 
@@ -449,15 +468,18 @@ void Application::HandleInput()
                     auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
                     auto iter = std::find(std::cbegin(zone.mTiles), std::cend(zone.mTiles), mSelectionCoords);
                     if (iter != std::cend(zone.mTiles))
-                        mSelectedCharacter->SetTileCoords(*iter);
+                    {
+                        mMovementPath = mTilePathing.FindPath(mSelectedCharacter->GetTileCoords(), mSelectionCoords);
+                        mCurMovement = mSelectedCharacter->GetTileCoords();
+                        //mSelectedCharacter->SetTileCoords(*iter);
+                    }
                 }
 
-                mSelectedCharacter = nullptr;
+                //mSelectedCharacter = nullptr;
             }
             else
             {
-                auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]);
-                if (charWindow)
+                if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow)
                     mSelectedCharacter = charWindow->GetCharacter(mSelectionCoords);
             }
         }
@@ -485,10 +507,35 @@ glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos)
     return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
 }
 
+glm::vec2 Application::GetPosFromTileCoords(glm::uvec2 coords)
+{
+    const uint32 tileWidth = mTileMap->GetTileWidth();
+    const uint32 tileHeight = mTileMap->GetTileHeight();
+    const uint32 numTilesWidth = mTileMap->GetWidth();
+    const uint32 numTilesHeight = mTileMap->GetHeight();
+
+    const uint32 xPos = coords.x * tileWidth;
+    const int32 yPos = -((int32)coords.y * (int32)tileHeight);
+
+    return { (f32)xPos, (f32)yPos };
+}
+
 void Application::Render(const Ref<GLVertexArray>& vao)
 {
     const uint32 count = vao->GetIndexBuffer()->GetCount();
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+}
+
+template<typename T>
+Ref<T> Application::GetImGuiWindow()
+{
+    for (const auto& window : mImGuiWindows)
+    {
+        if (auto castWindow = DynamicCastRef<T>(window); castWindow)
+            return castWindow;
+    }
+
+    return nullptr;
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)
