@@ -2,7 +2,7 @@
 include "Dependencies.lua"
 
 workspace "TilePathing"
-    startproject "TilePathing"
+    startproject "Editor"
     configurations { "Debug", "Release", "Dist" }
     platforms { "Win64" }
     flags { "MultiProcessorCompile" }
@@ -21,5 +21,6 @@ outputTargetDir = "Build/%{cfg.platform}-%{cfg.buildcfg}/Bin"
 outputObjDir = "Build/%{cfg.platform}-%{cfg.buildcfg}/Obj"
 
 include "Vendor/ImGui"
-include "TilePathing"
+--include "TilePathing"
+include "Editor"
 include "Benchmarking"
