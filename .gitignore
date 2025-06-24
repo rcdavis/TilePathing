@@ -30,8 +30,6 @@
 *.out
 *.app
 
-!Vendor/Premake/premake5.exe
-
 # VS
 .vs/
 *.sln
@@ -39,11 +37,10 @@
 *.vcxproj.user
 *.vcxproj.filters
 
-**/Build/
-**/Bin/
-**/Obj/
-
 *.log
 *.tlog
 
 JSON/
+
+build/
+Makefile
