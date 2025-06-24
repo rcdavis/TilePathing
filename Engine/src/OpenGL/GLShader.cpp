@@ -22,10 +22,7 @@ namespace Utils {
 GLShader::GLShader(const std::string &name, const std::filesystem::path &vs, const std::filesystem::path &fs) :
 	mName(name)
 {
-	std::unordered_map<uint32, std::string> sources;
-	sources[GL_VERTEX_SHADER] = FileUtils::ReadText(vs);
-	sources[GL_FRAGMENT_SHADER] = FileUtils::ReadText(fs);
-	Compile(sources);
+	CompileProgram(vs, fs);
 }
 
 GLShader::~GLShader() {
@@ -138,6 +135,68 @@ uint32 GLShader::CompileShader(const uint32 type, const std::string &src) {
 		glDeleteShader(shader);
 
 		LOG_ERROR("{0}", std::data(infoLog));
+		return 0;
+	}
+
+	return shader;
+}
+
+void GLShader::CompileProgram(const std::filesystem::path& vs, const std::filesystem::path& fs) {
+	GLuint vsId = CompileShader(GL_VERTEX_SHADER, vs);
+	GLuint fsId = CompileShader(GL_FRAGMENT_SHADER, fs);
+	if (vsId == 0 || fsId == 0)
+		return;
+
+	const GLuint program = glCreateProgram();
+
+	glAttachShader(program, vsId);
+	glAttachShader(program, fsId);
+
+	glLinkProgram(program);
+
+	GLint isLinked = 0;
+	glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
+	if (isLinked == GL_FALSE) {
+		GLint maxLength = 0;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> infoLog(maxLength);
+		glGetProgramInfoLog(program, maxLength, &maxLength, std::data(infoLog));
+
+		glDeleteProgram(program);
+		glDeleteShader(vsId);
+		glDeleteShader(fsId);
+
+		LOG_ERROR("Failed to link shader program {0}: {1}", mName, std::data(infoLog));
+		assert(false && "Shader link failure");
+	}
+
+	glDetachShader(program, vsId);
+	glDetachShader(program, fsId);
+
+	mId = program;
+}
+
+uint32 GLShader::CompileShader(const uint32 type, const std::filesystem::path& shaderFile) {
+	const std::string src = FileUtils::ReadText(shaderFile);
+	const GLuint shader = glCreateShader(type);
+
+	const GLchar *const source = std::data(src);
+	glShaderSource(shader, 1, &source, 0);
+	glCompileShader(shader);
+
+	GLint isCompiled = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE) {
+		GLint maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> infoLog(maxLength);
+		glGetShaderInfoLog(shader, maxLength, &maxLength, std::data(infoLog));
+
+		glDeleteShader(shader);
+
+		LOG_ERROR("Failed to compile {0}: {1}", shaderFile.string(), std::data(infoLog));
 		return 0;
 	}
 

@@ -15,10 +15,6 @@ namespace FileUtils
             return "";
         }
 
-        std::vector<char> buffer(std::filesystem::file_size(filepath));
-        file.read(std::data(buffer), std::size(buffer));
-        file.close();
-
-        return std::data(buffer);
+		return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     }
 }

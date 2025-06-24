@@ -1,18 +1,12 @@
 // Colored Tile Fragment Shader
-#version 450 core
+#version 460 core
+
+layout(location = 0) in vec4 v_Color;
 
 layout(location = 0) out vec4 color;
 
-struct VertexOutput
-{
-	vec4 color;
-};
-
-layout(location = 0) in VertexOutput InVert;
-
-void main()
-{
-	if (InVert.color.a < 0.1)
+void main() {
+	if (v_Color.a < 0.1)
 		discard;
-	color = InVert.color;
+	color = v_Color;
 }

@@ -33,6 +33,9 @@ private:
 	void Compile(const std::unordered_map<uint32, std::string> &shaderSources);
 	uint32 CompileShader(const uint32 type, const std::string &src);
 
+	void CompileProgram(const std::filesystem::path& vs, const std::filesystem::path& fs);
+	uint32 CompileShader(const uint32 type, const std::filesystem::path& shaderFile);
+
 private:
 	std::string mName;
 	uint32 mId = 0;
