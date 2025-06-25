@@ -222,7 +222,6 @@ void Application::RenderScene()
 
     RenderTilePaths();
 
-    //auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
 	auto tilePropsWindow = GetImGuiWindow<TileMapPropertiesWindow>();
     if (mSelectionTexture && tilePropsWindow)
     {
@@ -250,8 +249,6 @@ void Application::RenderScene()
 
 void Application::RenderTilePaths()
 {
-    //auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
-    //auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
 	auto tileMapPropertiesWindow = GetImGuiWindow<TileMapPropertiesWindow>();
 	auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
     if (!tileMapPropertiesWindow || !tileMapPathsWindow)
