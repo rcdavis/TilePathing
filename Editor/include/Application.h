@@ -51,6 +51,9 @@ private:
 
     void Render(const Ref<GLVertexArray>& vao);
 
+	template <typename T>
+	Ref<T> GetImGuiWindow();
+
     static void GlfwErrorCallback(int error, const char* description);
 
 private:

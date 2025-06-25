@@ -207,7 +207,7 @@ void Application::RenderScene()
     mVAO->Bind();
     Render(mVAO);
 
-    if (auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]); charWindow)
+    if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow)
     {
         for (const auto& c : charWindow->GetCharacters())
         {
@@ -222,7 +222,8 @@ void Application::RenderScene()
 
     RenderTilePaths();
 
-    auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    //auto tilePropsWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+	auto tilePropsWindow = GetImGuiWindow<TileMapPropertiesWindow>();
     if (mSelectionTexture && tilePropsWindow)
     {
         mColoredRectVao->Bind();
@@ -249,8 +250,10 @@ void Application::RenderScene()
 
 void Application::RenderTilePaths()
 {
-    auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
-    auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
+    //auto tileMapPropertiesWindow = DynamicCastRef<TileMapPropertiesWindow>(mImGuiWindows[0]);
+    //auto tileMapPathsWindow = DynamicCastRef<TileMapPathsWindow>(mImGuiWindows[1]);
+	auto tileMapPropertiesWindow = GetImGuiWindow<TileMapPropertiesWindow>();
+	auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
     if (!tileMapPropertiesWindow || !tileMapPathsWindow)
         return;
 
@@ -492,6 +495,17 @@ void Application::Render(const Ref<GLVertexArray>& vao)
 {
     const uint32 count = vao->GetIndexBuffer()->GetCount();
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
+}
+
+template <typename T>
+Ref<T> Application::GetImGuiWindow() {
+	for (auto window : mImGuiWindows) {
+		auto convertedWindow = DynamicCastRef<T>(window);
+		if (convertedWindow)
+			return convertedWindow;
+	}
+
+	return nullptr;
 }
 
 void Application::GlfwErrorCallback(int error, const char* description)
