@@ -22,7 +22,10 @@ namespace Utils {
 GLShader::GLShader(const std::string &name, const std::filesystem::path &vs, const std::filesystem::path &fs) :
 	mName(name)
 {
-	CompileProgram(vs, fs);
+	std::unordered_map<uint32, std::filesystem::path> shaders;
+	shaders[GL_VERTEX_SHADER] = vs;
+	shaders[GL_FRAGMENT_SHADER] = fs;
+	CompileProgram(shaders);
 }
 
 GLShader::~GLShader() {
@@ -77,13 +80,13 @@ void GLShader::SetMat4(const std::string &name, const glm::mat4 &value) {
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void GLShader::Compile(const std::unordered_map<uint32, std::string> &shaderSources) {
+void GLShader::CompileFromSources(const std::unordered_map<uint32, std::string> &shaderSources) {
 	assert(std::size(shaderSources) <= 2 && "Only 2 shaders supported (vertex and fragment)");
 	const GLuint program = glCreateProgram();
 	std::vector<uint32> shaderIds;
 	shaderIds.reserve(std::size(shaderSources));
 	for (const auto &[shaderId, source] : shaderSources) {
-		auto shader = CompileShader(shaderId, source);
+		auto shader = CompileShaderFromSource(shaderId, source);
 		if (shader) {
 			glAttachShader(program, shader);
 			shaderIds.push_back(shader);
@@ -106,17 +109,19 @@ void GLShader::Compile(const std::unordered_map<uint32, std::string> &shaderSour
 		for (auto id : shaderIds)
 			glDeleteShader(id);
 
-		LOG_ERROR("{0}", std::data(infoLog));
+		LOG_ERROR("Failed to link program {0}: {1}", mName, std::data(infoLog));
 		assert(false && "Shader link failure");
 	}
 
-	for (auto id : shaderIds)
+	for (auto id : shaderIds) {
 		glDetachShader(program, id);
+		glDeleteShader(id);
+	}
 
 	mId = program;
 }
 
-uint32 GLShader::CompileShader(const uint32 type, const std::string &src) {
+uint32 GLShader::CompileShaderFromSource(const uint32 type, const std::string &src) {
 	const GLuint shader = glCreateShader(type);
 
 	const GLchar *const source = std::data(src);
@@ -141,16 +146,18 @@ uint32 GLShader::CompileShader(const uint32 type, const std::string &src) {
 	return shader;
 }
 
-void GLShader::CompileProgram(const std::filesystem::path& vs, const std::filesystem::path& fs) {
-	GLuint vsId = CompileShader(GL_VERTEX_SHADER, vs);
-	GLuint fsId = CompileShader(GL_FRAGMENT_SHADER, fs);
-	if (vsId == 0 || fsId == 0)
-		return;
-
+void GLShader::CompileProgram(const std::unordered_map<uint32, std::filesystem::path> &shaderFiles) {
+	assert(std::size(shaderFiles) <= 2 && "Only 2 shaders supported (vertex and fragment)");
 	const GLuint program = glCreateProgram();
-
-	glAttachShader(program, vsId);
-	glAttachShader(program, fsId);
+	std::vector<uint32> shaderIds;
+	shaderIds.reserve(std::size(shaderFiles));
+	for (const auto &[shaderId, file] : shaderFiles) {
+		auto shader = CompileShader(shaderId, file);
+		if (shader) {
+			glAttachShader(program, shader);
+			shaderIds.push_back(shader);
+		}
+	}
 
 	glLinkProgram(program);
 
@@ -164,15 +171,18 @@ void GLShader::CompileProgram(const std::filesystem::path& vs, const std::filesy
 		glGetProgramInfoLog(program, maxLength, &maxLength, std::data(infoLog));
 
 		glDeleteProgram(program);
-		glDeleteShader(vsId);
-		glDeleteShader(fsId);
 
-		LOG_ERROR("Failed to link shader program {0}: {1}", mName, std::data(infoLog));
+		for (auto id : shaderIds)
+			glDeleteShader(id);
+
+		LOG_ERROR("Failed to link program {0}: {1]}", mName, std::data(infoLog));
 		assert(false && "Shader link failure");
 	}
 
-	glDetachShader(program, vsId);
-	glDetachShader(program, fsId);
+	for (auto id : shaderIds) {
+		glDetachShader(program, id);
+		glDeleteShader(id);
+	}
 
 	mId = program;
 }

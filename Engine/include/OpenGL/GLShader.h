@@ -30,10 +30,10 @@ public:
 	static Ref<GLShader> Create(const std::string &name, const std::filesystem::path &vs, const std::filesystem::path &fs);
 
 private:
-	void Compile(const std::unordered_map<uint32, std::string> &shaderSources);
-	uint32 CompileShader(const uint32 type, const std::string &src);
+	void CompileFromSources(const std::unordered_map<uint32, std::string> &shaderSources);
+	uint32 CompileShaderFromSource(const uint32 type, const std::string &src);
 
-	void CompileProgram(const std::filesystem::path& vs, const std::filesystem::path& fs);
+	void CompileProgram(const std::unordered_map<uint32, std::filesystem::path> &shaderFiles);
 	uint32 CompileShader(const uint32 type, const std::filesystem::path& shaderFile);
 
 private:
