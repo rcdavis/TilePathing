@@ -166,6 +166,9 @@ bool Application::Init()
 
 void Application::Shutdown()
 {
+	mImGuiWindows.clear();
+
+	mSelectionTexture = nullptr;
     mTestTexture = nullptr;
     mShader = nullptr;
     mTileMap = nullptr;
