@@ -20,7 +20,7 @@
 				}
 			],
 			"miDebuggerPath": "/usr/bin/gdb",
-			"preLaunchTask": "Build Editor"
+			"preLaunchTask": "Build All"
 		},
 		{
 			"name": "Run Editor",
@@ -28,7 +28,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/build/Editor/Editor",
 			"cwd": "${workspaceFolder}/build/Editor",
-			"preLaunchTask": "Build Editor"
+			"preLaunchTask": "Build All"
 		}
 	]
 }
