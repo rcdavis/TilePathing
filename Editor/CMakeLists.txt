@@ -1,5 +1,14 @@
 project(Editor)
 
+include(FetchContent)
+
+FetchContent_Declare(
+    pugixml
+    GIT_REPOSITORY https://github.com/zeux/pugixml.git
+    GIT_TAG v1.15
+)
+FetchContent_MakeAvailable(pugixml)
+
 add_executable(Editor
     src/Application.cpp
     src/Camera.cpp
@@ -26,9 +35,7 @@ target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-find_package(pugixml REQUIRED)
-
 target_link_libraries(Editor PRIVATE
-    pugixml::pugixml
+    pugixml
     Engine
 )

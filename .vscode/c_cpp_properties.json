@@ -3,6 +3,9 @@
 		{
 			"name": "Linux (Debug)",
 			"includePath": [
+				"${workspaceFolder}/build-linux-debug/_deps/glfw-src/include/",
+				"${workspaceFolder}/build-linux-debug/_deps/spdlog-src/include/",
+				"${workspaceFolder}/build-linux-debug/_deps/pugixml-src/src/",
 				"${workspaceFolder}/Editor/include/",
 				"${workspaceFolder}/Engine/include/",
 				"${workspaceFolder}/Engine/glad/include/",
@@ -13,6 +16,7 @@
 				"/usr/include"
 			],
 			"defines": [
+				"DEBUG",
 				"GLFW_INCLUDE_NONE",
 				"LOGGING_ENABLED",
 				"ASSERTS_ENABLED"

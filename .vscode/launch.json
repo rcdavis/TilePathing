@@ -2,13 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "GDB Debugging",
+			"name": "Editor (Linux Debug)",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build/Editor/Editor",
+			"program": "${workspaceFolder}/build-linux-debug/Editor/Editor",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/build/Editor",
+			"cwd": "${workspaceFolder}/build-linux-debug/Editor",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -20,15 +20,28 @@
 				}
 			],
 			"miDebuggerPath": "/usr/bin/gdb",
-			"preLaunchTask": "Build All"
+			"preLaunchTask": "Build All (Linux Debug)"
 		},
 		{
-			"name": "Run Editor",
+			"name": "Editor (Linux Release)",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build/Editor/Editor",
-			"cwd": "${workspaceFolder}/build/Editor",
-			"preLaunchTask": "Build All"
+			"program": "${workspaceFolder}/build-linux-release/Editor/Editor",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/build-linux-release/Editor",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			],
+			"miDebuggerPath": "/usr/bin/gdb",
+			"preLaunchTask": "Build All (Linux Release)"
 		}
 	]
 }
