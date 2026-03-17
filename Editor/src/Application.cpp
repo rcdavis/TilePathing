@@ -507,5 +507,9 @@ Ref<T> Application::GetImGuiWindow() {
 
 void Application::GlfwErrorCallback(int error, const char* description)
 {
+	// Ignore Wayland error that complains about not providing the window position.
+	if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND && error == 65548)
+		return;
+
     LOG_ERROR("GLFW Error ({0}): {1}", error, description);
 }
