@@ -9,6 +9,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+)
+FetchContent_MakeAvailable(glm)
+
 set(SPDLOG_HEADER_ONLY ON CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
@@ -61,7 +68,6 @@ target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ImGuiFileDialog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ImGui/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/glm/include
 )
 
 target_include_directories(Engine PRIVATE
@@ -73,6 +79,7 @@ find_package(OpenGL REQUIRED)
 
 target_link_libraries(Engine PUBLIC
     glfw
+    glm::glm
     spdlog::spdlog_header_only
     OpenGL::GL
 )

@@ -6,6 +6,7 @@
 				"${workspaceFolder}/build-linux-debug/_deps/glfw-src/include/",
 				"${workspaceFolder}/build-linux-debug/_deps/spdlog-src/include/",
 				"${workspaceFolder}/build-linux-debug/_deps/pugixml-src/src/",
+				"${workspaceFolder}/build-linux-debug/_deps/glm-src/",
 				"${workspaceFolder}/Editor/include/",
 				"${workspaceFolder}/Engine/include/",
 				"${workspaceFolder}/Engine/glad/include/",
