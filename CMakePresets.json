@@ -5,7 +5,10 @@
 			"name": "common",
 			"hidden": true,
 			"generator": "Ninja",
-			"binaryDir": "build/${presetName}"
+			"binaryDir": "build/${presetName}",
+			"cacheVariables": {
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+			}
 		},
 		{
 			"name": "common-clang",
@@ -14,8 +17,7 @@
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "clang",
 				"CMAKE_CXX_COMPILER": "clang++",
-				"CMAKE_CXX_FLAGS": "-stdlib=libstdc++",
-				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+				"CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
 			}
 		},
 		{
@@ -24,24 +26,7 @@
 			"inherits": "common",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "gcc",
-				"CMAKE_CXX_COMPILER": "g++",
-				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-			}
-		},
-		{
-			"name": "linux-debug-gcc",
-			"displayName": "Linux - Debug (GCC)",
-			"inherits": "common-gcc",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug"
-			}
-		},
-		{
-			"name": "linux-release-gcc",
-			"displayName": "Linux - Release (GCC)",
-			"inherits": "common-gcc",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release"
+				"CMAKE_CXX_COMPILER": "g++"
 			}
 		},
 		{
@@ -56,6 +41,22 @@
 			"name": "linux-release-clang",
 			"displayName": "Linux - Release (Clang)",
 			"inherits": "common-clang",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "linux-debug-gcc",
+			"displayName": "Linux - Debug (GCC)",
+			"inherits": "common-gcc",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "linux-release-gcc",
+			"displayName": "Linux - Release (GCC)",
+			"inherits": "common-gcc",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release"
 			}
