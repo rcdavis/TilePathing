@@ -5,7 +5,7 @@
         "--background-index",
         "--clang-tidy",
         "--completion-style=detailed",
-        "--compile-commands-dir=/home/ren/repos/TilePathing/build/linux-debug-gcc",
+        "--compile-commands-dir=/home/ren/repos/TilePathing/build/linux-debug-clang",
         "--query-driver=/usr/bin/g++"
     ],
     "files.associations": {
