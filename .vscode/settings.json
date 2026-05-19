@@ -1,4 +1,12 @@
 {
+	"C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--compile-commands-dir=/home/ren/repos/TilePathing/build/linux-debug-gcc",
+        "--query-driver=/usr/bin/g++"
+    ],
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",

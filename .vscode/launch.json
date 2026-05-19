@@ -2,13 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Editor (Linux Debug)",
+			"name": "Editor - Linux Debug (GCC)",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build-linux-debug/Editor/Editor",
+			"program": "${workspaceFolder}/build/linux-debug-gcc/Editor/Editor",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/build-linux-debug/Editor",
+			"cwd": "${workspaceFolder}/build/linux-debug-gcc/Editor",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -20,16 +20,16 @@
 				}
 			],
 			"miDebuggerPath": "/usr/bin/gdb",
-			"preLaunchTask": "Build All (Linux Debug)"
+			"preLaunchTask": "Build All - Linux Debug (GCC)"
 		},
 		{
-			"name": "Editor (Linux Release)",
+			"name": "Editor - Linux Debug (Clang)",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build-linux-release/Editor/Editor",
+			"program": "${workspaceFolder}/build/linux-debug-clang/Editor/Editor",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/build-linux-release/Editor",
+			"cwd": "${workspaceFolder}/build/linux-debug-clang/Editor",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "gdb",
@@ -41,7 +41,7 @@
 				}
 			],
 			"miDebuggerPath": "/usr/bin/gdb",
-			"preLaunchTask": "Build All (Linux Release)"
+			"preLaunchTask": "Build All - Linux Debug (Clang)"
 		}
 	]
 }

@@ -6,14 +6,11 @@
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
-#include "OpenGL/GLVertexBuffer.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
 
 #include "TileMap/TileMap.h"
-#include "TileMap/TileMapLayer.h"
-#include "TileMap/TileLayer.h"
 #include "TileMap/TileSet.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
