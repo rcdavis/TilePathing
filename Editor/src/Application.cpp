@@ -6,14 +6,11 @@
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
-#include "OpenGL/GLVertexBuffer.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
 
 #include "TileMap/TileMap.h"
-#include "TileMap/TileMapLayer.h"
-#include "TileMap/TileLayer.h"
 #include "TileMap/TileSet.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
@@ -507,5 +504,9 @@ Ref<T> Application::GetImGuiWindow() {
 
 void Application::GlfwErrorCallback(int error, const char* description)
 {
+	// Ignore Wayland error that complains about not providing the window position.
+	if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND && error == 65548)
+		return;
+
     LOG_ERROR("GLFW Error ({0}): {1}", error, description);
 }

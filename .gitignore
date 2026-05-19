@@ -44,3 +44,5 @@ JSON/
 
 build/
 Makefile
+
+/build*/

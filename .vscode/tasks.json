@@ -2,16 +2,31 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build All",
+			"label": "Build All - Linux Debug (GCC)",
 			"type": "shell",
-			"command": "make",
-			"args": ["-j12"],
+			"command": "ninja",
+			"args": [],
 			"options": {
-				"cwd": "${workspaceFolder}/build"
+				"cwd": "${workspaceFolder}/build/linux-debug-gcc"
 			},
 			"group": {
 				"kind": "build",
 				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always"
+			}
+		},
+		{
+			"label": "Build All - Linux Debug (Clang)",
+			"type": "shell",
+			"command": "ninja",
+			"args": [],
+			"options": {
+				"cwd": "${workspaceFolder}/build/linux-debug-clang"
+			},
+			"group": {
+				"kind": "build"
 			},
 			"presentation": {
 				"reveal": "always"
