@@ -11,7 +11,7 @@
 			},
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": false
 			},
 			"presentation": {
 				"reveal": "always"
@@ -26,7 +26,8 @@
 				"cwd": "${workspaceFolder}/build/linux-debug-clang"
 			},
 			"group": {
-				"kind": "build"
+				"kind": "build",
+				"isDefault": true
 			},
 			"presentation": {
 				"reveal": "always"
