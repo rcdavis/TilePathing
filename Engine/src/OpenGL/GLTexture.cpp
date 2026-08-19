@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
-#include "Log.h"
+#include "Utils/Log.h"
 
 GLTexture::GLTexture() {
 	glCreateTextures(GL_TEXTURE_2D, 1, &mId);

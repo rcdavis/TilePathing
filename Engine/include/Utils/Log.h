@@ -1,20 +1,16 @@
-
 #pragma once
 
-#pragma warning(push, 0)
-#include "spdlog/spdlog.h"
-#pragma warning(pop)
-
-#include "Core.h"
+#include <memory>
+#include "spdlog/logger.h"
 
 class Log {
 public:
-	static void Init();
+	static void Init(const std::string& tag);
 
-	static Ref<spdlog::logger> &GetLogger() { return s_Logger; }
+	static std::shared_ptr<spdlog::logger> &GetLogger() { return s_Logger; }
 
 private:
-	static Ref<spdlog::logger> s_Logger;
+	static std::shared_ptr<spdlog::logger> s_Logger;
 };
 
 #if LOGGING_ENABLED

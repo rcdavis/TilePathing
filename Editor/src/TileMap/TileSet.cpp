@@ -1,7 +1,7 @@
 #include "TileMap/TileSet.h"
 
 #include "Core.h"
-#include "Log.h"
+#include "Utils/Log.h"
 #include "OpenGL/GLTexture.h"
 
 #include <pugixml.hpp>

@@ -18,8 +18,8 @@ add_library(Engine STATIC
     src/OpenGL/GLVertexArray.cpp
     src/OpenGL/GLVertexBuffer.cpp
     src/Utils/FileUtils.cpp
+    src/Utils/Log.cpp
     src/Utils/StringUtils.cpp
-    src/Log.cpp
 )
 
 target_compile_definitions(Engine PUBLIC

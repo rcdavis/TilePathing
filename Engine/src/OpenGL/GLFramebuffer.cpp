@@ -1,6 +1,6 @@
 #include "OpenGL/GLFramebuffer.h"
 
-#include "Log.h"
+#include "Utils/Log.h"
 
 #include <glad/glad.h>
 

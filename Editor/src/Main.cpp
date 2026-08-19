@@ -1,10 +1,10 @@
 
-#include "Log.h"
+#include "Utils/Log.h"
 #include "Application.h"
 
 int main()
 {
-    Log::Init();
+    Log::Init("Editor");
 
     LOG_INFO("Starting Tile Pathing...");
 
