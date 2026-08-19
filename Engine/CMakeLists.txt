@@ -45,6 +45,8 @@ target_include_directories(Engine PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/stb/include
 )
 
+target_compile_features(Engine PRIVATE cxx_std_20)
+
 cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 

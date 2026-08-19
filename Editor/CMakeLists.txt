@@ -26,6 +26,8 @@ target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_compile_features(Editor PRIVATE cxx_std_20)
+
 target_link_libraries(Editor PRIVATE
     pugixml
     Engine

@@ -175,7 +175,7 @@ void GLShader::CompileProgram(const std::unordered_map<uint32, std::filesystem::
 		for (auto id : shaderIds)
 			glDeleteShader(id);
 
-		LOG_ERROR("Failed to link program {0}: {1]}", mName, std::data(infoLog));
+		LOG_ERROR("Failed to link program {0}: {1}", mName, std::data(infoLog));
 		assert(false && "Shader link failure");
 	}
 
