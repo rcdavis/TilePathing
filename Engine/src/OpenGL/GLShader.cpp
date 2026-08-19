@@ -4,8 +4,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Log.h"
 #include "Utils/FileUtils.h"
+#include "Utils/Log.h"
 
 namespace Utils {
 	static GLenum ShaderTypeFromString(const std::string &type) {

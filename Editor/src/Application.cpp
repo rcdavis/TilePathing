@@ -1,6 +1,5 @@
 #include "Application.h"
 
-#include "Log.h"
 #include "Character.h"
 #include "Input/Input.h"
 
@@ -19,6 +18,7 @@
 #include "ImGuiWindows/CharacterWindow.h"
 
 #include "Utils/MeshUtils.h"
+#include "Utils/Log.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
