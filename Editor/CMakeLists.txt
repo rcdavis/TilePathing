@@ -19,7 +19,7 @@ add_executable(Editor
     src/Utils/MeshUtils.cpp
 )
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res
      DESTINATION ${CMAKE_BINARY_DIR}/Editor)
 
 target_include_directories(Editor PUBLIC

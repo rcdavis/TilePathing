@@ -123,11 +123,11 @@ bool Application::Init()
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-    mTestTexture = GLTexture::Load("assets/textures/SMB_BlockTiles.png");
-    mShader = GLShader::Create("TileMap", "assets/shaders/TileMap.vert", "assets/shaders/TileMap.frag");
-    mTileMap = TileMap::Load("assets/tilemaps/SMBMap.tmx");
+    mTestTexture = GLTexture::Load("res/textures/SMB_BlockTiles.png");
+    mShader = GLShader::Create("TileMap", "res/shaders/TileMap.vert", "res/shaders/TileMap.frag");
+    mTileMap = TileMap::Load("res/tilemaps/SMBMap.tmx");
 
-    mColorShader = GLShader::Create("ColoredTile", "assets/shaders/ColoredTile.vert", "assets/shaders/ColoredTile.frag");
+    mColorShader = GLShader::Create("ColoredTile", "res/shaders/ColoredTile.vert", "res/shaders/ColoredTile.frag");
 
     mTilePathing.SetTileMap(mTileMap);
 
@@ -141,13 +141,13 @@ bool Application::Init()
     mImGuiWindows.push_back(charWindow);
 
     auto character = CreateRef<Character>();
-    character->SetTexture(GLTexture::Load("assets/textures/FileIcon.png"));
+    character->SetTexture(GLTexture::Load("res/textures/FileIcon.png"));
     character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
     character->SetTileCoords({ 7, 20 });
     character->SetMovementSteps(6);
     charWindow->AddCharacter(character);
 
-    mSelectionTexture = GLTexture::Load("assets/textures/SelectionRing.png");
+    mSelectionTexture = GLTexture::Load("res/textures/SelectionRing.png");
 
     FramebufferSpecs specs;
     specs.attachments = {
