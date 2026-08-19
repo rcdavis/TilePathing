@@ -53,6 +53,6 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(Engine PUBLIC
     glfw
     glm::glm
-    spdlog::spdlog_header_only
+    spdlog::spdlog
     OpenGL::GL
 )
