@@ -2,6 +2,7 @@
 
 #include "Character.h"
 #include "Input/Input.h"
+#include "Res.h"
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
@@ -123,11 +124,11 @@ bool Application::Init()
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-    mTestTexture = GLTexture::Load("res/textures/SMB_BlockTiles.png");
-    mShader = GLShader::Create("TileMap", "res/shaders/TileMap.vert", "res/shaders/TileMap.frag");
-    mTileMap = TileMap::Load("res/tilemaps/SMBMap.tmx");
+    mTestTexture = GLTexture::Load(Res::Paths::Textures::SMB_BlockTiles);
+    mShader = GLShader::Create("TileMap", Res::Paths::Shaders::TileMapVS, Res::Paths::Shaders::TileMapFS);
+    mTileMap = TileMap::Load(Res::Paths::TileMap::SMBMap);
 
-    mColorShader = GLShader::Create("ColoredTile", "res/shaders/ColoredTile.vert", "res/shaders/ColoredTile.frag");
+    mColorShader = GLShader::Create("ColoredTile", Res::Paths::Shaders::ColoredTileVS, Res::Paths::Shaders::ColoredTileFS);
 
     mTilePathing.SetTileMap(mTileMap);
 
