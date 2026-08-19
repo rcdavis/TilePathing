@@ -31,7 +31,7 @@ const TileSet::Terrain& TileSet::GetTerrain(const uint32 tileId)
 
 Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
 {
-    const std::filesystem::path filepath = std::filesystem::path("assets/tilemaps") / node.attribute("source").as_string();
+    const std::filesystem::path filepath = std::filesystem::path("res/tilemaps") / node.attribute("source").as_string();
 
     pugi::xml_document doc;
     if (const auto result = doc.load_file(filepath.string().c_str()); !result)
@@ -53,7 +53,7 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
 
     const auto imageNode = tilesetNode.child("image");
     const std::filesystem::path imagePath = imageNode.attribute("source").as_string();
-    tileSet->mTexture = GLTexture::Load("assets/textures" / imagePath.filename());
+    tileSet->mTexture = GLTexture::Load("res/textures" / imagePath.filename());
 
     tileSet->mTerrains.resize(tileSet->mTileCount);
     for (int i = 0; i < std::size(tileSet->mTerrains); ++i)

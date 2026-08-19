@@ -6,9 +6,9 @@
 
 ContentBrowserWindow::ContentBrowserWindow(const bool isOpen) :
     BaseImGuiWindow("Content Browser", isOpen),
-    mCurDir("assets"),
-    mDirIcon(GLTexture::Load("assets/textures/DirectoryIcon.png")),
-    mFileIcon(GLTexture::Load("assets/textures/FileIcon.png")),
+    mCurDir("res"),
+    mDirIcon(GLTexture::Load("res/textures/DirectoryIcon.png")),
+    mFileIcon(GLTexture::Load("res/textures/FileIcon.png")),
     mPadding(16.0f),
     mThumbnailSize(74.0f)
 {}
@@ -27,7 +27,7 @@ void ContentBrowserWindow::OnRender()
     for (const auto& dirEntry : std::filesystem::directory_iterator(mCurDir))
     {
         const auto& path = dirEntry.path();
-        const auto relativePath = std::filesystem::relative(path, "assets");
+        const auto relativePath = std::filesystem::relative(path, "res");
         const auto filenameStr = relativePath.filename().string();
         const Ref<GLTexture>& icon = dirEntry.is_directory() ? mDirIcon : mFileIcon;
 

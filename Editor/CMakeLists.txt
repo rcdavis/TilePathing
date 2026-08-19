@@ -1,14 +1,5 @@
 project(Editor)
 
-include(FetchContent)
-
-FetchContent_Declare(
-    pugixml
-    GIT_REPOSITORY https://github.com/zeux/pugixml.git
-    GIT_TAG v1.15
-)
-FetchContent_MakeAvailable(pugixml)
-
 add_executable(Editor
     src/Application.cpp
     src/Camera.cpp
@@ -28,12 +19,14 @@ add_executable(Editor
     src/Utils/MeshUtils.cpp
 )
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res
      DESTINATION ${CMAKE_BINARY_DIR}/Editor)
 
 target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+target_compile_features(Editor PRIVATE cxx_std_20)
 
 target_link_libraries(Editor PRIVATE
     pugixml

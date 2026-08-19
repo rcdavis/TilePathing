@@ -50,7 +50,7 @@ void CharacterWindow::OnRender()
     if (ImGui::Button("Add Character"))
     {
         Ref<Character> c = CreateRef<Character>();
-        c->SetTexture(GLTexture::Load("assets/textures/DirectoryIcon.png"));
+        c->SetTexture(GLTexture::Load("res/textures/DirectoryIcon.png"));
         c->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
         c->SetMovementSteps(6);
         AddCharacter(c);
