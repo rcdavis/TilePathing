@@ -1,20 +1,22 @@
 #include "Log.h"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
-Ref<spdlog::logger> Log::s_Logger;
+std::shared_ptr<spdlog::logger> Log::s_Logger;
 
-void Log::Init() {
+void Log::Init(const std::string& tag) {
 #if LOGGING_ENABLED
-	std::vector<spdlog::sink_ptr> logSinks;
-	logSinks.emplace_back(CreateRef<spdlog::sinks::stdout_color_sink_mt>());
-	logSinks.emplace_back(CreateRef<spdlog::sinks::basic_file_sink_mt>("Editor.log", true));
+	const std::array<spdlog::sink_ptr, 2> logSinks = {
+		std::make_shared<spdlog::sinks::stdout_color_sink_mt>(),
+		std::make_shared<spdlog::sinks::basic_file_sink_mt>(tag + ".log", true),
+	};
 
 	logSinks[0]->set_pattern("%^[%T] %n: %v%$");
 	logSinks[1]->set_pattern("[%T] [%l] %n: %v");
 
-	s_Logger = CreateRef<spdlog::logger>("EDITOR", std::begin(logSinks), std::end(logSinks));
+	s_Logger = std::make_shared<spdlog::logger>(tag, std::cbegin(logSinks), std::cend(logSinks));
 	s_Logger->set_level(spdlog::level::trace);
 	s_Logger->flush_on(spdlog::level::trace);
 	spdlog::register_logger(s_Logger);
