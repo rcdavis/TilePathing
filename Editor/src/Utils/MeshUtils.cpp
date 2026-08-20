@@ -30,7 +30,7 @@ namespace MeshUtils
                 Ref<TileSet> tileSet;
                 for (const auto& ts : tileMap->GetTileSets())
                 {
-                    if (tile.mId >= ts->GetFirstGid())
+                    if (tile.mId >= ts->firstGid)
                     {
                         tileSet = ts;
                         break;
@@ -39,8 +39,8 @@ namespace MeshUtils
 
                 assert(tileSet && "Tile Layer does not have a tile set");
 
-                const uint32 tileWidth = tileSet->GetTileWidth();
-                const uint32 tileHeight = tileSet->GetTileHeight();
+                const uint32 tileWidth = tileSet->tileWidth;
+                const uint32 tileHeight = tileSet->tileHeight;
                 const uint32 numTilesWidth = tileLayer->GetWidth();
                 const uint32 numTilesHeight = tileLayer->GetHeight();
 

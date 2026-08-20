@@ -171,7 +171,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
             Ref<TileSet> tileSet;
             for (const auto& ts : tileMap->GetTileSets())
             {
-                if (tile.mId >= ts->GetFirstGid())
+                if (tile.mId >= ts->firstGid)
                 {
                     tileSet = ts;
                     break;

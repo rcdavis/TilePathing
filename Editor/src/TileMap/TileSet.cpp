@@ -8,16 +8,16 @@
 
 std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32 tileId)
 {
-    const uint32 texWidth = mTexture->GetWidth();
-    const uint32 texHeight = mTexture->GetHeight();
-    const f32 texCoordU = (((tileId - mFirstGid) % mColumnCount) * mTileWidth) / (f32)texWidth;
-    const f32 texCoordV = (((tileId - mFirstGid) / mColumnCount) * mTileHeight) / (f32)texHeight;
+    const uint32 texWidth = texture->GetWidth();
+    const uint32 texHeight = texture->GetHeight();
+    const f32 texCoordU = (((tileId - firstGid) % columnCount) * tileWidth) / (f32)texWidth;
+    const f32 texCoordV = (((tileId - firstGid) / columnCount) * tileHeight) / (f32)texHeight;
 
     const std::array<glm::vec2, 4> texCoords = {
         glm::vec2 { texCoordU, 1.0f - texCoordV },
-        glm::vec2 { texCoordU + (mTileWidth / (f32)texWidth), 1.0f - texCoordV },
-        glm::vec2 { texCoordU + (mTileWidth / (f32)texWidth), 1.0f - (texCoordV + (mTileHeight / (f32)texHeight)) },
-        glm::vec2 { texCoordU, 1.0f - (texCoordV + (mTileHeight / (f32)texHeight)) }
+        glm::vec2 { texCoordU + (tileWidth / (f32)texWidth), 1.0f - texCoordV },
+        glm::vec2 { texCoordU + (tileWidth / (f32)texWidth), 1.0f - (texCoordV + (tileHeight / (f32)texHeight)) },
+        glm::vec2 { texCoordU, 1.0f - (texCoordV + (tileHeight / (f32)texHeight)) }
     };
 
     return texCoords;
@@ -25,8 +25,8 @@ std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32 tileId)
 
 const TileSet::Terrain& TileSet::GetTerrain(const uint32 tileId)
 {
-    assert(tileId - mFirstGid >= 0 && tileId - mFirstGid < std::size(mTerrains) && "Invalid tileId");
-    return mTerrains[tileId - mFirstGid];
+    assert(tileId - firstGid >= 0 && tileId - firstGid < std::size(terrains) && "Invalid tileId");
+    return terrains[tileId - firstGid];
 }
 
 Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
@@ -41,29 +41,29 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
     }
 
     auto tileSet = CreateRef<TileSet>();
-    tileSet->mFirstGid = node.attribute("firstgid").as_uint();
+    tileSet->firstGid = node.attribute("firstgid").as_uint();
 
     const auto tilesetNode = doc.child("tileset");
-    tileSet->mName = tilesetNode.attribute("name").as_string();
-    tileSet->mTileWidth = tilesetNode.attribute("tilewidth").as_uint();
-    tileSet->mTileHeight = tilesetNode.attribute("tileheight").as_uint();
-    tileSet->mTileCount = tilesetNode.attribute("tilecount").as_uint();
-    tileSet->mColumnCount = tilesetNode.attribute("columns").as_uint();
-    tileSet->mProperties = Property::LoadList(tilesetNode.child("properties"));
+    tileSet->name = tilesetNode.attribute("name").as_string();
+    tileSet->tileWidth = tilesetNode.attribute("tilewidth").as_uint();
+    tileSet->tileHeight = tilesetNode.attribute("tileheight").as_uint();
+    tileSet->tileCount = tilesetNode.attribute("tilecount").as_uint();
+    tileSet->columnCount = tilesetNode.attribute("columns").as_uint();
+    tileSet->properties = Property::LoadList(tilesetNode.child("properties"));
 
     const auto imageNode = tilesetNode.child("image");
     const std::filesystem::path imagePath = imageNode.attribute("source").as_string();
-    tileSet->mTexture = GLTexture::Load("res/textures" / imagePath.filename());
+    tileSet->texture = GLTexture::Load("res/textures" / imagePath.filename());
 
-    tileSet->mTerrains.resize(tileSet->mTileCount);
-    for (int i = 0; i < std::size(tileSet->mTerrains); ++i)
-        tileSet->mTerrains[i].mTileId = i;
+    tileSet->terrains.resize(tileSet->tileCount);
+    for (int i = 0; i < std::size(tileSet->terrains); ++i)
+        tileSet->terrains[i].mTileId = i;
 
     for (auto tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile"))
     {
         const uint32 tileId = tileNode.attribute("id").as_uint();
-        tileSet->mTerrains[tileId].mTileId = tileId;
-        tileSet->mTerrains[tileId].mProperties = Property::LoadList(tileNode.child("properties"));
+        tileSet->terrains[tileId].mTileId = tileId;
+        tileSet->terrains[tileId].mProperties = Property::LoadList(tileNode.child("properties"));
     }
 
     return tileSet;
