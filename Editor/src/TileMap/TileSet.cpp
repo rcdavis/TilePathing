@@ -6,10 +6,10 @@
 
 #include <pugixml.hpp>
 
-std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32 tileId)
+std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32_t tileId)
 {
-    const uint32 texWidth = texture->GetWidth();
-    const uint32 texHeight = texture->GetHeight();
+    const uint32_t texWidth = texture->GetWidth();
+    const uint32_t texHeight = texture->GetHeight();
     const f32 texCoordU = (((tileId - firstGid) % columnCount) * tileWidth) / (f32)texWidth;
     const f32 texCoordV = (((tileId - firstGid) / columnCount) * tileHeight) / (f32)texHeight;
 
@@ -23,7 +23,7 @@ std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32 tileId)
     return texCoords;
 }
 
-const TileSet::Terrain& TileSet::GetTerrain(const uint32 tileId)
+const TileSet::Terrain& TileSet::GetTerrain(const uint32_t tileId)
 {
     assert(tileId - firstGid >= 0 && tileId - firstGid < std::size(terrains) && "Invalid tileId");
     return terrains[tileId - firstGid];
@@ -61,7 +61,7 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
 
     for (auto tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile"))
     {
-        const uint32 tileId = tileNode.attribute("id").as_uint();
+        const uint32_t tileId = tileNode.attribute("id").as_uint();
         tileSet->terrains[tileId].mTileId = tileId;
         tileSet->terrains[tileId].mProperties = Property::LoadList(tileNode.child("properties"));
     }

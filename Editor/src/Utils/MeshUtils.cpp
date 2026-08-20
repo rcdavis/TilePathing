@@ -23,7 +23,7 @@ namespace MeshUtils
                 continue;
 
             const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
-            const auto& tiles = tileLayer->GetTiles();
+            const auto& tiles = tileLayer->tiles;
             for (uint32 i = 0; i < std::size(tiles); ++i)
             {
                 const auto& tile = tiles[i];
@@ -41,8 +41,8 @@ namespace MeshUtils
 
                 const uint32 tileWidth = tileSet->tileWidth;
                 const uint32 tileHeight = tileSet->tileHeight;
-                const uint32 numTilesWidth = tileLayer->GetWidth();
-                const uint32 numTilesHeight = tileLayer->GetHeight();
+                const uint32 numTilesWidth = tileLayer->width;
+                const uint32 numTilesHeight = tileLayer->height;
 
                 const uint32 xPos = ((i % numTilesWidth) * tileWidth);
                 const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);

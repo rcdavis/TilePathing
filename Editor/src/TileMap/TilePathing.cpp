@@ -167,7 +167,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
     {
         for (uint32 col = 0; col < mNumCols; ++col)
         {
-            const auto& tile = tileLayer->GetTiles()[((uint64)row * tileLayer->GetWidth()) + col];
+            const auto& tile = tileLayer->tiles[((uint64)row * tileLayer->width) + col];
             Ref<TileSet> tileSet;
             for (const auto& ts : tileMap->GetTileSets())
             {

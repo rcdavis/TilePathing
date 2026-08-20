@@ -11,8 +11,8 @@ Ref<TileLayer> TileLayer::Load(const pugi::xml_node& node)
 
     tileLayer->mName = node.attribute("name").as_string();
     tileLayer->mIsVisible = node.attribute("visible").as_bool(true);
-    tileLayer->mWidth = node.attribute("width").as_uint();
-    tileLayer->mHeight = node.attribute("height").as_uint();
+    tileLayer->width = node.attribute("width").as_uint();
+    tileLayer->height = node.attribute("height").as_uint();
     tileLayer->mProperties = Property::LoadList(node.child("properties"));
 
     const auto dataNode = node.child("data");
@@ -21,7 +21,7 @@ Ref<TileLayer> TileLayer::Load(const pugi::xml_node& node)
         const auto strs = StringUtils::Split(dataNode.text().as_string(), ", \n");
         for (const auto& s : strs)
             if (!std::empty(s))
-                tileLayer->mTiles.push_back(TileLayer::Tile{ (uint32)atoi(s.c_str()) });
+                tileLayer->tiles.push_back(TileLayer::Tile{ (uint32)atoi(s.c_str()) });
     }
 
     return tileLayer;

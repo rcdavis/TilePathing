@@ -29,8 +29,8 @@ public:
 public:
     TileSet() = default;
 
-    std::array<glm::vec2, 4> GetTexCoords(const uint32 tileId);
-    const Terrain& GetTerrain(const uint32 tileId);
+    std::array<glm::vec2, 4> GetTexCoords(const uint32_t tileId);
+    const Terrain& GetTerrain(const uint32_t tileId);
 
     static Ref<TileSet> Load(const pugi::xml_node& node);
 
@@ -40,9 +40,9 @@ public:
     std::vector<Terrain> terrains;
     std::vector<Property> properties;
 
-    uint32 firstGid = 1;
-    uint32 tileWidth = 0;
-    uint32 tileHeight = 0;
-    uint32 tileCount = 0;
-    uint32 columnCount = 0;
+    uint32_t firstGid = 1;
+    uint32_t tileWidth = 0;
+    uint32_t tileHeight = 0;
+    uint32_t tileCount = 0;
+    uint32_t columnCount = 0;
 };
