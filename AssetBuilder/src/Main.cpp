@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <vector>
 #include <regex>
+#include <fstream>
 
 struct TileSetData {
 	std::string name;
@@ -56,13 +57,6 @@ int main(int argc, char** argv) {
 }
 
 static void ConvertTilemap(const std::string& tilemapPath, const std::string& tilesetPath, const std::string& outputPath) {
-	std::cout << "Converting tilemap:\n";
-	std::cout << "  Tilemap: " << tilemapPath << std::endl;
-	std::cout << "  Tileset: " << tilesetPath << std::endl;
-	std::cout << "  Output: " << outputPath << std::endl;
-
-	std::cout << "Parsing tilemap..." << std::endl;
-
 	pugi::xml_document doc;
 	if (const auto result = doc.load_file(tilemapPath.c_str()); !result) {
 		std::cerr << "Failed to load tile map \"" << tilemapPath << "\": " << result.description() << std::endl;
@@ -127,4 +121,32 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 	}
 
 	tileMapData.tilesets.emplace_back(tilesetData);
+
+	std::ofstream file(outputPath, std::ios::binary);
+	if (!file) {
+		std::cerr << "Failed to create file \"" << outputPath << "\"" << std::endl;
+		return;
+	}
+
+	file << tileMapData.width << tileMapData.height;
+	file << tileMapData.tileWidth << tileMapData.tileHeight;
+
+	file << (uint32_t)tileMapData.tilesets.size();
+	file << (uint32_t)tileMapData.layers.size();
+
+	for (const TileSetData& tileSet : tileMapData.tilesets) {
+		file << tileSet.tileWidth << tileSet.tileHeight;
+		file << tileSet.tileCount;
+		file << tileSet.columnCount;
+
+		file.write((const char*)tileSet.movementCosts.data(), tileSet.movementCosts.size());
+	}
+
+	for (const TileLayerData& layerData : tileMapData.layers) {
+		file << layerData.width << layerData.height;
+
+		file.write((const char*)layerData.tiles.data(), layerData.tiles.size());
+	}
+
+	std::cout << "Converted tile map \"" << tilemapPath << "\" to \"" << outputPath << "\"" << std::endl;
 }
