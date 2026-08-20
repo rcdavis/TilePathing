@@ -14,6 +14,7 @@ add_executable(Editor
     src/Input/Input.cpp
     src/TileMap/TileLayer.cpp
     src/TileMap/TileMap.cpp
+    src/TileMap/TileMapLoader.cpp
     src/TileMap/TilePathing.cpp
     src/TileMap/TileSet.cpp
     src/Utils/MeshUtils.cpp

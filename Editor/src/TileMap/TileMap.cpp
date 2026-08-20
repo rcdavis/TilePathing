@@ -1,46 +1,16 @@
 #include "TileMap/TileMap.h"
 
 #include "Core.h"
+#include "TileMap/TileMapLayer.h"
+#include "TileMap/TilePathing.h"
 #include "Utils/Log.h"
 #include "TileMap/TileSet.h"
 #include "TileMap/TileLayer.h"
+#include "TileMap/TileMapLoader.h"
 
 #include <cstdint>
 #include <pugixml.hpp>
-#include <fstream>
 #include <vector>
-
-struct TileMapBinHeader {
-	uint32_t width = 0;
-	uint32_t height = 0;
-	uint32_t tileWidth = 0;
-	uint32_t tileHeight = 0;
-	uint32_t tilesetCount = 0;
-	uint32_t layerCount = 0;
-};
-
-struct TileSetData {
-	uint32_t tileWidth = 0;
-	uint32_t tileHeight = 0;
-	uint32_t tileCount = 0;
-	uint32_t columnCount = 0;
-	std::vector<uint8_t> movementCosts;
-};
-
-struct TileLayerData {
-	uint32_t width = 0;
-	uint32_t height = 0;
-	std::vector<uint8_t> tiles;
-};
-
-struct TileMapData {
-	uint32_t width = 0;
-	uint32_t height = 0;
-	uint32_t tileWidth = 0;
-	uint32_t tileHeight = 0;
-	std::vector<TileSetData> tilesets;
-	std::vector<TileLayerData> layers;
-};
 
 Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
 {
@@ -72,44 +42,49 @@ Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
 }
 
 Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
-	std::ifstream file(filepath, std::ios::binary);
-	if (!file) {
-		LOG_ERROR("Failed to load tile map binary \"{}\"", filepath.c_str());
+	TileMapData tileMapData;
+	if (!TileMapLoader::LoadBinary(filepath.c_str(), tileMapData)) {
+		LOG_ERROR("");
 		return nullptr;
 	}
 
-	TileMapBinHeader header;
-	file.read((char*)&header, sizeof(TileMapBinHeader));
+	auto tileMap = CreateRef<TileMap>();
 
-	TileMapData tileMapData;
-	tileMapData.width = header.width;
-	tileMapData.height = header.height;
-	tileMapData.tileWidth = header.tileWidth;
-	tileMapData.tileHeight = header.tileHeight;
+	tileMap->name = filepath.stem().string();
+	tileMap->width = tileMapData.width;
+	tileMap->height = tileMapData.height;
+	tileMap->tileWidth = tileMapData.tileWidth;
+	tileMap->tileHeight = tileMapData.tileHeight;
 
-	for (uint32_t i = 0; i < header.tilesetCount; ++i) {
-		TileSetData tilesetData;
-		file.read((char*)&tilesetData.tileWidth, sizeof(uint32_t));
-		file.read((char*)&tilesetData.tileHeight, sizeof(uint32_t));
-		file.read((char*)&tilesetData.tileCount, sizeof(uint32_t));
-		file.read((char*)&tilesetData.columnCount, sizeof(uint32_t));
+	tileMap->tileSets.reserve(tileMapData.tilesets.size());
+	for (uint32_t i = 0; i < tileMapData.tilesets.size(); ++i) {
+		auto tileSet = CreateRef<TileSet>();
+		tileSet->tileWidth = tileMapData.tilesets[i].tileWidth;
+		tileSet->tileHeight = tileMapData.tilesets[i].tileHeight;
+		tileSet->tileCount = tileMapData.tilesets[i].tileCount;
+		tileSet->columnCount = tileMapData.tilesets[i].columnCount;
 
-		tilesetData.movementCosts.resize(tilesetData.tileCount);
-		file.read((char*)tilesetData.movementCosts.data(), tilesetData.movementCosts.size());
+		tileSet->terrains.resize(tileMapData.tilesets[i].movementCosts.size());
+		for (uint32_t k = 0; k < tileMapData.tilesets[i].movementCosts.size(); ++k) {
+			tileSet->terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
+		}
 
-		tileMapData.tilesets.emplace_back(tilesetData);
+		tileMap->tileSets.emplace_back(tileSet);
 	}
 
-	for (uint32_t i = 0; i < header.layerCount; ++i) {
-		TileLayerData layerData;
-		file.read((char*)&layerData.width, sizeof(uint32_t));
-		file.read((char*)&layerData.height, sizeof(uint32_t));
+	tileMap->layers.reserve(tileMapData.layers.size());
+	for (uint32_t i = 0; i < tileMapData.layers.size(); ++i) {
+		auto tileLayer = CreateRef<TileLayer>();
+		tileLayer->width = tileMapData.layers[i].width;
+		tileLayer->height = tileMapData.layers[i].height;
 
-		layerData.tiles.resize(layerData.width * layerData.height);
-		file.read((char*)layerData.tiles.data(), layerData.tiles.size());
+		tileLayer->tiles.resize(tileMapData.layers[i].tiles.size());
+		for (uint32_t k = 0; k < tileMapData.layers[i].tiles.size(); ++k) {
+			tileLayer->tiles[k].mId = tileMapData.layers[i].tiles[k];
+		}
 
-		tileMapData.layers.emplace_back(layerData);
+		tileMap->layers.emplace_back(tileLayer);
 	}
 
-	return nullptr;
+	return tileMap;
 }
