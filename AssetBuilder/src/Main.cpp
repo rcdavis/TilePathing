@@ -2,6 +2,10 @@
 #include "CLI/CLI.hpp"
 
 #include "pugixml.hpp"
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
+#include <regex>
 
 struct TileSetData {
 	std::string name;
@@ -9,6 +13,21 @@ struct TileSetData {
 	uint32_t tileHeight = 0;
 	uint32_t tileCount = 0;
 	uint32_t columnCount = 0;
+};
+
+struct TileLayerData {
+	uint32_t width = 0;
+	uint32_t height = 0;
+	std::vector<uint8_t> tiles;
+};
+
+struct TileMapData {
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t tileWidth = 0;
+	uint32_t tileHeight = 0;
+	std::vector<TileSetData> tilesets;
+	std::vector<TileLayerData> layers;
 };
 
 static void ConvertTilemap(const std::string& tilemapPath, const std::string& tilesetPath, const std::string& outputPath);
@@ -41,16 +60,52 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 	std::cout << "  Tileset: " << tilesetPath << std::endl;
 	std::cout << "  Output: " << outputPath << std::endl;
 
-	std::cout << "Parsing tileset..." << std::endl;
+	std::cout << "Parsing tilemap..." << std::endl;
 
 	pugi::xml_document doc;
+	if (const auto result = doc.load_file(tilemapPath.c_str()); !result) {
+		std::cerr << "Failed to load tile map \"" << tilemapPath << "\": " << result.description() << std::endl;
+		return;
+	}
+
+	TileMapData tileMapData;
+	const pugi::xml_node mapNode = doc.child("map");
+	tileMapData.width = mapNode.attribute("width").as_uint();
+	tileMapData.height = mapNode.attribute("height").as_uint();
+	tileMapData.tileWidth = mapNode.attribute("tilewidth").as_uint();
+	tileMapData.tileHeight = mapNode.attribute("tileheight").as_uint();
+
+	for (pugi::xml_node layerNode = mapNode.child("layer"); layerNode; layerNode = layerNode.next_sibling("layer")) {
+		TileLayerData layerData;
+		layerData.width = layerNode.attribute("width").as_uint();
+		layerData.height = layerNode.attribute("height").as_uint();
+
+		const pugi::xml_node dataNode = layerNode.child("data");
+    	if (strcmp(dataNode.attribute("encoding").as_string(), "csv") == 0) {
+			const std::string csvText = dataNode.text().as_string();
+			std::vector<std::string> splitValues;
+			const std::regex reg("[, \n]");
+			std::copy(
+				std::sregex_token_iterator(std::cbegin(csvText), std::cend(csvText), reg, -1),
+				std::sregex_token_iterator(),
+				std::back_inserter(splitValues)
+			);
+
+			for (const auto& tileId : splitValues) {
+				layerData.tiles.emplace_back((uint8_t)atoi(tileId.c_str()));
+			}
+		}
+
+		tileMapData.layers.emplace_back(layerData);
+	}
+
 	if (const auto result = doc.load_file(tilesetPath.c_str()); !result) {
 		std::cerr << "Failed to load tile set \"" << tilesetPath << "\": " << result.description() << std::endl;
 		return;
 	}
 
 	TileSetData tilesetData;
-    const auto tilesetNode = doc.child("tileset");
+    const pugi::xml_node tilesetNode = doc.child("tileset");
 	tilesetData.name = tilesetNode.attribute("name").as_string();
 	tilesetData.tileWidth = tilesetNode.attribute("tilewidth").as_uint();
 	tilesetData.tileHeight = tilesetNode.attribute("tileheight").as_uint();
