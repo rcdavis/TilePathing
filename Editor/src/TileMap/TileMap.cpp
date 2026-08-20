@@ -55,18 +55,18 @@ Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
 	const auto root = doc.child("map");
 
 	auto tileMap = CreateRef<TileMap>();
-	tileMap->mName = filepath.stem().string();
-	tileMap->mWidth = root.attribute("width").as_uint();
-	tileMap->mHeight = root.attribute("height").as_uint();
-	tileMap->mTileWidth = root.attribute("tilewidth").as_uint();
-	tileMap->mTileHeight = root.attribute("tileheight").as_uint();
-	tileMap->mProperties = Property::LoadList(root.child("properties"));
+	tileMap->name = filepath.stem().string();
+	tileMap->width = root.attribute("width").as_uint();
+	tileMap->height = root.attribute("height").as_uint();
+	tileMap->tileWidth = root.attribute("tilewidth").as_uint();
+	tileMap->tileHeight = root.attribute("tileheight").as_uint();
+	tileMap->properties = Property::LoadList(root.child("properties"));
 
 	for (auto node = root.child("tileset"); node; node = node.next_sibling("tileset"))
-		tileMap->mTileSets.push_back(TileSet::Load(node));
+		tileMap->tileSets.push_back(TileSet::Load(node));
 
 	for (auto node = root.child("layer"); node; node = node.next_sibling("layer"))
-		tileMap->mLayers.push_back(TileLayer::Load(node));
+		tileMap->layers.push_back(TileLayer::Load(node));
 
 	return tileMap;
 }

@@ -146,10 +146,10 @@ uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const
 void TilePathing::CreateMap(Ref<TileMap> tileMap)
 {
     assert(tileMap && "Tile map is null");
-    assert(!std::empty(tileMap->GetTileSets()) && "Tile map does not have a tile set");
+    assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
 
     Ref<TileLayer> tileLayer;
-    for (const auto& layer : tileMap->GetLayers())
+    for (const auto& layer : tileMap->layers)
     {
         if (layer->GetType() == TileMapLayer::Type::Tile)
         {
@@ -159,8 +159,8 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
     }
     assert(tileLayer && "Tile map does not have a tile layer");
 
-    mNumRows = tileMap->GetHeight();
-    mNumCols = tileMap->GetWidth();
+    mNumRows = tileMap->height;
+    mNumCols = tileMap->width;
     mMap.resize((size_t)mNumRows * (size_t)mNumCols);
 
     for (uint32 row = 0; row < mNumRows; ++row)
@@ -169,7 +169,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
         {
             const auto& tile = tileLayer->tiles[((uint64)row * tileLayer->width) + col];
             Ref<TileSet> tileSet;
-            for (const auto& ts : tileMap->GetTileSets())
+            for (const auto& ts : tileMap->tileSets)
             {
                 if (tile.mId >= ts->firstGid)
                 {
