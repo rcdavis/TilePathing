@@ -22,6 +22,29 @@ add_executable(Editor
 file(COPY ${CMAKE_SOURCE_DIR}/res
      DESTINATION ${CMAKE_BINARY_DIR}/Editor)
 
+set(TILE_MAP_SOURCES
+    ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
+    ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
+)
+set(TEST_MAP_BIN_FILE ${CMAKE_BINARY_DIR}/Editor/res/tilemaps/TestMap.tmbin)
+
+add_custom_command(
+    OUTPUT ${TEST_MAP_BIN_FILE}
+    COMMAND $<TARGET_FILE:AssetBuilder> tilemaps
+        --tilemap
+        ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
+        --tileset
+        ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
+        --output
+        ${TEST_MAP_BIN_FILE}
+    DEPENDS ${TILE_MAP_SOURCES}
+    COMMENT "Creating TestMap.tmbin..."
+    VERBATIM
+)
+
+add_custom_target(CompileTileMaps ALL DEPENDS ${TEST_MAP_BIN_FILE})
+add_dependencies(Editor CompileTileMaps)
+
 target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
