@@ -17,6 +17,6 @@ namespace Res::Paths {
 
 	namespace TileMap {
 		constexpr const char* SMBMap = "res/tilemaps/SMBMap.tmx";
-		constexpr const char* SMBMapTileset = "res/tilemaps/SMBMapTileset.png";
+		constexpr const char* SMBMapTileset = "res/tilemaps/SMBMapTileset.tsx";
 	}
 }
