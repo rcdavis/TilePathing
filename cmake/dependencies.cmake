@@ -37,6 +37,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
+    CLI11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG v2.7.2
+)
+FetchContent_MakeAvailable(CLI11)
+
+FetchContent_Declare(
     pugixml
     GIT_REPOSITORY https://github.com/zeux/pugixml.git
     GIT_TAG v1.16

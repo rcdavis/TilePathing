@@ -127,6 +127,7 @@ bool Application::Init()
     mTestTexture = GLTexture::Load(Res::Paths::Textures::SMB_BlockTiles);
     mShader = GLShader::Create("TileMap", Res::Paths::Shaders::TileMapVS, Res::Paths::Shaders::TileMapFS);
     mTileMap = TileMap::Load(Res::Paths::TileMap::SMBMap);
+	TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
 
     mColorShader = GLShader::Create("ColoredTile", Res::Paths::Shaders::ColoredTileVS, Res::Paths::Shaders::ColoredTileFS);
 
