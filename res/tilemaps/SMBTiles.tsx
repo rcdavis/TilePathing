@@ -4,7 +4,7 @@
  <tile id="0">
   <properties>
    <property name="isGround" type="bool" value="true"/>
-   <property name="movementCost" type="int" value="9000"/>
+   <property name="movementCost" type="int" value="250"/>
   </properties>
  </tile>
  <tile id="25">

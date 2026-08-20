@@ -13,6 +13,7 @@ struct TileSetData {
 	uint32_t tileHeight = 0;
 	uint32_t tileCount = 0;
 	uint32_t columnCount = 0;
+	std::vector<uint8_t> movementCosts;
 };
 
 struct TileLayerData {
@@ -111,11 +112,19 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 	tilesetData.tileHeight = tilesetNode.attribute("tileheight").as_uint();
 	tilesetData.tileCount = tilesetNode.attribute("tilecount").as_uint();
 	tilesetData.columnCount = tilesetNode.attribute("columns").as_uint();
+	tilesetData.movementCosts.resize(tilesetData.tileCount, 1);
 
-	std::cout << "Tileset data:\n";
-	std::cout << "  Name: " << tilesetData.name << std::endl;
-	std::cout << "  Tile Width: " << tilesetData.tileWidth << std::endl;
-	std::cout << "  Tile Height: " << tilesetData.tileHeight << std::endl;
-	std::cout << "  Tile Count: " << tilesetData.tileCount << std::endl;
-	std::cout << "  Column Count: " << tilesetData.columnCount << std::endl;
+	for (pugi::xml_node tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile")) {
+        const uint8_t tileId = (uint8_t)tileNode.attribute("id").as_uint();
+		const pugi::xml_node propertiesNode = tileNode.child("properties");
+		for (pugi::xml_node propNode = propertiesNode.child("property"); propNode; propNode = propNode.next_sibling("property")) {
+			const auto name = propNode.attribute("name").as_string();
+			const auto val = propNode.attribute("value");
+			if (strcmp(name, "movementCost") == 0) {
+				tilesetData.movementCosts[tileId] = (uint8_t)val.as_uint(1);
+			}
+		}
+	}
+
+	tileMapData.tilesets.emplace_back(tilesetData);
 }
