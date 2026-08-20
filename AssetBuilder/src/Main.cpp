@@ -76,7 +76,7 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 		layerData.height = layerNode.attribute("height").as_uint();
 
 		const pugi::xml_node dataNode = layerNode.child("data");
-    	if (strcmp(dataNode.attribute("encoding").as_string(), "csv") == 0) {
+		if (strcmp(dataNode.attribute("encoding").as_string(), "csv") == 0) {
 			const std::string csvText = dataNode.text().as_string();
 			std::vector<std::string> splitValues;
 			const std::regex reg("[, \n]");
@@ -100,7 +100,7 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 	}
 
 	TileSetData tilesetData;
-    const pugi::xml_node tilesetNode = doc.child("tileset");
+	const pugi::xml_node tilesetNode = doc.child("tileset");
 	tilesetData.name = tilesetNode.attribute("name").as_string();
 	tilesetData.tileWidth = tilesetNode.attribute("tilewidth").as_uint();
 	tilesetData.tileHeight = tilesetNode.attribute("tileheight").as_uint();
@@ -109,7 +109,7 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 	tilesetData.movementCosts.resize(tilesetData.tileCount, 1);
 
 	for (pugi::xml_node tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile")) {
-        const uint8_t tileId = (uint8_t)tileNode.attribute("id").as_uint();
+		const uint8_t tileId = (uint8_t)tileNode.attribute("id").as_uint();
 		const pugi::xml_node propertiesNode = tileNode.child("properties");
 		for (pugi::xml_node propNode = propertiesNode.child("property"); propNode; propNode = propNode.next_sibling("property")) {
 			const auto name = propNode.attribute("name").as_string();
@@ -128,22 +128,28 @@ static void ConvertTilemap(const std::string& tilemapPath, const std::string& ti
 		return;
 	}
 
-	file << tileMapData.width << tileMapData.height;
-	file << tileMapData.tileWidth << tileMapData.tileHeight;
+	file.write((const char*)&tileMapData.width, sizeof(uint32_t));
+	file.write((const char*)&tileMapData.height, sizeof(uint32_t));
+	file.write((const char*)&tileMapData.tileWidth, sizeof(uint32_t));
+	file.write((const char*)&tileMapData.tileHeight, sizeof(uint32_t));
 
-	file << (uint32_t)tileMapData.tilesets.size();
-	file << (uint32_t)tileMapData.layers.size();
+	const uint32_t tilesetCount = (uint32_t)tileMapData.tilesets.size();
+	file.write((const char*)&tilesetCount, sizeof(uint32_t));
+	const uint32_t layerCount = (uint32_t)tileMapData.layers.size();
+	file.write((const char*)&layerCount, sizeof(uint32_t));
 
 	for (const TileSetData& tileSet : tileMapData.tilesets) {
-		file << tileSet.tileWidth << tileSet.tileHeight;
-		file << tileSet.tileCount;
-		file << tileSet.columnCount;
+		file.write((const char*)&tileSet.tileWidth, sizeof(uint32_t));
+		file.write((const char*)&tileSet.tileHeight, sizeof(uint32_t));
+		file.write((const char*)&tileSet.tileCount, sizeof(uint32_t));
+		file.write((const char*)&tileSet.columnCount, sizeof(uint32_t));
 
 		file.write((const char*)tileSet.movementCosts.data(), tileSet.movementCosts.size());
 	}
 
 	for (const TileLayerData& layerData : tileMapData.layers) {
-		file << layerData.width << layerData.height;
+		file.write((const char*)&layerData.width, sizeof(uint32_t));
+		file.write((const char*)&layerData.height, sizeof(uint32_t));
 
 		file.write((const char*)layerData.tiles.data(), layerData.tiles.size());
 	}

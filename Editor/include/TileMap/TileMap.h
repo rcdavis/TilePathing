@@ -31,6 +31,7 @@ public:
     void SetTileHeight(const uint32 height) { mTileHeight = height; }
 
     static Ref<TileMap> Load(const std::filesystem::path& filepath);
+    static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
 
 private:
     std::vector<Ref<TileSet>> mTileSets;
