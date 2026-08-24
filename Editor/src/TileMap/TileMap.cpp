@@ -44,7 +44,7 @@ Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
 Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 	TileMapData tileMapData;
 	if (!TileMapLoader::LoadBinary(filepath.c_str(), tileMapData)) {
-		LOG_ERROR("");
+		LOG_ERROR("Failed to parse tile map binary \"{0}\"", filepath.c_str());
 		return nullptr;
 	}
 
