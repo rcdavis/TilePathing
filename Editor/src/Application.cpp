@@ -427,7 +427,7 @@ void Application::HandleInput()
         }
         else if (Input::IsKeyDown(Key::Right, ts))
         {
-            if (mSelectionCoords.x < mTileMap->GetWidth() - 1)
+            if (mSelectionCoords.x < mTileMap->width - 1)
                 mSelectionCoords.x++;
         }
 
@@ -438,7 +438,7 @@ void Application::HandleInput()
         }
         else if (Input::IsKeyDown(Key::Down, ts))
         {
-            if (mSelectionCoords.y < mTileMap->GetHeight() - 1)
+            if (mSelectionCoords.y < mTileMap->height - 1)
                 mSelectionCoords.y++;
         }
 
@@ -468,10 +468,10 @@ void Application::HandleInput()
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords)
 {
-    const uint32 tileWidth = mTileMap->GetTileWidth();
-    const uint32 tileHeight = mTileMap->GetTileHeight();
-    const uint32 numTilesWidth = mTileMap->GetWidth();
-    const uint32 numTilesHeight = mTileMap->GetHeight();
+    const uint32 tileWidth = mTileMap->tileWidth;
+    const uint32 tileHeight = mTileMap->tileHeight;
+    const uint32 numTilesWidth = mTileMap->width;
+    const uint32 numTilesHeight = mTileMap->height;
 
     const uint32 xPos = coords.x * tileWidth;
     const int32 yPos = -((int32)coords.y * (int32)tileHeight);
@@ -481,8 +481,8 @@ glm::mat4 Application::GetTileTransform(glm::uvec2 coords)
 
 glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos)
 {
-    const uint32 tileWidth = mTileMap->GetTileWidth();
-    const uint32 tileHeight = mTileMap->GetTileHeight();
+    const uint32 tileWidth = mTileMap->tileWidth;
+    const uint32 tileHeight = mTileMap->tileHeight;
 
     return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
 }

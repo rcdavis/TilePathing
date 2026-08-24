@@ -13,24 +13,24 @@ namespace MeshUtils
     std::vector<Vertex> CreateTileMapVertices(Ref<TileMap> tileMap)
     {
         assert(tileMap && "Passing in a null tile map");
-        assert(!std::empty(tileMap->GetTileSets()) && "Tile map does not have a tile set");
+        assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
 
         std::vector<Vertex> vertices;
 
-        for (const Ref<TileMapLayer>& layer : tileMap->GetLayers())
+        for (const Ref<TileMapLayer>& layer : tileMap->layers)
         {
             if (layer->GetType() != TileMapLayer::Type::Tile)
                 continue;
 
             const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
-            const auto& tiles = tileLayer->GetTiles();
+            const auto& tiles = tileLayer->tiles;
             for (uint32 i = 0; i < std::size(tiles); ++i)
             {
                 const auto& tile = tiles[i];
                 Ref<TileSet> tileSet;
-                for (const auto& ts : tileMap->GetTileSets())
+                for (const auto& ts : tileMap->tileSets)
                 {
-                    if (tile.mId >= ts->GetFirstGid())
+                    if (tile.mId >= ts->firstGid)
                     {
                         tileSet = ts;
                         break;
@@ -39,10 +39,10 @@ namespace MeshUtils
 
                 assert(tileSet && "Tile Layer does not have a tile set");
 
-                const uint32 tileWidth = tileSet->GetTileWidth();
-                const uint32 tileHeight = tileSet->GetTileHeight();
-                const uint32 numTilesWidth = tileLayer->GetWidth();
-                const uint32 numTilesHeight = tileLayer->GetHeight();
+                const uint32 tileWidth = tileSet->tileWidth;
+                const uint32 tileHeight = tileSet->tileHeight;
+                const uint32 numTilesWidth = tileLayer->width;
+                const uint32 numTilesHeight = tileLayer->height;
 
                 const uint32 xPos = ((i % numTilesWidth) * tileWidth);
                 const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
@@ -109,9 +109,9 @@ namespace MeshUtils
         auto vao = GLVertexArray::Create();
         vao->Bind();
 
-        const uint32 numTilesHeight = tileMap->GetHeight();
-        const uint32 tileWidth = tileMap->GetTileWidth();
-        const uint32 tileHeight = tileMap->GetTileHeight();
+        const uint32 numTilesHeight = tileMap->height;
+        const uint32 tileWidth = tileMap->tileWidth;
+        const uint32 tileHeight = tileMap->tileHeight;
 
         constexpr f32 xPos = 0.0f;
         const f32 yPos = (f32)(numTilesHeight * tileHeight);

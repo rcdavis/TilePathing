@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Property.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <array>
@@ -19,41 +20,29 @@ class GLTexture;
 class TileSet
 {
 public:
-    struct Terrain
-    {
-        std::string mName;
-        uint32 mTileId = -1;
+    struct Terrain {
+        uint32_t mTileId = -1;
+		uint8_t movementCost = 1;
         std::vector<Property> mProperties;
     };
 
 public:
     TileSet() = default;
 
-    const std::string& GetName() const { return mName; }
-    const Ref<GLTexture>& GetTexture() const { return mTexture; }
-    const std::vector<Terrain>& GetTerrains() const { return mTerrains; }
-    const std::vector<Property>& GetProperties() const { return mProperties; }
-
-    uint32 GetFirstGid() const { return mFirstGid; }
-    uint32 GetTileWidth() const { return mTileWidth; }
-    uint32 GetTileHeight() const { return mTileHeight; }
-    uint32 GetTileCount() const { return mTileCount; }
-    uint32 GetColumnCount() const { return mColumnCount; }
-
-    std::array<glm::vec2, 4> GetTexCoords(const uint32 tileId);
-    const Terrain& GetTerrain(const uint32 tileId);
+    std::array<glm::vec2, 4> GetTexCoords(const uint32_t tileId);
+    const Terrain& GetTerrain(const uint32_t tileId);
 
     static Ref<TileSet> Load(const pugi::xml_node& node);
 
-private:
-    std::string mName;
-    Ref<GLTexture> mTexture;
-    std::vector<Terrain> mTerrains;
-    std::vector<Property> mProperties;
+public:
+    std::string name;
+    Ref<GLTexture> texture;
+    std::vector<Terrain> terrains;
+    std::vector<Property> properties;
 
-    uint32 mFirstGid = 1;
-    uint32 mTileWidth = 0;
-    uint32 mTileHeight = 0;
-    uint32 mTileCount = 0;
-    uint32 mColumnCount = 0;
+    uint32_t firstGid = 1;
+    uint32_t tileWidth = 0;
+    uint32_t tileHeight = 0;
+    uint32_t tileCount = 0;
+    uint32_t columnCount = 0;
 };
