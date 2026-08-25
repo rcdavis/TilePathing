@@ -103,7 +103,9 @@ void AssetBuilder::ParseTiledMap(const std::filesystem::path& tilemapPath, const
 			);
 
 			for (const auto& tileId : splitValues) {
-				layerData.tiles.emplace_back((uint8_t)atoi(tileId.c_str()));
+				if (!tileId.empty()) {
+					layerData.tiles.emplace_back((uint8_t)atoi(tileId.c_str()));
+				}
 			}
 		}
 
