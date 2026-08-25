@@ -12,6 +12,8 @@ void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std:
 
 	BuildTextures(inputDir, generatedDir);
 
+	BuildShaders(inputDir, generatedDir);
+
 	// TODO: Replace hardcoded tilemap and tileset paths.
 	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/TestMap.tmbin");
 }
@@ -28,6 +30,20 @@ void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const st
 	}
 
 	CreateTextureIdHeader(inputDir, generatedDir);
+}
+
+void AssetBuilder::BuildShaders(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(inputDir / "shaders")) {
+		if (entry.is_regular_file()) {
+			const auto& path = entry.path();
+			if (path.extension() == ".vert" || path.extension() == ".frag") {
+				mShaders.push_back(path);
+				std::cout << "Found shader: " << path << std::endl;
+			}
+		}
+	}
+
+	CreateShaderIdHeader(inputDir, generatedDir);
 }
 
 void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
@@ -176,4 +192,72 @@ void AssetBuilder::CreateTextureIdHeader(const std::filesystem::path& inputDir, 
 	file << "}\n";
 
 	std::cout << "Generated texture ID header at " << generatedDir / "TextureIds.h" << std::endl;
+}
+
+void AssetBuilder::CreateShaderIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	std::ofstream file(generatedDir / "ShaderIds.h");
+	if (!file) {
+		std::cerr << "Failed to create header file " << generatedDir / "ShaderIds.h" << std::endl;
+		return;
+	}
+
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "// This file is auto-generated. Do not modify directly.\n";
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "#pragma once\n\n";
+	file << "#include <cstdint>\n\n";
+
+	file << "namespace Res::Shaders {\n";
+
+	file << "\tenum class Id : uint8_t {\n";
+	for (const auto& path : mShaders) {
+		const auto extension = path.extension().string();
+		if (extension == ".vert") {
+			file << "\t\t" << path.stem().string() << "VS,\n";
+		} else if (extension == ".frag") {
+			file << "\t\t" << path.stem().string() << "FS,\n";
+		} else {
+			file << "\t\t" << path.stem().string() << ",\n";
+		}
+	}
+	file << "\t\tCount\n";
+	file << "\t};\n\n";
+
+	file << "\tinline constexpr const char* ToString(Id id) {\n";
+	file << "\t\tswitch (id) {\n";
+	for (const auto& path : mShaders) {
+		const auto extension = path.extension().string();
+		if (extension == ".vert") {
+			file << "\t\t\tcase Id::" << path.stem().string() << "VS: return \"" << path.stem().string() << "VS\";\n";
+		} else if (extension == ".frag") {
+			file << "\t\t\tcase Id::" << path.stem().string() << "FS: return \"" << path.stem().string() << "FS\";\n";
+		} else {
+			file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
+		}
+	}
+	file << "\t\t\tdefault: return \"Unknown\";\n";
+	file << "\t\t}\n";
+	file << "\t}\n";
+
+	const auto resParentDir = inputDir / "..";
+	file << "\n\tinline constexpr const char* GetPath(Id id) {\n";
+	file << "\t\tswitch (id) {\n";
+	for (const auto& path : mShaders) {
+		const auto relativePath = std::filesystem::relative(path, resParentDir);
+		const auto extension = path.extension().string();
+		if (extension == ".vert") {
+			file << "\t\t\tcase Id::" << path.stem().string() << "VS: return \"" << relativePath.generic_string() << "\";\n";
+		} else if (extension == ".frag") {
+			file << "\t\t\tcase Id::" << path.stem().string() << "FS: return \"" << relativePath.generic_string() << "\";\n";
+		} else {
+			file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+		}
+	}
+	file << "\t\t\tdefault: return nullptr;\n";
+	file << "\t\t}\n";
+	file << "\t}\n";
+
+	file << "}\n";
+
+	std::cout << "Generated shader ID header at " << generatedDir / "ShaderIds.h" << std::endl;
 }
