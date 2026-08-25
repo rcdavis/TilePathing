@@ -20,8 +20,25 @@ add_executable(Editor
     src/Utils/MeshUtils.cpp
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/res
-     DESTINATION ${CMAKE_BINARY_DIR}/Editor)
+file(GLOB_RECURSE TEXTURE_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/res/textures/*.png)
+set(COPIED_TEXTURES "")
+
+foreach(TEXTURE_FILE ${TEXTURE_FILES})
+    get_filename_component(TEXTURE_NAME ${TEXTURE_FILE} NAME)
+    set(DEST_TEXTURE_FILE ${CMAKE_BINARY_DIR}/Editor/res/textures/${TEXTURE_NAME})
+
+    add_custom_command(
+        OUTPUT ${DEST_TEXTURE_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TEXTURE_FILE} ${DEST_TEXTURE_FILE}
+        DEPENDS ${TEXTURE_FILE}
+        COMMENT "Copying texture: ${TEXTURE_NAME}"
+    )
+
+    list(APPEND COPIED_TEXTURES ${DEST_TEXTURE_FILE})
+endforeach()
+
+add_custom_target(CopyTextures ALL DEPENDS ${COPIED_TEXTURES})
+add_dependencies(Editor CopyTextures)
 
 set(TILE_MAP_SOURCES
     ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
