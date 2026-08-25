@@ -1,6 +1,7 @@
 #include "AssetBuilder.h"
 
 #include "pugixml.hpp"
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <cstring>
@@ -172,6 +173,7 @@ void AssetBuilder::CreateTileMapBinary(const std::filesystem::path& tilemapPath,
 	file.write((const char*)&header, sizeof(TmbinHeader));
 
 	for (const TileSetData& tileSet : tileMapData.tilesets) {
+		file.write((const char*)&tileSet.imageId, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileWidth, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileHeight, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileCount, sizeof(uint32_t));
