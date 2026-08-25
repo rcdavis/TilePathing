@@ -6,6 +6,15 @@
 #include <cstring>
 #include <regex>
 
+void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir) {
+	// TODO: Replace hardcoded tilemap and tileset paths.
+	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/TestMap.tmbin");
+}
+
+void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir) {
+	// Implementation for building textures goes here
+}
+
 void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
 	pugi::xml_document doc;
 	if (const auto result = doc.load_file(tilemapPath.c_str()); !result) {
