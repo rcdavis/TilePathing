@@ -16,7 +16,7 @@ ContentBrowserWindow::ContentBrowserWindow(const bool isOpen) :
 
 void ContentBrowserWindow::OnRender()
 {
-    if (mCurDir != "assets" && ImGui::Button("<-"))
+    if (mCurDir != "res" && ImGui::Button("<-"))
         mCurDir = mCurDir.parent_path();
 
     const f32 cellSize = mThumbnailSize + mPadding;
