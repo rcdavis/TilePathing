@@ -2,9 +2,9 @@
 
 #include "Character.h"
 #include "Input/Input.h"
-#include "Res.h"
 #include "TextureIds.h"
 #include "ShaderIds.h"
+#include "TileIds.h"
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
@@ -131,7 +131,7 @@ bool Application::Init()
 		"TileMap",
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
-    mTileMap = TileMap::Load(Res::Paths::TileMap::SMBMap);
+    mTileMap = TileMap::Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap));
 	//TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
 
     mColorShader = GLShader::Create(
