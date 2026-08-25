@@ -35,12 +35,15 @@ public:
 	void BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir);
 
 	void BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
+	void BuildShaders(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 
 	void ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath);
 
 private:
 	void CreateTextureIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
+	void CreateShaderIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 
 private:
 	std::vector<std::filesystem::path> mTextures;
+	std::vector<std::filesystem::path> mShaders;
 };
