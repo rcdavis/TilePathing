@@ -125,7 +125,7 @@ bool Application::Init()
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-    mTestTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+    mTestTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SMB_BlockTiles));
     mShader = GLShader::Create("TileMap", Res::Paths::Shaders::TileMapVS, Res::Paths::Shaders::TileMapFS);
     mTileMap = TileMap::Load(Res::Paths::TileMap::SMBMap);
 	//TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
