@@ -75,12 +75,9 @@ set(TEST_MAP_BIN_FILE ${CMAKE_BINARY_DIR}/Editor/res/tilemaps/TestMap.tmbin)
 add_custom_command(
     OUTPUT ${TEST_MAP_BIN_FILE}
     COMMAND $<TARGET_FILE:AssetBuilder> tilemaps
-        --tilemap
-        ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
-        --tileset
-        ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
-        --output
-        ${TEST_MAP_BIN_FILE}
+        --tilemap ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
+        --tileset ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
+        --output ${TEST_MAP_BIN_FILE}
     DEPENDS ${TILE_MAP_SOURCES}
     COMMENT "Creating TestMap.tmbin..."
     VERBATIM
@@ -88,6 +85,26 @@ add_custom_command(
 
 add_custom_target(CompileTileMaps ALL DEPENDS ${TEST_MAP_BIN_FILE})
 add_dependencies(Editor CompileTileMaps)
+
+# TODO: Remove copying Tiled files when fully moved to the new tilemap system with binary files.
+set(COPIED_TILE_MAPS "")
+
+foreach(TILE_MAP_FILE ${TILE_MAP_SOURCES})
+    get_filename_component(TILE_MAP_NAME ${TILE_MAP_FILE} NAME)
+    set(DEST_TILE_MAP_FILE ${CMAKE_BINARY_DIR}/Editor/res/tilemaps/${TILE_MAP_NAME})
+
+    add_custom_command(
+        OUTPUT ${DEST_TILE_MAP_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TILE_MAP_FILE} ${DEST_TILE_MAP_FILE}
+        DEPENDS ${TILE_MAP_FILE}
+        COMMENT "Copying tile map: ${TILE_MAP_NAME}"
+    )
+
+    list(APPEND COPIED_TILE_MAPS ${DEST_TILE_MAP_FILE})
+endforeach()
+
+add_custom_target(CopyTileMaps ALL DEPENDS ${COPIED_TILE_MAPS})
+add_dependencies(Editor CopyTileMaps)
 
 target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
