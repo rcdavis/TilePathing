@@ -39,5 +39,8 @@ public:
 	void ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath);
 
 private:
+	void CreateTextureIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
+
+private:
 	std::vector<std::filesystem::path> mTextures;
 };

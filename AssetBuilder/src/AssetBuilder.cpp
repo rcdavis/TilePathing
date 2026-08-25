@@ -7,6 +7,9 @@
 #include <regex>
 
 void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir) {
+	std::filesystem::create_directories(outputDir);
+	std::filesystem::create_directories(generatedDir);
+
 	BuildTextures(inputDir, generatedDir);
 
 	// TODO: Replace hardcoded tilemap and tileset paths.
@@ -23,6 +26,8 @@ void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const st
 			}
 		}
 	}
+
+	CreateTextureIdHeader(inputDir, generatedDir);
 }
 
 void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
@@ -124,4 +129,51 @@ void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, cons
 	}
 
 	std::cout << "Converted tile map " << tilemapPath << " to " << outputPath << std::endl;
+}
+
+void AssetBuilder::CreateTextureIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	std::ofstream file(generatedDir / "TextureIds.h");
+	if (!file) {
+		std::cerr << "Failed to create header file " << generatedDir / "TextureIds.h" << std::endl;
+		return;
+	}
+
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "// This file is auto-generated. Do not modify directly.\n";
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "#pragma once\n\n";
+	file << "#include <cstdint>\n\n";
+
+	file << "namespace Res::Textures {\n";
+
+	file << "\tenum class Id : uint8_t {\n";
+	for (const auto& path : mTextures) {
+		file << "\t\t" << path.stem().string() << ",\n";
+	}
+	file << "\t\tCount\n";
+	file << "\t};\n\n";
+
+	file << "\tinline constexpr const char* ToString(Id id) {\n";
+	file << "\t\tswitch (id) {\n";
+	for (const auto& path : mTextures) {
+		file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
+	}
+	file << "\t\t\tdefault: return \"Unknown\";\n";
+	file << "\t\t}\n";
+	file << "\t}\n";
+
+	const auto resParentDir = inputDir / "..";
+	file << "\n\tinline constexpr const char* GetPath(Id id) {\n";
+	file << "\t\tswitch (id) {\n";
+	for (const auto& path : mTextures) {
+		const auto relativePath = std::filesystem::relative(path, resParentDir);
+		file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+	}
+	file << "\t\t\tdefault: return nullptr;\n";
+	file << "\t\t}\n";
+	file << "\t}\n";
+
+	file << "}\n";
+
+	std::cout << "Generated texture ID header at " << generatedDir / "TextureIds.h" << std::endl;
 }
