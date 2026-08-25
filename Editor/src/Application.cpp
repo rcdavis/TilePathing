@@ -3,6 +3,7 @@
 #include "Character.h"
 #include "Input/Input.h"
 #include "Res.h"
+#include "TextureIds.h"
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
@@ -124,10 +125,10 @@ bool Application::Init()
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-    mTestTexture = GLTexture::Load(Res::Paths::Textures::SMB_BlockTiles);
+    mTestTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SMB_BlockTiles));
     mShader = GLShader::Create("TileMap", Res::Paths::Shaders::TileMapVS, Res::Paths::Shaders::TileMapFS);
     mTileMap = TileMap::Load(Res::Paths::TileMap::SMBMap);
-	TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
+	//TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
 
     mColorShader = GLShader::Create("ColoredTile", Res::Paths::Shaders::ColoredTileVS, Res::Paths::Shaders::ColoredTileFS);
 
@@ -143,13 +144,13 @@ bool Application::Init()
     mImGuiWindows.push_back(charWindow);
 
     auto character = CreateRef<Character>();
-    character->SetTexture(GLTexture::Load("res/textures/FileIcon.png"));
+    character->SetTexture(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon)));
     character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
     character->SetTileCoords({ 7, 20 });
     character->SetMovementSteps(6);
     charWindow->AddCharacter(character);
 
-    mSelectionTexture = GLTexture::Load("res/textures/SelectionRing.png");
+    mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
 
     FramebufferSpecs specs;
     specs.attachments = {

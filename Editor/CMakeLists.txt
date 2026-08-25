@@ -70,21 +70,21 @@ set(TILE_MAP_SOURCES
     ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
     ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
 )
-set(TEST_MAP_BIN_FILE ${CMAKE_BINARY_DIR}/Editor/res/tilemaps/TestMap.tmbin)
 
 add_custom_command(
-    OUTPUT ${TEST_MAP_BIN_FILE}
-    COMMAND $<TARGET_FILE:AssetBuilder> tilemaps
-        --tilemap ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
-        --tileset ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
-        --output ${TEST_MAP_BIN_FILE}
-    DEPENDS ${TILE_MAP_SOURCES}
-    COMMENT "Creating TestMap.tmbin..."
+    OUTPUT ${CMAKE_BINARY_DIR}/Editor/build_assets.stamp
+    COMMAND $<TARGET_FILE:AssetBuilder>
+        --input ${CMAKE_SOURCE_DIR}/res
+        --output ${CMAKE_BINARY_DIR}/Editor/res
+        --generated ${CMAKE_BINARY_DIR}/generated
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/Editor/build_assets.stamp
+    DEPENDS ${TEXTURE_FILES} ${SHADER_FILES} ${TILE_MAP_SOURCES}
+    COMMENT "Building Assets..."
     VERBATIM
 )
 
-add_custom_target(CompileTileMaps ALL DEPENDS ${TEST_MAP_BIN_FILE})
-add_dependencies(Editor CompileTileMaps)
+add_custom_target(BuildAssets ALL DEPENDS ${CMAKE_BINARY_DIR}/Editor/build_assets.stamp)
+add_dependencies(Editor BuildAssets)
 
 # TODO: Remove copying Tiled files when fully moved to the new tilemap system with binary files.
 set(COPIED_TILE_MAPS "")
@@ -108,6 +108,7 @@ add_dependencies(Editor CopyTileMaps)
 
 target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/generated
 )
 
 target_compile_features(Editor PRIVATE cxx_std_20)
