@@ -33,6 +33,7 @@ namespace TileMapLoader {
 
 		for (uint32_t i = 0; i < header.tilesetCount; ++i) {
 			TileSetData tilesetData;
+			file.read((char*)&tilesetData.firstGid, sizeof(uint32_t));
 			file.read((char*)&tilesetData.imageId, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileWidth, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileHeight, sizeof(uint32_t));
@@ -40,7 +41,7 @@ namespace TileMapLoader {
 			file.read((char*)&tilesetData.columnCount, sizeof(uint32_t));
 
 			tilesetData.movementCosts.resize(tilesetData.tileCount);
-			file.read((char*)tilesetData.movementCosts.data(), tilesetData.movementCosts.size());
+			file.read((char*)tilesetData.movementCosts.data(), tilesetData.movementCosts.size() * sizeof(uint8_t));
 
 			tileMapData.tilesets.emplace_back(tilesetData);
 		}
@@ -51,7 +52,7 @@ namespace TileMapLoader {
 			file.read((char*)&layerData.height, sizeof(uint32_t));
 
 			layerData.tiles.resize(layerData.width * layerData.height);
-			file.read((char*)layerData.tiles.data(), layerData.tiles.size());
+			file.read((char*)layerData.tiles.data(), layerData.tiles.size() * sizeof(uint8_t));
 
 			tileMapData.layers.emplace_back(layerData);
 		}

@@ -1,7 +1,6 @@
 #include "TileMap/TileMap.h"
 
 #include "Core.h"
-#include "TileMap/TileMapLayer.h"
 #include "TileMap/TilePathing.h"
 #include "Utils/Log.h"
 #include "TileMap/TileSet.h"
@@ -62,6 +61,7 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 	tileMap->tileSets.reserve(tileMapData.tilesets.size());
 	for (uint32_t i = 0; i < tileMapData.tilesets.size(); ++i) {
 		auto tileSet = CreateRef<TileSet>();
+		tileSet->firstGid = tileMapData.tilesets[i].firstGid;
 		tileSet->texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
 		tileSet->tileWidth = tileMapData.tilesets[i].tileWidth;
 		tileSet->tileHeight = tileMapData.tilesets[i].tileHeight;

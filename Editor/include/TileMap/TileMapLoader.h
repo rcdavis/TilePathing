@@ -4,6 +4,7 @@
 #include <vector>
 
 struct TileSetData {
+	uint32_t firstGid = 1;
 	uint32_t imageId = 0;
 	uint32_t tileWidth = 0;
 	uint32_t tileHeight = 0;

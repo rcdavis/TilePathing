@@ -116,6 +116,8 @@ void AssetBuilder::ParseTiledMap(const std::filesystem::path& tilemapPath, const
 		return;
 	}
 
+	const uint32_t firstGid = tilesetChildNode.attribute("firstgid").as_uint(1);
+
 	const auto tilesetPath = inputDir / "tilemaps" / tilesetChildNode.attribute("source").as_string();
 	if (const auto result = doc.load_file(tilesetPath.c_str()); !result) {
 		std::cerr << "Failed to load tile set " << tilesetPath << ": " << result.description() << std::endl;
@@ -125,6 +127,7 @@ void AssetBuilder::ParseTiledMap(const std::filesystem::path& tilemapPath, const
 	TileSetData tilesetData;
 	const pugi::xml_node tilesetNode = doc.child("tileset");
 	tilesetData.name = tilesetNode.attribute("name").as_string();
+	tilesetData.firstGid = firstGid;
 	tilesetData.tileWidth = tilesetNode.attribute("tilewidth").as_uint();
 	tilesetData.tileHeight = tilesetNode.attribute("tileheight").as_uint();
 	tilesetData.tileCount = tilesetNode.attribute("tilecount").as_uint();
@@ -173,6 +176,7 @@ void AssetBuilder::CreateTileMapBinary(const std::filesystem::path& tilemapPath,
 	file.write((const char*)&header, sizeof(TmbinHeader));
 
 	for (const TileSetData& tileSet : tileMapData.tilesets) {
+		file.write((const char*)&tileSet.firstGid, sizeof(uint32_t));
 		file.write((const char*)&tileSet.imageId, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileWidth, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileHeight, sizeof(uint32_t));
