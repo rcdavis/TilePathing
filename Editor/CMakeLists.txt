@@ -76,6 +76,7 @@ add_custom_command(
     COMMAND $<TARGET_FILE:AssetBuilder>
         --input ${CMAKE_SOURCE_DIR}/res
         --output ${CMAKE_BINARY_DIR}/Editor/res
+        --generated ${CMAKE_BINARY_DIR}/generated
     COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/Editor/build_assets.stamp
     DEPENDS ${TEXTURE_FILES} ${SHADER_FILES} ${TILE_MAP_SOURCES}
     COMMENT "Building Assets..."
@@ -107,6 +108,7 @@ add_dependencies(Editor CopyTileMaps)
 
 target_include_directories(Editor PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/generated
 )
 
 target_compile_features(Editor PRIVATE cxx_std_20)
