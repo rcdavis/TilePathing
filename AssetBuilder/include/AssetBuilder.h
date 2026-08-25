@@ -36,11 +36,14 @@ public:
 
 	void BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 	void BuildShaders(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
-	void BuildTiles(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
+	void BuildTiles(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir);
 
 	void ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath);
 
 private:
+	void ParseTiledMap(const std::filesystem::path& tilemapPath, const std::filesystem::path& inputDir, TileMapData& tileMapData);
+	void CreateTileMapBinary(const std::filesystem::path& tilemapPath, const std::filesystem::path& outputPath, const TileMapData& tileMapData);
+
 	void CreateTextureIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 	void CreateShaderIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 	void CreateTileIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
