@@ -14,8 +14,10 @@ void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std:
 
 	BuildShaders(inputDir, generatedDir);
 
+	BuildTiles(inputDir, generatedDir);
+
 	// TODO: Replace hardcoded tilemap and tileset paths.
-	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/TestMap.tmbin");
+	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/SMBMap.tmbin");
 }
 
 void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
@@ -44,6 +46,23 @@ void AssetBuilder::BuildShaders(const std::filesystem::path& inputDir, const std
 	}
 
 	CreateShaderIdHeader(inputDir, generatedDir);
+}
+
+void AssetBuilder::BuildTiles(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(inputDir / "tilemaps")) {
+		if (entry.is_regular_file()) {
+			const auto& path = entry.path();
+			if (path.extension() == ".tmx") {
+				mTilemaps.push_back(path);
+				std::cout << "Found tilemap: " << path << std::endl;
+			} else if (path.extension() == ".tsx") {
+				mTilesets.push_back(path);
+				std::cout << "Found tileset: " << path << std::endl;
+			}
+		}
+	}
+
+	CreateTileIdHeader(inputDir, generatedDir);
 }
 
 void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
@@ -260,4 +279,85 @@ void AssetBuilder::CreateShaderIdHeader(const std::filesystem::path& inputDir, c
 	file << "}\n";
 
 	std::cout << "Generated shader ID header at " << generatedDir / "ShaderIds.h" << std::endl;
+}
+
+void AssetBuilder::CreateTileIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	std::ofstream file(generatedDir / "TileIds.h");
+	if (!file) {
+		std::cerr << "Failed to create header file " << generatedDir / "TileIds.h" << std::endl;
+		return;
+	}
+
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "// This file is auto-generated. Do not modify directly.\n";
+	file << "////////////////////////////////////////////////////////////////////////\n";
+	file << "#pragma once\n\n";
+	file << "#include <cstdint>\n\n";
+
+	file << "namespace Res::Tiles {\n";
+
+	file << "\tnamespace Maps {\n";
+
+	file << "\t\tenum class Id : uint8_t {\n";
+	for (const auto& path : mTilemaps) {
+		file << "\t\t\t" << path.stem().string() << ",\n";
+	}
+	file << "\t\t\tCount\n";
+	file << "\t\t};\n\n";
+
+	file << "\t\tinline constexpr const char* ToString(Id id) {\n";
+	file << "\t\t\tswitch (id) {\n";
+	for (const auto& path : mTilemaps) {
+		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
+	}
+	file << "\t\t\t\tdefault: return \"Unknown\";\n";
+	file << "\t\t\t}\n";
+	file << "\t\t}\n";
+
+	const auto resParentDir = inputDir / "..";
+	file << "\n\t\tinline constexpr const char* GetPath(Id id) {\n";
+	file << "\t\t\tswitch (id) {\n";
+	for (const auto& path : mTilemaps) {
+		const auto relativePath = std::filesystem::relative(path, resParentDir);
+		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+	}
+	file << "\t\t\t\tdefault: return nullptr;\n";
+	file << "\t\t\t}\n";
+	file << "\t\t}\n";
+
+	file << "\t}\n\n";
+
+	file << "\tnamespace Sets {\n";
+
+	file << "\t\tenum class Id : uint8_t {\n";
+	for (const auto& path : mTilesets) {
+		file << "\t\t\t" << path.stem().string() << ",\n";
+	}
+	file << "\t\t\tCount\n";
+	file << "\t\t};\n\n";
+
+	file << "\t\tinline constexpr const char* ToString(Id id) {\n";
+	file << "\t\t\tswitch (id) {\n";
+	for (const auto& path : mTilesets) {
+		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
+	}
+	file << "\t\t\t\tdefault: return \"Unknown\";\n";
+	file << "\t\t\t}\n";
+	file << "\t\t}\n";
+
+	file << "\n\t\tinline constexpr const char* GetPath(Id id) {\n";
+	file << "\t\t\tswitch (id) {\n";
+	for (const auto& path : mTilesets) {
+		const auto relativePath = std::filesystem::relative(path, resParentDir);
+		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+	}
+	file << "\t\t\t\tdefault: return nullptr;\n";
+	file << "\t\t\t}\n";
+	file << "\t\t}\n";
+
+	file << "\t}\n";
+
+	file << "}\n";
+
+	std::cout << "Generated tile ID header at " << generatedDir / "TileIds.h" << std::endl;
 }

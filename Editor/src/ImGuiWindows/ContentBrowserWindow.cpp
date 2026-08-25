@@ -3,13 +3,13 @@
 #include <imgui.h>
 
 #include "OpenGL/GLTexture.h"
-#include "Res.h"
+#include "TextureIds.h"
 
 ContentBrowserWindow::ContentBrowserWindow(const bool isOpen) :
     BaseImGuiWindow("Content Browser", isOpen),
     mCurDir("res"),
-    mDirIcon(GLTexture::Load(Res::Paths::Textures::DirectoryIcon)),
-    mFileIcon(GLTexture::Load(Res::Paths::Textures::FileIcon)),
+    mDirIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon))),
+    mFileIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon))),
     mPadding(16.0f),
     mThumbnailSize(74.0f)
 {}
