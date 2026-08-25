@@ -106,7 +106,7 @@ endforeach()
 add_custom_target(CopyTileMaps ALL DEPENDS ${COPIED_TILE_MAPS})
 add_dependencies(Editor CopyTileMaps)
 
-target_include_directories(Editor PUBLIC
+target_include_directories(Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/generated
 )

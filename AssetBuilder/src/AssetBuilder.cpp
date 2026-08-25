@@ -1,6 +1,7 @@
 #include "AssetBuilder.h"
 
 #include "pugixml.hpp"
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <cstring>
@@ -14,10 +15,7 @@ void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std:
 
 	BuildShaders(inputDir, generatedDir);
 
-	BuildTiles(inputDir, generatedDir);
-
-	// TODO: Replace hardcoded tilemap and tileset paths.
-	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/SMBMap.tmbin");
+	BuildTiles(inputDir, outputDir, generatedDir);
 }
 
 void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
@@ -48,7 +46,7 @@ void AssetBuilder::BuildShaders(const std::filesystem::path& inputDir, const std
 	CreateShaderIdHeader(inputDir, generatedDir);
 }
 
-void AssetBuilder::BuildTiles(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+void AssetBuilder::BuildTiles(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir) {
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(inputDir / "tilemaps")) {
 		if (entry.is_regular_file()) {
 			const auto& path = entry.path();
@@ -62,17 +60,24 @@ void AssetBuilder::BuildTiles(const std::filesystem::path& inputDir, const std::
 		}
 	}
 
+	for (const auto& path : mTilemaps) {
+		TileMapData tileMapData;
+		ParseTiledMap(path, inputDir, tileMapData);
+
+		const auto outputPath = outputDir / "tilemaps" / (path.stem().string() + ".tmbin");
+		CreateTileMapBinary(outputPath, tileMapData);
+	}
+
 	CreateTileIdHeader(inputDir, generatedDir);
 }
 
-void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
+void AssetBuilder::ParseTiledMap(const std::filesystem::path& tilemapPath, const std::filesystem::path& inputDir, TileMapData& tileMapData) {
 	pugi::xml_document doc;
 	if (const auto result = doc.load_file(tilemapPath.c_str()); !result) {
 		std::cerr << "Failed to load tile map " << tilemapPath << ": " << result.description() << std::endl;
 		return;
 	}
 
-	TileMapData tileMapData;
 	const pugi::xml_node mapNode = doc.child("map");
 	tileMapData.width = mapNode.attribute("width").as_uint();
 	tileMapData.height = mapNode.attribute("height").as_uint();
@@ -96,13 +101,22 @@ void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, cons
 			);
 
 			for (const auto& tileId : splitValues) {
-				layerData.tiles.emplace_back((uint8_t)atoi(tileId.c_str()));
+				if (!tileId.empty()) {
+					layerData.tiles.emplace_back((uint8_t)atoi(tileId.c_str()));
+				}
 			}
 		}
 
 		tileMapData.layers.emplace_back(layerData);
 	}
 
+	const auto tilesetChildNode = mapNode.child("tileset");
+	if (!tilesetChildNode) {
+		std::cerr << "No tileset found in tile map " << tilemapPath << std::endl;
+		return;
+	}
+
+	const auto tilesetPath = inputDir / "tilemaps" / tilesetChildNode.attribute("source").as_string();
 	if (const auto result = doc.load_file(tilesetPath.c_str()); !result) {
 		std::cerr << "Failed to load tile set " << tilesetPath << ": " << result.description() << std::endl;
 		return;
@@ -117,6 +131,15 @@ void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, cons
 	tilesetData.columnCount = tilesetNode.attribute("columns").as_uint();
 	tilesetData.movementCosts.resize(tilesetData.tileCount, 1);
 
+	const pugi::xml_node imageNode = tilesetNode.child("image");
+	const std::filesystem::path imageSource = imageNode.attribute("source").as_string();
+	for (size_t i = 0; i < mTextures.size(); ++i) {
+		if (mTextures[i].filename() == imageSource.filename()) {
+			tilesetData.imageId = (uint32_t)i;
+			break;
+		}
+	}
+
 	for (pugi::xml_node tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile")) {
 		const uint8_t tileId = (uint8_t)tileNode.attribute("id").as_uint();
 		const pugi::xml_node propertiesNode = tileNode.child("properties");
@@ -130,40 +153,43 @@ void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, cons
 	}
 
 	tileMapData.tilesets.emplace_back(tilesetData);
+}
 
-	std::ofstream file(outputPath, std::ios::binary);
+void AssetBuilder::CreateTileMapBinary(const std::filesystem::path& tilemapPath, const TileMapData& tileMapData) {
+	std::ofstream file(tilemapPath, std::ios::binary);
 	if (!file) {
-		std::cerr << "Failed to create file " << outputPath << std::endl;
+		std::cerr << "Failed to create file " << tilemapPath << std::endl;
 		return;
 	}
 
-	file.write((const char*)&tileMapData.width, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.height, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.tileWidth, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.tileHeight, sizeof(uint32_t));
+	TmbinHeader header;
+	header.width = tileMapData.width;
+	header.height = tileMapData.height;
+	header.tileWidth = tileMapData.tileWidth;
+	header.tileHeight = tileMapData.tileHeight;
+	header.tilesetCount = (uint32_t)std::size(tileMapData.tilesets);
+	header.layerCount = (uint32_t)std::size(tileMapData.layers);
 
-	const uint32_t tilesetCount = (uint32_t)tileMapData.tilesets.size();
-	file.write((const char*)&tilesetCount, sizeof(uint32_t));
-	const uint32_t layerCount = (uint32_t)tileMapData.layers.size();
-	file.write((const char*)&layerCount, sizeof(uint32_t));
+	file.write((const char*)&header, sizeof(TmbinHeader));
 
 	for (const TileSetData& tileSet : tileMapData.tilesets) {
+		file.write((const char*)&tileSet.imageId, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileWidth, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileHeight, sizeof(uint32_t));
 		file.write((const char*)&tileSet.tileCount, sizeof(uint32_t));
 		file.write((const char*)&tileSet.columnCount, sizeof(uint32_t));
 
-		file.write((const char*)tileSet.movementCosts.data(), tileSet.movementCosts.size() * sizeof(uint8_t));
+		file.write((const char*)std::data(tileSet.movementCosts), std::size(tileSet.movementCosts) * sizeof(uint8_t));
 	}
 
 	for (const TileLayerData& layerData : tileMapData.layers) {
 		file.write((const char*)&layerData.width, sizeof(uint32_t));
 		file.write((const char*)&layerData.height, sizeof(uint32_t));
 
-		file.write((const char*)layerData.tiles.data(), layerData.tiles.size());
+		file.write((const char*)std::data(layerData.tiles), std::size(layerData.tiles) * sizeof(uint8_t));
 	}
 
-	std::cout << "Converted tile map " << tilemapPath << " to " << outputPath << std::endl;
+	std::cout << "Created tile map binary " << tilemapPath << std::endl;
 }
 
 void AssetBuilder::CreateTextureIdHeader(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
