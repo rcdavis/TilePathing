@@ -132,7 +132,8 @@ bool Application::Init()
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
     mTileMap = TileMap::Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap));
-	//TileMap::LoadBinary(Res::Paths::TileMap::TestMap);
+	// TODO: Replace with Id
+	TileMap::LoadBinary("res/tilemaps/SMBMap.tmbin");
 
     mColorShader = GLShader::Create(
 		"ColoredTile",

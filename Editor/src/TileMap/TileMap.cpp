@@ -8,6 +8,9 @@
 #include "TileMap/TileLayer.h"
 #include "TileMap/TileMapLoader.h"
 
+#include "OpenGL/GLTexture.h"
+#include "TextureIds.h"
+
 #include <cstdint>
 #include <pugixml.hpp>
 #include <vector>
@@ -59,6 +62,7 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 	tileMap->tileSets.reserve(tileMapData.tilesets.size());
 	for (uint32_t i = 0; i < tileMapData.tilesets.size(); ++i) {
 		auto tileSet = CreateRef<TileSet>();
+		tileSet->texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
 		tileSet->tileWidth = tileMapData.tilesets[i].tileWidth;
 		tileSet->tileHeight = tileMapData.tilesets[i].tileHeight;
 		tileSet->tileCount = tileMapData.tilesets[i].tileCount;

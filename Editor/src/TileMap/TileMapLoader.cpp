@@ -5,7 +5,9 @@
 #include <fstream>
 
 namespace TileMapLoader {
-	struct TileMapBinHeader {
+	struct TmbinHeader {
+		char magic[4] = { 'T', 'M', 'B', '1' };
+		uint32_t version = 1;
 		uint32_t width = 0;
 		uint32_t height = 0;
 		uint32_t tileWidth = 0;
@@ -21,8 +23,8 @@ namespace TileMapLoader {
 			return false;
 		}
 
-		TileMapBinHeader header;
-		file.read((char*)&header, sizeof(TileMapBinHeader));
+		TmbinHeader header;
+		file.read((char*)&header, sizeof(TmbinHeader));
 
 		tileMapData.width = header.width;
 		tileMapData.height = header.height;
@@ -31,6 +33,7 @@ namespace TileMapLoader {
 
 		for (uint32_t i = 0; i < header.tilesetCount; ++i) {
 			TileSetData tilesetData;
+			file.read((char*)&tilesetData.imageId, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileWidth, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileHeight, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileCount, sizeof(uint32_t));
