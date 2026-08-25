@@ -177,14 +177,14 @@ void AssetBuilder::CreateTileMapBinary(const std::filesystem::path& tilemapPath,
 		file.write((const char*)&tileSet.tileCount, sizeof(uint32_t));
 		file.write((const char*)&tileSet.columnCount, sizeof(uint32_t));
 
-		file.write((const char*)tileSet.movementCosts.data(), tileSet.movementCosts.size() * sizeof(uint8_t));
+		file.write((const char*)std::data(tileSet.movementCosts), std::size(tileSet.movementCosts) * sizeof(uint8_t));
 	}
 
 	for (const TileLayerData& layerData : tileMapData.layers) {
 		file.write((const char*)&layerData.width, sizeof(uint32_t));
 		file.write((const char*)&layerData.height, sizeof(uint32_t));
 
-		file.write((const char*)layerData.tiles.data(), layerData.tiles.size() * sizeof(uint8_t));
+		file.write((const char*)std::data(layerData.tiles), std::size(layerData.tiles) * sizeof(uint8_t));
 	}
 
 	std::cout << "Created tile map binary " << tilemapPath << std::endl;
