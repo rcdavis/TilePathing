@@ -1,12 +1,25 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 #include <filesystem>
 
 class AssetBuilder {
 public:
+	struct TmbinHeader {
+		char magic[4] = { 'T', 'M', 'B', '1' };
+		uint32_t version = 1;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t tileWidth = 0;
+		uint32_t tileHeight = 0;
+		uint32_t tilesetCount = 0;
+		uint32_t layerCount = 0;
+	};
+
 	struct TileSetData {
 		std::string name;
+		uint32_t imageId = -1;
 		uint32_t tileWidth = 0;
 		uint32_t tileHeight = 0;
 		uint32_t tileCount = 0;

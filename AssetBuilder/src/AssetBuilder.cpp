@@ -130,6 +130,15 @@ void AssetBuilder::ParseTiledMap(const std::filesystem::path& tilemapPath, const
 	tilesetData.columnCount = tilesetNode.attribute("columns").as_uint();
 	tilesetData.movementCosts.resize(tilesetData.tileCount, 1);
 
+	const pugi::xml_node imageNode = tilesetNode.child("image");
+	const std::filesystem::path imageSource = imageNode.attribute("source").as_string();
+	for (size_t i = 0; i < mTextures.size(); ++i) {
+		if (mTextures[i].filename() == imageSource.filename()) {
+			tilesetData.imageId = (uint32_t)i;
+			break;
+		}
+	}
+
 	for (pugi::xml_node tileNode = tilesetNode.child("tile"); tileNode; tileNode = tileNode.next_sibling("tile")) {
 		const uint8_t tileId = (uint8_t)tileNode.attribute("id").as_uint();
 		const pugi::xml_node propertiesNode = tileNode.child("properties");
@@ -152,15 +161,15 @@ void AssetBuilder::CreateTileMapBinary(const std::filesystem::path& tilemapPath,
 		return;
 	}
 
-	file.write((const char*)&tileMapData.width, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.height, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.tileWidth, sizeof(uint32_t));
-	file.write((const char*)&tileMapData.tileHeight, sizeof(uint32_t));
+	TmbinHeader header;
+	header.width = tileMapData.width;
+	header.height = tileMapData.height;
+	header.tileWidth = tileMapData.tileWidth;
+	header.tileHeight = tileMapData.tileHeight;
+	header.tilesetCount = (uint32_t)std::size(tileMapData.tilesets);
+	header.layerCount = (uint32_t)std::size(tileMapData.layers);
 
-	const uint32_t tilesetCount = (uint32_t)tileMapData.tilesets.size();
-	file.write((const char*)&tilesetCount, sizeof(uint32_t));
-	const uint32_t layerCount = (uint32_t)tileMapData.layers.size();
-	file.write((const char*)&layerCount, sizeof(uint32_t));
+	file.write((const char*)&header, sizeof(TmbinHeader));
 
 	for (const TileSetData& tileSet : tileMapData.tilesets) {
 		file.write((const char*)&tileSet.tileWidth, sizeof(uint32_t));
