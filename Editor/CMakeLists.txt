@@ -20,6 +20,7 @@ add_executable(Editor
     src/Utils/MeshUtils.cpp
 )
 
+# Copy textures to the build directory
 file(GLOB_RECURSE TEXTURE_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/res/textures/*.png)
 set(COPIED_TEXTURES "")
 
@@ -40,6 +41,31 @@ endforeach()
 add_custom_target(CopyTextures ALL DEPENDS ${COPIED_TEXTURES})
 add_dependencies(Editor CopyTextures)
 
+# Copy shaders to the build directory
+file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/res/shaders/*.vert
+    ${CMAKE_SOURCE_DIR}/res/shaders/*.frag
+)
+set(COPIED_SHADERS "")
+
+foreach(SHADER_FILE ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
+    set(DEST_SHADER_FILE ${CMAKE_BINARY_DIR}/Editor/res/shaders/${SHADER_NAME})
+
+    add_custom_command(
+        OUTPUT ${DEST_SHADER_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILE} ${DEST_SHADER_FILE}
+        DEPENDS ${SHADER_FILE}
+        COMMENT "Copying shader: ${SHADER_NAME}"
+    )
+
+    list(APPEND COPIED_SHADERS ${DEST_SHADER_FILE})
+endforeach()
+
+add_custom_target(CopyShaders ALL DEPENDS ${COPIED_SHADERS})
+add_dependencies(Editor CopyShaders)
+
+# Create a custom command to compile the tile maps into a binary format
 set(TILE_MAP_SOURCES
     ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBMap.tmx
     ${CMAKE_SOURCE_DIR}/res/tilemaps/SMBTiles.tsx
