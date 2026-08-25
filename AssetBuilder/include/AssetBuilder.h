@@ -32,9 +32,9 @@ public:
 public:
 	AssetBuilder() = default;
 
-	void BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir);
+	void BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir);
 
-	void BuildTextures(const std::filesystem::path& inputDir);
+	void BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir);
 
 	void ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath);
 

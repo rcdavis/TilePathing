@@ -6,13 +6,23 @@
 #include <cstring>
 #include <regex>
 
-void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir) {
+void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir) {
+	BuildTextures(inputDir, generatedDir);
+
 	// TODO: Replace hardcoded tilemap and tileset paths.
 	ConvertTilemap(inputDir / "tilemaps/SMBMap.tmx", inputDir / "tilemaps/SMBTiles.tsx", outputDir / "tilemaps/TestMap.tmbin");
 }
 
-void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir) {
-	// Implementation for building textures goes here
+void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(inputDir / "textures")) {
+		if (entry.is_regular_file()) {
+			const auto& path = entry.path();
+			if (path.extension() == ".png") {
+				mTextures.push_back(path);
+				std::cout << "Found texture: " << path << std::endl;
+			}
+		}
+	}
 }
 
 void AssetBuilder::ConvertTilemap(const std::filesystem::path& tilemapPath, const std::filesystem::path& tilesetPath, const std::filesystem::path& outputPath) {
