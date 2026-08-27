@@ -26,6 +26,16 @@ namespace TileMapLoader {
 		TmbinHeader header;
 		file.read((char*)&header, sizeof(TmbinHeader));
 
+		if (strncmp(header.magic, "TMB1", 4) != 0) {
+			LOG_ERROR("Invalid tile map binary header in \"{}\"", filepath);
+			return false;
+		}
+
+		if (header.version != 1) {
+			LOG_ERROR("Unsupported tile map binary version in \"{}\"", filepath);
+			return false;
+		}
+
 		tileMapData.width = header.width;
 		tileMapData.height = header.height;
 		tileMapData.tileWidth = header.tileWidth;
