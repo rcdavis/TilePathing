@@ -1,7 +1,5 @@
 #include "TileMap/TileMap.h"
 
-#include "Core.h"
-#include "TileMap/TilePathing.h"
 #include "Utils/Log.h"
 #include "TileMap/TileSet.h"
 #include "TileMap/TileLayer.h"
@@ -9,39 +7,6 @@
 
 #include "OpenGL/GLTexture.h"
 #include "TextureIds.h"
-
-#include <cstdint>
-#include <pugixml.hpp>
-#include <vector>
-
-Ref<TileMap> TileMap::Load(const std::filesystem::path& filepath)
-{
-	pugi::xml_document doc;
-	const auto result = doc.load_file(filepath.string().c_str());
-	if (!result)
-	{
-		LOG_ERROR("Failed to load tile map \"{0}\": {1}", filepath.string(), result.description());
-		return nullptr;
-	}
-
-	const auto root = doc.child("map");
-
-	auto tileMap = CreateRef<TileMap>();
-	tileMap->name = filepath.stem().string();
-	tileMap->width = root.attribute("width").as_uint();
-	tileMap->height = root.attribute("height").as_uint();
-	tileMap->tileWidth = root.attribute("tilewidth").as_uint();
-	tileMap->tileHeight = root.attribute("tileheight").as_uint();
-	tileMap->properties = Property::LoadList(root.child("properties"));
-
-	for (auto node = root.child("tileset"); node; node = node.next_sibling("tileset"))
-		tileMap->tileSets.push_back(TileSet::Load(node));
-
-	for (auto node = root.child("layer"); node; node = node.next_sibling("layer"))
-		tileMap->layers.push_back(TileLayer::Load(node));
-
-	return tileMap;
-}
 
 Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 	TileMapData tileMapData;

@@ -1,19 +1,12 @@
 #pragma once
 
 #include "Core.h"
-#include "Property.h"
 
-#include <cstdint>
 #include <string>
 #include <vector>
 #include <array>
 
 #include <glm/glm.hpp>
-
-namespace pugi
-{
-    class xml_node;
-}
 
 class GLTexture;
 
@@ -30,8 +23,6 @@ public:
 
     std::array<glm::vec2, 4> GetTexCoords(const uint32_t tileId);
     const Terrain& GetTerrain(const uint32_t tileId);
-
-    static Ref<TileSet> Load(const pugi::xml_node& node);
 
 public:
     std::string name;

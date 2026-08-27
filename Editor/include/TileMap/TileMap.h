@@ -9,12 +9,10 @@
 class TileSet;
 class TileMapLayer;
 
-class TileMap
-{
+class TileMap {
 public:
     TileMap() = default;
 
-    static Ref<TileMap> Load(const std::filesystem::path& filepath);
     static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
 
 public:
@@ -23,8 +21,8 @@ public:
     std::vector<Property> properties;
 
     std::string name;
-    uint32 width = 0;
-    uint32 height = 0;
-    uint32 tileWidth = 0;
-    uint32 tileHeight = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t tileWidth = 0;
+    uint32_t tileHeight = 0;
 };
