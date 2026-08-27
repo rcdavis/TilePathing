@@ -131,7 +131,6 @@ bool Application::Init()
 		"TileMap",
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
-    //mTileMap = TileMap::Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap));
 	// TODO: Replace with Id
 	mTileMap = TileMap::LoadBinary("res/tilemaps/SMBMap.tmbin");
 

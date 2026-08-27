@@ -49,7 +49,6 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
     tileSet->tileHeight = tilesetNode.attribute("tileheight").as_uint();
     tileSet->tileCount = tilesetNode.attribute("tilecount").as_uint();
     tileSet->columnCount = tilesetNode.attribute("columns").as_uint();
-    tileSet->properties = Property::LoadList(tilesetNode.child("properties"));
 
     const auto imageNode = tilesetNode.child("image");
     const std::filesystem::path imagePath = imageNode.attribute("source").as_string();
@@ -63,7 +62,6 @@ Ref<TileSet> TileSet::Load(const pugi::xml_node& node)
     {
         const uint32_t tileId = tileNode.attribute("id").as_uint();
         tileSet->terrains[tileId].mTileId = tileId;
-        tileSet->terrains[tileId].mProperties = Property::LoadList(tileNode.child("properties"));
     }
 
     return tileSet;
