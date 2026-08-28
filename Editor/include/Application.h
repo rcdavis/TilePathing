@@ -26,11 +26,6 @@ public:
 
 	void Run();
 
-	static Application& Get() {
-		static Application app;
-		return app;
-	}
-
 	GLFWwindow* GetWindow() { return mWindow; }
 
 private:
