@@ -4,7 +4,6 @@ add_executable(Editor
     src/Application.cpp
     src/Camera.cpp
     src/Main.cpp
-    src/Property.cpp
     src/ImGuiWindows/CharacterWindow.cpp
     src/ImGuiWindows/ConsoleWindow.cpp
     src/ImGuiWindows/ContentBrowserWindow.cpp
@@ -12,7 +11,6 @@ add_executable(Editor
     src/ImGuiWindows/TileMapPathsWindow.cpp
     src/ImGuiWindows/TileMapPropertiesWindow.cpp
     src/Input/Input.cpp
-    src/TileMap/TileLayer.cpp
     src/TileMap/TileMap.cpp
     src/TileMap/TileMapLoader.cpp
     src/TileMap/TilePathing.cpp

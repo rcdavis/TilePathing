@@ -178,14 +178,8 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap)
                 }
             }
             assert(tileSet && "Tile does not have a tile set");
-            const auto& props = tileSet->GetTerrain(tile.mId).mProperties;
-            auto iter = std::find_if(std::cbegin(props), std::cend(props), [](const Property& p)
-                {
-                    return strcmp(std::data(p.GetName()), "movementCost") == 0;
-                });
-            const uint32 movementCost = (iter != std::cend(props)) ? (uint32)iter->AsInt32() : 1;
 
-            mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(col, row), movementCost);
+            mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(col, row), tileSet->GetTerrain(tile.mId).movementCost);
         }
     }
 }

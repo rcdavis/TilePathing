@@ -5,7 +5,9 @@
 #include <fstream>
 
 namespace TileMapLoader {
-	struct TileMapBinHeader {
+	struct TmbinHeader {
+		char magic[4] = { 'T', 'M', 'B', '1' };
+		uint32_t version = 1;
 		uint32_t width = 0;
 		uint32_t height = 0;
 		uint32_t tileWidth = 0;
@@ -21,8 +23,18 @@ namespace TileMapLoader {
 			return false;
 		}
 
-		TileMapBinHeader header;
-		file.read((char*)&header, sizeof(TileMapBinHeader));
+		TmbinHeader header;
+		file.read((char*)&header, sizeof(TmbinHeader));
+
+		if (strncmp(header.magic, "TMB1", 4) != 0) {
+			LOG_ERROR("Invalid tile map binary header in \"{}\"", filepath);
+			return false;
+		}
+
+		if (header.version != 1) {
+			LOG_ERROR("Unsupported tile map binary version in \"{}\"", filepath);
+			return false;
+		}
 
 		tileMapData.width = header.width;
 		tileMapData.height = header.height;
@@ -31,13 +43,15 @@ namespace TileMapLoader {
 
 		for (uint32_t i = 0; i < header.tilesetCount; ++i) {
 			TileSetData tilesetData;
+			file.read((char*)&tilesetData.firstGid, sizeof(uint32_t));
+			file.read((char*)&tilesetData.imageId, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileWidth, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileHeight, sizeof(uint32_t));
 			file.read((char*)&tilesetData.tileCount, sizeof(uint32_t));
 			file.read((char*)&tilesetData.columnCount, sizeof(uint32_t));
 
 			tilesetData.movementCosts.resize(tilesetData.tileCount);
-			file.read((char*)tilesetData.movementCosts.data(), tilesetData.movementCosts.size());
+			file.read((char*)tilesetData.movementCosts.data(), tilesetData.movementCosts.size() * sizeof(uint8_t));
 
 			tileMapData.tilesets.emplace_back(tilesetData);
 		}
@@ -48,7 +62,7 @@ namespace TileMapLoader {
 			file.read((char*)&layerData.height, sizeof(uint32_t));
 
 			layerData.tiles.resize(layerData.width * layerData.height);
-			file.read((char*)layerData.tiles.data(), layerData.tiles.size());
+			file.read((char*)layerData.tiles.data(), layerData.tiles.size() * sizeof(uint8_t));
 
 			tileMapData.layers.emplace_back(layerData);
 		}
