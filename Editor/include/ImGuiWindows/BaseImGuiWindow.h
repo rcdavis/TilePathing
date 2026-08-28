@@ -3,26 +3,25 @@
 #include <functional>
 #include <string>
 
-class BaseImGuiWindow
-{
+class BaseImGuiWindow {
 public:
-    BaseImGuiWindow() = default;
-    BaseImGuiWindow(const std::string& title, bool isOpen = false);
-    virtual ~BaseImGuiWindow() {}
+	BaseImGuiWindow() = default;
+	BaseImGuiWindow(const std::string& title, bool isOpen = false);
+	virtual ~BaseImGuiWindow() {}
 
-    const std::string& GetTitle() const { return mTitle; }
-    void SetTitle(const std::string& title) { mTitle = title; }
+	const std::string& GetTitle() const { return mTitle; }
+	void SetTitle(const std::string& title) { mTitle = title; }
 
-    bool IsOpen() const { return mIsOpen; }
-    void Open(bool isOpen) { mIsOpen = isOpen; }
+	bool IsOpen() const { return mIsOpen; }
+	void Open(bool isOpen) { mIsOpen = isOpen; }
 
-    virtual void RenderMenuItem(std::function<void()> onClick = nullptr);
-    void Render();
-
-protected:
-    virtual void OnRender() = 0;
+	virtual void RenderMenuItem(std::function<void()> onClick = nullptr);
+	void Render();
 
 protected:
-    std::string mTitle;
-    bool mIsOpen = false;
+	virtual void OnRender() = 0;
+
+protected:
+	std::string mTitle;
+	bool mIsOpen = false;
 };

@@ -7,23 +7,21 @@
 
 #include <glm/glm.hpp>
 
-class TileMapPathsWindow : public BaseImGuiWindow
-{
+class TileMapPathsWindow : public BaseImGuiWindow {
 public:
-    struct Path
-    {
-        glm::uvec2 start{ 0, 0 };
-        glm::uvec2 end{ 0, 0 };
-    };
+	struct Path {
+		glm::uvec2 start{ 0, 0 };
+		glm::uvec2 end{ 0, 0 };
+	};
 
 public:
-    TileMapPathsWindow(const bool isOpen = false);
+	TileMapPathsWindow(const bool isOpen = false);
 
-    const std::vector<Path>& GetPaths() const { return mPaths; }
+	const std::vector<Path>& GetPaths() const { return mPaths; }
 
-    void OnRender() override;
+	void OnRender() override;
 
 private:
-    std::vector<Path> mPaths;
-    uint32 mCurSelected = 0;
+	std::vector<Path> mPaths;
+	uint32 mCurSelected = 0;
 };

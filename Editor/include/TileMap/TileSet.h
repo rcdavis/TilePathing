@@ -10,28 +10,27 @@
 
 class GLTexture;
 
-class TileSet
-{
+class TileSet {
 public:
-    struct Terrain {
-        uint32_t mTileId = -1;
+	struct Terrain {
+		uint32_t mTileId = -1;
 		uint8_t movementCost = 1;
-    };
+	};
 
 public:
-    TileSet() = default;
+	TileSet() = default;
 
-    std::array<glm::vec2, 4> GetTexCoords(const uint32_t tileId);
-    const Terrain& GetTerrain(const uint32_t tileId);
+	std::array<glm::vec2, 4> GetTexCoords(const uint32_t tileId);
+	const Terrain& GetTerrain(const uint32_t tileId);
 
 public:
-    std::string name;
-    Ref<GLTexture> texture;
-    std::vector<Terrain> terrains;
+	std::string name;
+	Ref<GLTexture> texture;
+	std::vector<Terrain> terrains;
 
-    uint32_t firstGid = 1;
-    uint32_t tileWidth = 0;
-    uint32_t tileHeight = 0;
-    uint32_t tileCount = 0;
-    uint32_t columnCount = 0;
+	uint32_t firstGid = 1;
+	uint32_t tileWidth = 0;
+	uint32_t tileHeight = 0;
+	uint32_t tileCount = 0;
+	uint32_t columnCount = 0;
 };

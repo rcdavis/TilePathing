@@ -6,20 +6,19 @@
 #include <glm/gtc/type_ptr.hpp>
 
 TileMapPropertiesWindow::TileMapPropertiesWindow(bool isOpen) :
-    BaseImGuiWindow("Tile Map Properties", isOpen)
+	BaseImGuiWindow("Tile Map Properties", isOpen)
 {}
 
-void TileMapPropertiesWindow::OnRender()
-{
-    ImGui::ColorEdit3("Start Color", glm::value_ptr(mStartColor));
-    ImGui::ColorEdit3("End Color", glm::value_ptr(mEndColor));
-    ImGui::ColorEdit3("Path Color", glm::value_ptr(mPathColor));
-    ImGui::ColorEdit3("Checked Color", glm::value_ptr(mCheckedColor));
+void TileMapPropertiesWindow::OnRender() {
+	ImGui::ColorEdit3("Start Color", glm::value_ptr(startColor));
+	ImGui::ColorEdit3("End Color", glm::value_ptr(endColor));
+	ImGui::ColorEdit3("Path Color", glm::value_ptr(pathColor));
+	ImGui::ColorEdit3("Checked Color", glm::value_ptr(checkedColor));
 
-    ImGui::Checkbox("Show Visited Tiles?", &mShowVisitedTiles);
+	ImGui::Checkbox("Show Visited Tiles?", &showVisitedTiles);
 
-    ImGui::Separator();
+	ImGui::Separator();
 
-    ImGui::ColorEdit3("Selection Color", glm::value_ptr(mSelectionColor));
-    ImGui::ColorEdit3("Movement Zone Color", glm::value_ptr(mMovementZoneColor));
+	ImGui::ColorEdit3("Selection Color", glm::value_ptr(selectionColor));
+	ImGui::ColorEdit3("Movement Zone Color", glm::value_ptr(movementZoneColor));
 }

@@ -10,16 +10,16 @@ class TileMapLayer;
 
 class TileMap {
 public:
-    TileMap() = default;
+	TileMap() = default;
 
-    static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
+	static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
 
 public:
-    std::vector<Ref<TileSet>> tileSets;
-    std::vector<Ref<TileMapLayer>> layers;
+	std::vector<Ref<TileSet>> tileSets;
+	std::vector<Ref<TileMapLayer>> layers;
 
-    uint32_t width = 0;
-    uint32_t height = 0;
-    uint32_t tileWidth = 0;
-    uint32_t tileHeight = 0;
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t tileWidth = 0;
+	uint32_t tileHeight = 0;
 };

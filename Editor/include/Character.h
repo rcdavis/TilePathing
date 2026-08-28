@@ -7,31 +7,30 @@
 class GLTexture;
 class GLVertexArray;
 
-class Character
-{
+class Character {
 public:
-    Character() = default;
+	Character() = default;
 
-    glm::uvec2 GetTileCoords() const { return mTileCoords; }
-    void SetTileCoords(glm::uvec2 coords) { mTileCoords = coords; }
+	glm::uvec2 GetTileCoords() const { return mTileCoords; }
+	void SetTileCoords(glm::uvec2 coords) { mTileCoords = coords; }
 
-    void MoveUp(const uint32 numRows) { mTileCoords.y -= numRows; }
-    void MoveDown(const uint32 numRows) { mTileCoords.y += numRows; }
-    void MoveRight(const uint32 numCol) { mTileCoords.x += numCol; }
-    void MoveLeft(const uint32 numCol) { mTileCoords.x -= numCol; }
+	void MoveUp(const uint32 numRows) { mTileCoords.y -= numRows; }
+	void MoveDown(const uint32 numRows) { mTileCoords.y += numRows; }
+	void MoveRight(const uint32 numCol) { mTileCoords.x += numCol; }
+	void MoveLeft(const uint32 numCol) { mTileCoords.x -= numCol; }
 
-    Ref<GLTexture> GetTexture() { return mTexture; }
-    void SetTexture(Ref<GLTexture> texture) { mTexture = texture; }
+	Ref<GLTexture> GetTexture() { return mTexture; }
+	void SetTexture(Ref<GLTexture> texture) { mTexture = texture; }
 
-    Ref<GLVertexArray> GetVertexArray() { return mVAO; }
-    void SetVertexArray(Ref<GLVertexArray> vao) { mVAO = vao; }
+	Ref<GLVertexArray> GetVertexArray() { return mVAO; }
+	void SetVertexArray(Ref<GLVertexArray> vao) { mVAO = vao; }
 
-    uint32 GetMovementSteps() const { return mMovementSteps; }
-    void SetMovementSteps(const uint32 steps) { mMovementSteps = steps; }
+	uint32 GetMovementSteps() const { return mMovementSteps; }
+	void SetMovementSteps(const uint32 steps) { mMovementSteps = steps; }
 
 private:
-    glm::uvec2 mTileCoords{ 0.0f, 0.0f };
-    Ref<GLTexture> mTexture;
-    Ref<GLVertexArray> mVAO;
-    uint32 mMovementSteps = 0;
+	glm::uvec2 mTileCoords{ 0.0f, 0.0f };
+	Ref<GLTexture> mTexture;
+	Ref<GLVertexArray> mVAO;
+	uint32 mMovementSteps = 0;
 };

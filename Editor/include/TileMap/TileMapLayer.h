@@ -5,24 +5,24 @@
 
 class TileMapLayer {
 public:
-    enum class Type : uint8_t {
-        Tile,
-        Object
-    };
+	enum class Type : uint8_t {
+		Tile,
+		Object
+	};
 
 public:
-    virtual ~TileMapLayer() = default;
+	virtual ~TileMapLayer() = default;
 
-    Type GetType() const { return mType; }
-    const std::string& GetName() const { return mName; }
+	Type GetType() const { return mType; }
+	const std::string& GetName() const { return mName; }
 
 protected:
-    TileMapLayer(Type type) : mType(type) {}
+	TileMapLayer(Type type) : mType(type) {}
 
-    std::string mName;
+	std::string mName;
 
-    bool mIsVisible = true;
+	bool mIsVisible = true;
 
 private:
-    Type mType;
+	Type mType;
 };
