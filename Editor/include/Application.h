@@ -19,74 +19,72 @@ class TileMap;
 class BaseImGuiWindow;
 class Character;
 
-class Application
-{
+class Application {
 public:
-    Application();
-    ~Application();
+	Application();
+	~Application();
 
-    void Run();
+	void Run();
 
-    static Application& Get()
-    {
-        static Application app;
-        return app;
-    }
+	static Application& Get() {
+		static Application app;
+		return app;
+	}
 
-    GLFWwindow* GetWindow() { return mWindow; }
+	GLFWwindow* GetWindow() { return mWindow; }
 
 private:
-    bool Init();
-    void Shutdown();
+	bool Init();
+	void Shutdown();
 
-    void Render();
-    void RenderScene();
-    void RenderMainMenu();
-    void RenderTilePaths();
+	void Render();
+	void RenderScene();
+	void RenderMainMenu();
+	void RenderTilePaths();
 
-    void HandleInput();
+	void HandleInput();
 
-    glm::mat4 GetTileTransform(glm::uvec2 coords);
-    glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
+	glm::mat4 GetTileTransform(glm::uvec2 coords);
+	glm::uvec2 GetTileCoords(glm::uvec2 mousePos);
 
-    void Render(const Ref<GLVertexArray>& vao);
+	void Render(const Ref<GLVertexArray>& vao);
 
 	template <typename T>
 	Ref<T> GetImGuiWindow();
 
-    static void GlfwErrorCallback(int error, const char* description);
+	static void GlfwErrorCallback(int error, const char* description);
 
 private:
-    TilePathing mTilePathing;
-    Camera mCamera;
+	TilePathing mTilePathing;
+	Camera mCamera;
 
-    std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
-    Ref<Character> mSelectedCharacter;
+	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
+	Ref<Character> mSelectedCharacter;
 
-    glm::vec2 mMousePos{ 0.0f, 0.0f };
-    glm::vec2 mViewportSize{ 0.0f, 0.0f };
-    std::array<glm::vec2, 2> mViewportBounds = {
-        glm::vec2 { 0.0f, 0.0f },
-        glm::vec2 { 0.0f, 0.0f }
-    };
+	glm::vec2 mMousePos{ 0.0f, 0.0f };
+	glm::vec2 mViewportSize{ 0.0f, 0.0f };
+	std::array<glm::vec2, 2> mViewportBounds = {
+		glm::vec2 { 0.0f, 0.0f },
+		glm::vec2 { 0.0f, 0.0f }
+	};
 
-    TimeStep mLastFrameTime;
+	TimeStep mLastFrameTime;
 
-    Ref<GLFramebuffer> mFramebuffer;
+	Ref<GLFramebuffer> mFramebuffer;
 
-    Ref<GLVertexArray> mVAO;
-    Ref<GLTexture> mTestTexture;
-    Ref<TileMap> mTileMap;
-    Ref<GLShader> mShader;
+	Ref<GLVertexArray> mVAO;
+	Ref<GLTexture> mTestTexture;
+	Ref<TileMap> mTileMap;
+	Ref<GLShader> mShader;
 
-    Ref<GLVertexArray> mColoredRectVao;
-    Ref<GLShader> mColorShader;
+	Ref<GLVertexArray> mColoredRectVao;
+	Ref<GLShader> mColorShader;
 
-    Ref<GLTexture> mSelectionTexture;
-    glm::uvec2 mSelectionCoords{ 0, 0 };
+	Ref<GLTexture> mSelectionTexture;
+	glm::uvec2 mSelectionCoords{ 0, 0 };
 
-    GLFWwindow* mWindow = nullptr;
+	GLFWwindow* mWindow = nullptr;
 
-    bool mInitializedImGui = false;
-    bool mViewportClickable = false;
+	bool mInitializedImGui = false;
+	bool mViewportClickable = false;
 };

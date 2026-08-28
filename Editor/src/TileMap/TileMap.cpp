@@ -48,7 +48,7 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 
 		tileLayer->tiles.resize(tileMapData.layers[i].tiles.size());
 		for (uint32_t k = 0; k < tileMapData.layers[i].tiles.size(); ++k) {
-			tileLayer->tiles[k].mId = tileMapData.layers[i].tiles[k];
+			tileLayer->tiles[k].id = tileMapData.layers[i].tiles[k];
 		}
 
 		tileMap->layers.emplace_back(tileLayer);

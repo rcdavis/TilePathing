@@ -6,27 +6,25 @@
 
 #include "ImGuiWindows/BaseImGuiWindow.h"
 
-class ConsoleWindow : public BaseImGuiWindow
-{
+class ConsoleWindow : public BaseImGuiWindow {
 public:
-    struct ConsoleItem
-    {
-        std::string tag;
-        std::string text;
-        glm::vec3 color{ 1.0f };
-    };
+	struct ConsoleItem {
+		std::string tag;
+		std::string text;
+		glm::vec3 color{ 1.0f };
+	};
 
 public:
-    ConsoleWindow(bool isOpen = false);
+	ConsoleWindow(bool isOpen = false);
 
-    void SetEntryLimit(int limit) { mLimit = limit; }
+	void SetEntryLimit(int limit) { mLimit = limit; }
 
-    void AddLine(ConsoleItem item);
-    void Clear() { mItems.clear(); }
+	void AddLine(const ConsoleItem& item);
+	void Clear() { mItems.clear(); }
 
-    void OnRender() override;
+	void OnRender() override;
 
 private:
-    std::deque<ConsoleItem> mItems;
-    int mLimit = 100;
+	std::deque<ConsoleItem> mItems;
+	int mLimit = 100;
 };

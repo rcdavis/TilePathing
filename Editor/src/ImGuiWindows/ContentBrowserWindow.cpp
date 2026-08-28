@@ -6,64 +6,60 @@
 #include "TextureIds.h"
 
 ContentBrowserWindow::ContentBrowserWindow(const bool isOpen) :
-    BaseImGuiWindow("Content Browser", isOpen),
-    mCurDir("res"),
-    mDirIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon))),
-    mFileIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon))),
-    mPadding(16.0f),
-    mThumbnailSize(74.0f)
+	BaseImGuiWindow("Content Browser", isOpen),
+	mCurDir("res"),
+	mDirIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon))),
+	mFileIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon))),
+	mPadding(16.0f),
+	mThumbnailSize(74.0f)
 {}
 
-void ContentBrowserWindow::OnRender()
-{
-    if (mCurDir != "res" && ImGui::Button("<-"))
-        mCurDir = mCurDir.parent_path();
+void ContentBrowserWindow::OnRender() {
+	if (mCurDir != "res" && ImGui::Button("<-"))
+		mCurDir = mCurDir.parent_path();
 
-    const f32 cellSize = mThumbnailSize + mPadding;
-    const f32 panelWidth = ImGui::GetContentRegionAvail().x;
-    const int32 columnCount = std::max((int32)(panelWidth / cellSize), 1);
+	const f32 cellSize = mThumbnailSize + mPadding;
+	const f32 panelWidth = ImGui::GetContentRegionAvail().x;
+	const int32 columnCount = std::max((int32)(panelWidth / cellSize), 1);
 
-    ImGui::Columns(columnCount, nullptr, false);
+	ImGui::Columns(columnCount, nullptr, false);
 
-    for (const auto& dirEntry : std::filesystem::directory_iterator(mCurDir))
-    {
-        const auto& path = dirEntry.path();
-        const auto relativePath = std::filesystem::relative(path, "res");
-        const auto filenameStr = relativePath.filename().string();
-        const Ref<GLTexture>& icon = dirEntry.is_directory() ? mDirIcon : mFileIcon;
+	for (const auto& dirEntry : std::filesystem::directory_iterator(mCurDir)) {
+		const auto& path = dirEntry.path();
+		const auto relativePath = std::filesystem::relative(path, "res");
+		const auto filenameStr = relativePath.filename().string();
+		const Ref<GLTexture>& icon = dirEntry.is_directory() ? mDirIcon : mFileIcon;
 
-        ImGui::PushID(filenameStr.c_str());
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushID(filenameStr.c_str());
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
-        ImGui::ImageButton("icon_content_browser", (ImTextureID)icon->GetId(),
-            { mThumbnailSize, mThumbnailSize }, { 0, 1 }, { 1, 0 });
+		ImGui::ImageButton("icon_content_browser", (ImTextureID)icon->GetId(),
+			{ mThumbnailSize, mThumbnailSize }, { 0, 1 }, { 1, 0 });
 
-        if (ImGui::BeginDragDropSource())
-        {
+		if (ImGui::BeginDragDropSource()) {
 			const char* const itemPath = relativePath.c_str();
-            ImGui::SetDragDropPayload(ContentBrowserItemType, itemPath,
-                (strlen(itemPath) + 1) * sizeof(char));
+			ImGui::SetDragDropPayload(ContentBrowserItemType, itemPath,
+				(strlen(itemPath) + 1) * sizeof(char));
 
-            ImGui::EndDragDropSource();
-        }
+			ImGui::EndDragDropSource();
+		}
 
-        ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
 
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-        {
-            if (dirEntry.is_directory())
-                mCurDir /= path.filename();
-        }
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			if (dirEntry.is_directory())
+				mCurDir /= path.filename();
+		}
 
-        ImGui::TextWrapped("%s", filenameStr.c_str());
+		ImGui::TextWrapped("%s", filenameStr.c_str());
 
-        ImGui::NextColumn();
+		ImGui::NextColumn();
 
-        ImGui::PopID();
-    }
+		ImGui::PopID();
+	}
 
-    ImGui::Columns(1);
+	ImGui::Columns(1);
 
-    ImGui::SliderFloat("Thumbnail Size", &mThumbnailSize, 16, 512);
-    ImGui::SliderFloat("Padding", &mPadding, 0, 32);
+	ImGui::SliderFloat("Thumbnail Size", &mThumbnailSize, 16, 512);
+	ImGui::SliderFloat("Padding", &mPadding, 0, 32);
 }
