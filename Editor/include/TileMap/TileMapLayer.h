@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Property.h"
-
 #include <string>
+#include <cstdint>
 
-class TileMapLayer
-{
+class TileMapLayer {
 public:
-    enum class Type
-    {
+    enum class Type : uint8_t {
         Tile,
         Object
     };
@@ -18,13 +15,11 @@ public:
 
     Type GetType() const { return mType; }
     const std::string& GetName() const { return mName; }
-    const std::vector<Property>& GetProperties() const { return mProperties; }
 
 protected:
     TileMapLayer(Type type) : mType(type) {}
 
     std::string mName;
-    std::vector<Property> mProperties;
 
     bool mIsVisible = true;
 

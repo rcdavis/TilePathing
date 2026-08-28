@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "Property.h"
 
 #include <filesystem>
 #include <vector>
@@ -18,7 +17,6 @@ public:
 public:
     std::vector<Ref<TileSet>> tileSets;
     std::vector<Ref<TileMapLayer>> layers;
-    std::vector<Property> properties;
 
     std::string name;
     uint32_t width = 0;

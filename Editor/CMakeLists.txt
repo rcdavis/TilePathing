@@ -4,7 +4,6 @@ add_executable(Editor
     src/Application.cpp
     src/Camera.cpp
     src/Main.cpp
-    src/Property.cpp
     src/ImGuiWindows/CharacterWindow.cpp
     src/ImGuiWindows/ConsoleWindow.cpp
     src/ImGuiWindows/ContentBrowserWindow.cpp
