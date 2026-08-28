@@ -226,7 +226,7 @@ void Application::RenderScene() {
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
 		mShader->SetMat4("u_Transform", transform);
-		mShader->SetFloat4("u_Color", tilePropsWindow->GetSelectionColor());
+		mShader->SetFloat4("u_Color", tilePropsWindow->selectionColor);
 		Render(mColoredRectVao);
 	}
 
@@ -257,7 +257,7 @@ void Application::RenderTilePaths() {
 		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
 		for (auto& tile : zone.tiles) {
 			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetMovementZoneColor());
+			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->movementZoneColor);
 
 			Render(mColoredRectVao);
 		}
@@ -270,7 +270,7 @@ void Application::RenderTilePaths() {
 			auto transform = GetTileTransform(cell);
 			transform[3].z = 0.6f;
 			mColorShader->SetMat4("u_Transform", transform);
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetPathColor());
+			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->pathColor);
 
 			Render(mColoredRectVao);
 		}
@@ -281,11 +281,11 @@ void Application::RenderTilePaths() {
 		for (const glm::uvec2 cell : path) {
 			glm::vec4 color;
 			if (cell == p.start)
-				color = tileMapPropertiesWindow->GetStartColor();
+				color = tileMapPropertiesWindow->startColor;
 			else if (cell == p.end)
-				color = tileMapPropertiesWindow->GetEndColor();
+				color = tileMapPropertiesWindow->endColor;
 			else
-				color = tileMapPropertiesWindow->GetPathColor();
+				color = tileMapPropertiesWindow->pathColor;
 
 			mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
 			mColorShader->SetFloat4("u_Color", color);
@@ -293,10 +293,10 @@ void Application::RenderTilePaths() {
 			Render(mColoredRectVao);
 		}
 
-		if (tileMapPropertiesWindow->GetShowVisitedTiles()) {
+		if (tileMapPropertiesWindow->showVisitedTiles) {
 			for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords()) {
 				mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-				mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->GetCheckedColor());
+				mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->checkedColor);
 
 				Render(mColoredRectVao);
 			}
