@@ -7,23 +7,20 @@
 
 #include <glm/glm.hpp>
 
-class Input {
-public:
-	Input() = delete;
-	Input(const Input&) = delete;
-	Input& operator=(const Input&) = delete;
+struct GLFWwindow;
+class TimeStep;
 
-	static void Poll(TimeStep ts);
+namespace Input {
+	void Init(GLFWwindow* window);
 
-	static bool IsKeyPressed(const KeyCode keycode);
-	static bool IsKeyReleased(const KeyCode keycode);
-	static bool IsKeyDown(const KeyCode keycode, const TimeStep timeDiff = 0.0f);
-	static bool IsMouseButtonPressed(const MouseCode button);
+	void Poll(TimeStep ts);
 
-	static glm::vec2 GetMousePosition();
-	static f32 GetMouseX();
-	static f32 GetMouseY();
+	bool IsKeyPressed(const KeyCode keycode);
+	bool IsKeyReleased(const KeyCode keycode);
+	bool IsKeyDown(const KeyCode keycode, const TimeStep timeDiff = 0.0f);
+	bool IsMouseButtonPressed(const MouseCode button);
 
-private:
-	static TimeStep s_CurTime;
-};
+	glm::vec2 GetMousePosition();
+	f32 GetMouseX();
+	f32 GetMouseY();
+}

@@ -101,6 +101,8 @@ bool Application::Init() {
 
 	glfwSwapInterval(1);
 
+	Input::Init(mWindow);
+
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 
