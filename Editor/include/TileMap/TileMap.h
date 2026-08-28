@@ -18,7 +18,6 @@ public:
     std::vector<Ref<TileSet>> tileSets;
     std::vector<Ref<TileMapLayer>> layers;
 
-    std::string name;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t tileWidth = 0;

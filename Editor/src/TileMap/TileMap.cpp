@@ -17,7 +17,6 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 
 	auto tileMap = CreateRef<TileMap>();
 
-	tileMap->name = filepath.stem().string();
 	tileMap->width = tileMapData.width;
 	tileMap->height = tileMapData.height;
 	tileMap->tileWidth = tileMapData.tileWidth;
