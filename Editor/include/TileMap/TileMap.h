@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core.h"
-
-#include <filesystem>
 #include <vector>
 
 #include "TileMap/TileSet.h"
@@ -12,8 +9,6 @@ class TileMap {
 public:
 	TileMap() = default;
 	~TileMap();
-
-	static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
 
 	bool Load(const char* const filepath);
 
