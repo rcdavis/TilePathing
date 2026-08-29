@@ -137,12 +137,17 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap) {
 	assert(tileMap && "Tile map is null");
 	assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
 
-	Ref<TileLayer> tileLayer;
-	for (const auto& layer : tileMap->tileLayers) {
-		tileLayer = layer;
-		break;
+	uint8_t tileLayerIndex = std::numeric_limits<uint8_t>::max();
+	for (uint8_t i = 0; i < tileMap->tileLayers.size(); ++i) {
+		if (!std::empty(tileMap->tileLayers[i].tiles)) {
+			tileLayerIndex = i;
+			break;
+		}
 	}
-	assert(tileLayer && "Tile map does not have a tile layer");
+
+	assert(tileLayerIndex != std::numeric_limits<uint8_t>::max() && "Tile map does not have a valid tile layer index");
+
+	const auto& tileLayer = tileMap->tileLayers[tileLayerIndex];
 
 	mNumRows = tileMap->height;
 	mNumCols = tileMap->width;
@@ -150,7 +155,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap) {
 
 	for (uint32 row = 0; row < mNumRows; ++row) {
 		for (uint32 col = 0; col < mNumCols; ++col) {
-			const auto& tile = tileLayer->tiles[((uint64)row * tileLayer->width) + col];
+			const auto& tile = tileLayer.tiles[((uint64)row * tileLayer.width) + col];
 			uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
 			for (uint8_t i = 0; i < tileMap->tileSets.size(); ++i) {
 				if (tile.id >= tileMap->tileSets[i].firstGid) {

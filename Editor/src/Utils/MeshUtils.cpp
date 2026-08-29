@@ -15,8 +15,8 @@ namespace MeshUtils {
 
 		std::vector<Vertex> vertices;
 
-		for (const Ref<TileLayer>& tileLayer : tileMap->tileLayers) {
-			const auto& tiles = tileLayer->tiles;
+		for (const TileLayer& tileLayer : tileMap->tileLayers) {
+			const auto& tiles = tileLayer.tiles;
 			for (uint32 i = 0; i < std::size(tiles); ++i) {
 				const auto& tile = tiles[i];
 				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
@@ -31,8 +31,8 @@ namespace MeshUtils {
 				const auto& tileSet = tileMap->tileSets[tileSetIndex];
 				const uint32 tileWidth = tileSet.tileWidth;
 				const uint32 tileHeight = tileSet.tileHeight;
-				const uint32 numTilesWidth = tileLayer->width;
-				const uint32 numTilesHeight = tileLayer->height;
+				const uint32 numTilesWidth = tileLayer.width;
+				const uint32 numTilesHeight = tileLayer.height;
 
 				const uint32 xPos = ((i % numTilesWidth) * tileWidth);
 				const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);

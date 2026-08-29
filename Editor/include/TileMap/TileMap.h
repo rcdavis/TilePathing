@@ -16,7 +16,7 @@ public:
 
 public:
 	std::vector<TileSet> tileSets;
-	std::vector<Ref<TileLayer>> tileLayers;
+	std::vector<TileLayer> tileLayers;
 
 	uint16_t width = 0;
 	uint16_t height = 0;

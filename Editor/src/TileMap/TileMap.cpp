@@ -42,13 +42,13 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 
 	tileMap->tileLayers.reserve(tileMapData.layers.size());
 	for (uint32_t i = 0; i < tileMapData.layers.size(); ++i) {
-		auto tileLayer = CreateRef<TileLayer>();
-		tileLayer->width = tileMapData.layers[i].width;
-		tileLayer->height = tileMapData.layers[i].height;
+		TileLayer tileLayer;
+		tileLayer.width = tileMapData.layers[i].width;
+		tileLayer.height = tileMapData.layers[i].height;
 
-		tileLayer->tiles.resize(tileMapData.layers[i].tiles.size());
+		tileLayer.tiles.resize(tileMapData.layers[i].tiles.size());
 		for (uint32_t k = 0; k < tileMapData.layers[i].tiles.size(); ++k) {
-			tileLayer->tiles[k].id = tileMapData.layers[i].tiles[k];
+			tileLayer.tiles[k].id = tileMapData.layers[i].tiles[k];
 		}
 
 		tileMap->tileLayers.emplace_back(tileLayer);
