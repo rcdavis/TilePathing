@@ -11,8 +11,13 @@ class TileLayer;
 class TileMap {
 public:
 	TileMap() = default;
+	~TileMap();
 
 	static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
+
+	bool Load(const char* const filepath);
+
+	void Destroy();
 
 public:
 	std::vector<TileSet> tileSets;
