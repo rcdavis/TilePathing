@@ -7,7 +7,7 @@
 class TileLayer : public TileMapLayer {
 public:
 	struct Tile {
-		uint32_t id = -1;
+		uint8_t id = -1;
 	};
 
 public:

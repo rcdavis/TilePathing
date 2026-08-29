@@ -13,7 +13,7 @@ class GLTexture;
 class TileSet {
 public:
 	struct Terrain {
-		uint32_t mTileId = -1;
+		uint8_t mTileId = -1;
 		uint8_t movementCost = 1;
 	};
 
@@ -24,7 +24,6 @@ public:
 	const Terrain& GetTerrain(const uint32_t tileId);
 
 public:
-	std::string name;
 	Ref<GLTexture> texture;
 	std::vector<Terrain> terrains;
 
