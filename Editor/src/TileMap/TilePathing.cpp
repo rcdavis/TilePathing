@@ -12,7 +12,7 @@
 #include "TileMap/TileSet.h"
 #include "TileMap/TileLayer.h"
 
-TilePathing::TilePathing(Ref<TileMap> tileMap) :
+TilePathing::TilePathing(TileMap& tileMap) :
 	mMap(),
 	mVisitedCoords(),
 	mNumRows(0),
@@ -133,13 +133,12 @@ uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const {
 	return std::abs((long)end.x - (long)start.x) + std::abs((long)end.y - (long)start.y);
 }
 
-void TilePathing::CreateMap(Ref<TileMap> tileMap) {
-	assert(tileMap && "Tile map is null");
-	assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
+void TilePathing::CreateMap(TileMap& tileMap) {
+	assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
 	uint8_t tileLayerIndex = std::numeric_limits<uint8_t>::max();
-	for (uint8_t i = 0; i < tileMap->tileLayers.size(); ++i) {
-		if (!std::empty(tileMap->tileLayers[i].tiles)) {
+	for (uint8_t i = 0; i < tileMap.tileLayers.size(); ++i) {
+		if (!std::empty(tileMap.tileLayers[i].tiles)) {
 			tileLayerIndex = i;
 			break;
 		}
@@ -147,18 +146,18 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap) {
 
 	assert(tileLayerIndex != std::numeric_limits<uint8_t>::max() && "Tile map does not have a valid tile layer index");
 
-	const auto& tileLayer = tileMap->tileLayers[tileLayerIndex];
+	const auto& tileLayer = tileMap.tileLayers[tileLayerIndex];
 
-	mNumRows = tileMap->height;
-	mNumCols = tileMap->width;
+	mNumRows = tileMap.height;
+	mNumCols = tileMap.width;
 	mMap.resize((size_t)mNumRows * (size_t)mNumCols);
 
 	for (uint32 row = 0; row < mNumRows; ++row) {
 		for (uint32 col = 0; col < mNumCols; ++col) {
 			const auto& tile = tileLayer.tiles[((uint64)row * tileLayer.width) + col];
 			uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
-			for (uint8_t i = 0; i < tileMap->tileSets.size(); ++i) {
-				if (tile.id >= tileMap->tileSets[i].firstGid) {
+			for (uint8_t i = 0; i < tileMap.tileSets.size(); ++i) {
+				if (tile.id >= tileMap.tileSets[i].firstGid) {
 					tileSetIndex = i;
 					break;
 				}
@@ -167,7 +166,7 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap) {
 
 			mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(
 				glm::uvec2(col, row),
-				tileMap->tileSets[tileSetIndex].GetTerrain(tile.id).movementCost);
+				tileMap.tileSets[tileSetIndex].GetTerrain(tile.id).movementCost);
 		}
 	}
 }

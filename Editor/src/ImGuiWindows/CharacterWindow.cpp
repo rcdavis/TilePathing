@@ -5,11 +5,13 @@
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
 
+#include "TileMap/TileMap.h"
+
 #include "Utils/MeshUtils.h"
 
 #include <imgui.h>
 
-CharacterWindow::CharacterWindow(const bool isOpen, Ref<TileMap> tileMap) :
+CharacterWindow::CharacterWindow(const bool isOpen, TileMap& tileMap) :
 	BaseImGuiWindow("Character", isOpen),
 	mCharacters(),
 	mTileMap(tileMap),

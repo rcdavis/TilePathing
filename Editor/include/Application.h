@@ -4,6 +4,7 @@
 #include "TimeStep.h"
 #include "Camera.h"
 
+#include "TileMap/TileMap.h"
 #include "TileMap/TilePathing.h"
 
 #include <array>
@@ -50,6 +51,7 @@ private:
 	static void GlfwErrorCallback(int error, const char* description);
 
 private:
+	TileMap mTileMap;
 	TilePathing mTilePathing;
 	Camera mCamera;
 
@@ -69,7 +71,6 @@ private:
 
 	Ref<GLVertexArray> mVAO;
 	Ref<GLTexture> mTestTexture;
-	Ref<TileMap> mTileMap;
 	Ref<GLShader> mShader;
 
 	Ref<GLVertexArray> mColoredRectVao;

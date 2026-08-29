@@ -35,9 +35,9 @@ public:
 
 public:
 	TilePathing() = default;
-	TilePathing(Ref<TileMap> tileMap);
+	TilePathing(TileMap& tileMap);
 
-	void SetTileMap(Ref<TileMap> tileMap) { CreateMap(tileMap); }
+	void SetTileMap(TileMap& tileMap) { CreateMap(tileMap); }
 	std::unordered_set<glm::uvec2> GetVisitedCoords() { return mVisitedCoords; }
 
 	std::vector<glm::uvec2> FindPath(glm::uvec2 startCoords, glm::uvec2 endCoords);
@@ -49,7 +49,7 @@ private:
 		return coords.x >= 0 && coords.y >= 0 && coords.x < mNumCols&& coords.y < mNumRows;
 	}
 
-	void CreateMap(Ref<TileMap> tileMap);
+	void CreateMap(TileMap& tileMap);
 	uint32 Heuristic(glm::uvec2 start, glm::uvec2 end) const;
 
 private:

@@ -9,26 +9,25 @@
 #include "OpenGL/GLIndexBuffer.h"
 
 namespace MeshUtils {
-	std::vector<Vertex> CreateTileMapVertices(Ref<TileMap> tileMap) {
-		assert(tileMap && "Passing in a null tile map");
-		assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
+	std::vector<Vertex> CreateTileMapVertices(TileMap& tileMap) {
+		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
 		std::vector<Vertex> vertices;
 
-		for (const TileLayer& tileLayer : tileMap->tileLayers) {
+		for (const TileLayer& tileLayer : tileMap.tileLayers) {
 			const auto& tiles = tileLayer.tiles;
 			for (uint32 i = 0; i < std::size(tiles); ++i) {
 				const auto& tile = tiles[i];
 				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
-				for (uint8_t j = 0; j < tileMap->tileSets.size(); ++j) {
-					if (tile.id >= tileMap->tileSets[j].firstGid) {
+				for (uint8_t j = 0; j < tileMap.tileSets.size(); ++j) {
+					if (tile.id >= tileMap.tileSets[j].firstGid) {
 						tileSetIndex = j;
 						break;
 					}
 				}
 				assert(tileSetIndex != std::numeric_limits<uint8_t>::max() && "Tile does not have a tile set");
 
-				const auto& tileSet = tileMap->tileSets[tileSetIndex];
+				const auto& tileSet = tileMap.tileSets[tileSetIndex];
 				const uint32 tileWidth = tileSet.tileWidth;
 				const uint32 tileHeight = tileSet.tileHeight;
 				const uint32 numTilesWidth = tileLayer.width;
@@ -54,7 +53,7 @@ namespace MeshUtils {
 		return vertices;
 	}
 
-	Ref<GLVertexArray> CreateTileMapMesh(Ref<TileMap> tileMap) {
+	Ref<GLVertexArray> CreateTileMapMesh(TileMap& tileMap) {
 		const auto vertices = CreateTileMapVertices(tileMap);
 
 		auto vao = GLVertexArray::Create();
@@ -90,15 +89,15 @@ namespace MeshUtils {
 		return vao;
 	}
 
-	Ref<GLVertexArray> CreateColoredTileMesh(Ref<TileMap> tileMap) {
-		assert(tileMap && "Passing in a null tile map");
+	Ref<GLVertexArray> CreateColoredTileMesh(TileMap& tileMap) {
+		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
 		auto vao = GLVertexArray::Create();
 		vao->Bind();
 
-		const uint32 numTilesHeight = tileMap->height;
-		const uint32 tileWidth = tileMap->tileWidth;
-		const uint32 tileHeight = tileMap->tileHeight;
+		const uint32 numTilesHeight = tileMap.height;
+		const uint32 tileWidth = tileMap.tileWidth;
+		const uint32 tileHeight = tileMap.tileHeight;
 
 		constexpr f32 xPos = 0.0f;
 		const f32 yPos = (f32)(numTilesHeight * tileHeight);

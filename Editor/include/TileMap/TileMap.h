@@ -5,8 +5,8 @@
 #include <filesystem>
 #include <vector>
 
-class TileSet;
-class TileLayer;
+#include "TileMap/TileSet.h"
+#include "TileMap/TileLayer.h"
 
 class TileMap {
 public:

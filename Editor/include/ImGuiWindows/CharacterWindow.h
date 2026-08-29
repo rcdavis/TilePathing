@@ -12,7 +12,7 @@ class TileMap;
 
 class CharacterWindow : public BaseImGuiWindow {
 public:
-	CharacterWindow(const bool isOpen, Ref<TileMap> tileMap);
+	CharacterWindow(const bool isOpen, TileMap& tileMap);
 
 	const std::vector<Ref<Character>>& GetCharacters() const { return mCharacters; }
 	Ref<Character> GetCharacter(glm::uvec2 coords);
@@ -23,6 +23,6 @@ public:
 
 private:
 	std::vector<Ref<Character>> mCharacters;
-	Ref<TileMap> mTileMap;
+	TileMap& mTileMap;
 	uint32 mCurSelected = 0;
 };
