@@ -18,8 +18,8 @@ public:
 	std::vector<Ref<TileSet>> tileSets;
 	std::vector<Ref<TileMapLayer>> layers;
 
-	uint32_t width = 0;
-	uint32_t height = 0;
-	uint32_t tileWidth = 0;
-	uint32_t tileHeight = 0;
+	uint16_t width = 0;
+	uint16_t height = 0;
+	uint16_t tileWidth = 0;
+	uint16_t tileHeight = 0;
 };

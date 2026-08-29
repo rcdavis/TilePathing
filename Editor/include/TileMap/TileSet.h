@@ -12,7 +12,6 @@ class GLTexture;
 class TileSet {
 public:
 	struct Terrain {
-		uint8_t mTileId = -1;
 		uint8_t movementCost = 1;
 	};
 
