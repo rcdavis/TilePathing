@@ -19,18 +19,18 @@ namespace MeshUtils {
 			const auto& tiles = tileLayer->tiles;
 			for (uint32 i = 0; i < std::size(tiles); ++i) {
 				const auto& tile = tiles[i];
-				Ref<TileSet> tileSet;
-				for (const auto& ts : tileMap->tileSets) {
-					if (tile.id >= ts->firstGid) {
-						tileSet = ts;
+				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
+				for (uint8_t j = 0; j < tileMap->tileSets.size(); ++j) {
+					if (tile.id >= tileMap->tileSets[j].firstGid) {
+						tileSetIndex = j;
 						break;
 					}
 				}
+				assert(tileSetIndex != std::numeric_limits<uint8_t>::max() && "Tile does not have a tile set");
 
-				assert(tileSet && "Tile Layer does not have a tile set");
-
-				const uint32 tileWidth = tileSet->tileWidth;
-				const uint32 tileHeight = tileSet->tileHeight;
+				const auto& tileSet = tileMap->tileSets[tileSetIndex];
+				const uint32 tileWidth = tileSet.tileWidth;
+				const uint32 tileHeight = tileSet.tileHeight;
 				const uint32 numTilesWidth = tileLayer->width;
 				const uint32 numTilesHeight = tileLayer->height;
 
@@ -44,7 +44,7 @@ namespace MeshUtils {
 					glm::vec4 { xPos, yPos - tileHeight, 0.0f, 1.0f }
 				};
 
-				const std::array<glm::vec2, 4> texCoords = tileSet->GetTexCoords(tile.id);
+				const std::array<glm::vec2, 4> texCoords = tileSet.GetTexCoords(tile.id);
 
 				for (int i = 0; i < 4; ++i)
 					vertices.push_back({ vertPositions[i], texCoords[i] });

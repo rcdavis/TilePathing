@@ -18,8 +18,8 @@ public:
 public:
 	TileSet() = default;
 
-	std::array<glm::vec2, 4> GetTexCoords(const uint8_t tileId);
-	const Terrain& GetTerrain(const uint8_t tileId);
+	std::array<glm::vec2, 4> GetTexCoords(const uint8_t tileId) const;
+	const Terrain& GetTerrain(const uint8_t tileId) const;
 
 public:
 	Ref<GLTexture> texture;

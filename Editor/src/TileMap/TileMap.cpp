@@ -24,17 +24,17 @@ Ref<TileMap> TileMap::LoadBinary(const std::filesystem::path& filepath) {
 
 	tileMap->tileSets.reserve(tileMapData.tilesets.size());
 	for (uint32_t i = 0; i < tileMapData.tilesets.size(); ++i) {
-		auto tileSet = CreateRef<TileSet>();
-		tileSet->firstGid = tileMapData.tilesets[i].firstGid;
-		tileSet->texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
-		tileSet->tileWidth = tileMapData.tilesets[i].tileWidth;
-		tileSet->tileHeight = tileMapData.tilesets[i].tileHeight;
-		tileSet->tileCount = tileMapData.tilesets[i].tileCount;
-		tileSet->columnCount = tileMapData.tilesets[i].columnCount;
+		TileSet tileSet;
+		tileSet.firstGid = tileMapData.tilesets[i].firstGid;
+		tileSet.texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
+		tileSet.tileWidth = tileMapData.tilesets[i].tileWidth;
+		tileSet.tileHeight = tileMapData.tilesets[i].tileHeight;
+		tileSet.tileCount = tileMapData.tilesets[i].tileCount;
+		tileSet.columnCount = tileMapData.tilesets[i].columnCount;
 
-		tileSet->terrains.resize(tileMapData.tilesets[i].movementCosts.size());
+		tileSet.terrains.resize(tileMapData.tilesets[i].movementCosts.size());
 		for (uint32_t k = 0; k < tileMapData.tilesets[i].movementCosts.size(); ++k) {
-			tileSet->terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
+			tileSet.terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
 		}
 
 		tileMap->tileSets.emplace_back(tileSet);

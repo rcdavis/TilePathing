@@ -15,7 +15,7 @@ public:
 	static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
 
 public:
-	std::vector<Ref<TileSet>> tileSets;
+	std::vector<TileSet> tileSets;
 	std::vector<Ref<TileLayer>> tileLayers;
 
 	uint16_t width = 0;
