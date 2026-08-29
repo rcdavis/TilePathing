@@ -1,17 +1,16 @@
 #pragma once
 
-#include "TileMapLayer.h"
-
+#include <cstdint>
 #include <vector>
 
-class TileLayer : public TileMapLayer {
+class TileLayer {
 public:
 	struct Tile {
 		uint8_t id = -1;
 	};
 
 public:
-	TileLayer() : TileMapLayer(TileMapLayer::Type::Tile) {}
+	TileLayer() = default;
 
 public:
 	std::vector<Tile> tiles;

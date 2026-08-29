@@ -136,11 +136,9 @@ void TilePathing::CreateMap(Ref<TileMap> tileMap) {
 	assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
 
 	Ref<TileLayer> tileLayer;
-	for (const auto& layer : tileMap->layers) {
-		if (layer->GetType() == TileMapLayer::Type::Tile) {
-			tileLayer = DynamicCastRef<TileLayer>(layer);
-			break;
-		}
+	for (const auto& layer : tileMap->tileLayers) {
+		tileLayer = layer;
+		break;
 	}
 	assert(tileLayer && "Tile map does not have a tile layer");
 

@@ -15,11 +15,7 @@ namespace MeshUtils {
 
 		std::vector<Vertex> vertices;
 
-		for (const Ref<TileMapLayer>& layer : tileMap->layers) {
-			if (layer->GetType() != TileMapLayer::Type::Tile)
-				continue;
-
-			const auto& tileLayer = DynamicCastRef<TileLayer>(layer);
+		for (const Ref<TileLayer>& tileLayer : tileMap->tileLayers) {
 			const auto& tiles = tileLayer->tiles;
 			for (uint32 i = 0; i < std::size(tiles); ++i) {
 				const auto& tile = tiles[i];
