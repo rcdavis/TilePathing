@@ -2,7 +2,7 @@
 
 #include "OpenGL/GLTexture.h"
 
-std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32_t tileId) {
+std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint8_t tileId) {
 	const uint32_t texWidth = texture->GetWidth();
 	const uint32_t texHeight = texture->GetHeight();
 	const f32 texCoordU = (((tileId - firstGid) % columnCount) * tileWidth) / (f32)texWidth;
@@ -18,7 +18,7 @@ std::array<glm::vec2, 4> TileSet::GetTexCoords(const uint32_t tileId) {
 	return texCoords;
 }
 
-const TileSet::Terrain& TileSet::GetTerrain(const uint32_t tileId) {
+const TileSet::Terrain& TileSet::GetTerrain(const uint8_t tileId) {
 	assert(tileId - firstGid >= 0 && tileId - firstGid < std::size(terrains) && "Invalid tileId");
 	return terrains[tileId - firstGid];
 }
