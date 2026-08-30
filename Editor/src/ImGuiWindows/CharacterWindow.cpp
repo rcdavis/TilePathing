@@ -1,6 +1,7 @@
 #include "ImGuiWindows/CharacterWindow.h"
 
 #include "Character.h"
+#include "TextureIds.h"
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
@@ -35,38 +36,39 @@ void CharacterWindow::OnRender() {
 	}
 
 	if (mCurSelected < std::size(mCharacters)) {
-		glm::ivec2 coords = mCharacters[mCurSelected]->GetTileCoords();
+		glm::ivec2 coords = mCharacters[mCurSelected]->tileCoords;
 		ImGui::InputInt("Row", &coords.y);
 		ImGui::InputInt("Columns", &coords.x);
-		mCharacters[mCurSelected]->SetTileCoords(coords);
+		mCharacters[mCurSelected]->tileCoords = coords;
 
-		int32 steps = (int32)mCharacters[mCurSelected]->GetMovementSteps();
+		int32_t steps = (int32_t)mCharacters[mCurSelected]->movementSteps;
 		ImGui::InputInt("Movement", &steps);
-		mCharacters[mCurSelected]->SetMovementSteps((uint32)steps);
+		mCharacters[mCurSelected]->movementSteps = (uint32_t)steps;
 	}
 
 	if (ImGui::Button("Add Character")) {
+		constexpr auto dirIconPath = Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon);
 		Ref<Character> c = CreateRef<Character>();
-		c->SetTexture(GLTexture::Load("res/textures/DirectoryIcon.png"));
-		c->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-		c->SetMovementSteps(6);
+		c->texture = GLTexture::Load(dirIconPath);
+		c->vao = MeshUtils::CreateColoredTileMesh(mTileMap);
+		c->movementSteps = 6;
 		AddCharacter(c);
 	}
 
 	if (mCurSelected < std::size(mCharacters) && ImGui::Button("Remove Character")) {
 		mCharacters.erase(std::begin(mCharacters) + mCurSelected);
-		mCurSelected = std::max(0, (int32)mCurSelected - 1);
+		mCurSelected = std::max(0, (int32_t)mCurSelected - 1);
 	}
 }
 
 void CharacterWindow::AddCharacter(Ref<Character> character) {
 	mCharacters.push_back(character);
-	mCurSelected = (uint32)std::size(mCharacters) - 1;
+	mCurSelected = (uint32_t)std::size(mCharacters) - 1;
 }
 
 Ref<Character> CharacterWindow::GetCharacter(glm::uvec2 coords) {
 	for (const auto& c : mCharacters) {
-		if (c->GetTileCoords() == coords)
+		if (c->tileCoords == coords)
 			return c;
 	}
 
