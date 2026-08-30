@@ -1,22 +1,22 @@
 #pragma once
 
-#include "Core.h"
-
-#include <filesystem>
 #include <vector>
 
-class TileSet;
-class TileLayer;
+#include "TileMap/TileSet.h"
+#include "TileMap/TileLayer.h"
 
 class TileMap {
 public:
 	TileMap() = default;
+	~TileMap();
 
-	static Ref<TileMap> LoadBinary(const std::filesystem::path& filepath);
+	bool Load(const char* const filepath);
+
+	void Destroy();
 
 public:
-	std::vector<Ref<TileSet>> tileSets;
-	std::vector<Ref<TileLayer>> tileLayers;
+	std::vector<TileSet> tileSets;
+	std::vector<TileLayer> tileLayers;
 
 	uint16_t width = 0;
 	uint16_t height = 0;

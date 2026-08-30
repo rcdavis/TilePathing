@@ -4,6 +4,7 @@
 #include "TimeStep.h"
 #include "Camera.h"
 
+#include "TileMap/TileMap.h"
 #include "TileMap/TilePathing.h"
 
 #include <array>
@@ -50,11 +51,11 @@ private:
 	static void GlfwErrorCallback(int error, const char* description);
 
 private:
+	TileMap mTileMap;
 	TilePathing mTilePathing;
 	Camera mCamera;
 
 	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
-	Ref<Character> mSelectedCharacter;
 
 	glm::vec2 mMousePos{ 0.0f, 0.0f };
 	glm::vec2 mViewportSize{ 0.0f, 0.0f };
@@ -69,7 +70,6 @@ private:
 
 	Ref<GLVertexArray> mVAO;
 	Ref<GLTexture> mTestTexture;
-	Ref<TileMap> mTileMap;
 	Ref<GLShader> mShader;
 
 	Ref<GLVertexArray> mColoredRectVao;
@@ -79,6 +79,8 @@ private:
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
 	GLFWwindow* mWindow = nullptr;
+
+	Character* mSelectedCharacter = nullptr;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;

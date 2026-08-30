@@ -1,5 +1,7 @@
 #include "TileMap/TilePathing.h"
 
+#include <cstdint>
+#include <limits>
 #include <queue>
 #include <unordered_map>
 #include <array>
@@ -10,7 +12,7 @@
 #include "TileMap/TileSet.h"
 #include "TileMap/TileLayer.h"
 
-TilePathing::TilePathing(Ref<TileMap> tileMap) :
+TilePathing::TilePathing(TileMap& tileMap) :
 	mMap(),
 	mVisitedCoords(),
 	mNumRows(0),
@@ -131,34 +133,40 @@ uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const {
 	return std::abs((long)end.x - (long)start.x) + std::abs((long)end.y - (long)start.y);
 }
 
-void TilePathing::CreateMap(Ref<TileMap> tileMap) {
-	assert(tileMap && "Tile map is null");
-	assert(!std::empty(tileMap->tileSets) && "Tile map does not have a tile set");
+void TilePathing::CreateMap(TileMap& tileMap) {
+	assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
-	Ref<TileLayer> tileLayer;
-	for (const auto& layer : tileMap->tileLayers) {
-		tileLayer = layer;
-		break;
+	uint8_t tileLayerIndex = std::numeric_limits<uint8_t>::max();
+	for (uint8_t i = 0; i < tileMap.tileLayers.size(); ++i) {
+		if (!std::empty(tileMap.tileLayers[i].tiles)) {
+			tileLayerIndex = i;
+			break;
+		}
 	}
-	assert(tileLayer && "Tile map does not have a tile layer");
 
-	mNumRows = tileMap->height;
-	mNumCols = tileMap->width;
+	assert(tileLayerIndex != std::numeric_limits<uint8_t>::max() && "Tile map does not have a valid tile layer index");
+
+	const auto& tileLayer = tileMap.tileLayers[tileLayerIndex];
+
+	mNumRows = tileMap.height;
+	mNumCols = tileMap.width;
 	mMap.resize((size_t)mNumRows * (size_t)mNumCols);
 
 	for (uint32 row = 0; row < mNumRows; ++row) {
 		for (uint32 col = 0; col < mNumCols; ++col) {
-			const auto& tile = tileLayer->tiles[((uint64)row * tileLayer->width) + col];
-			Ref<TileSet> tileSet;
-			for (const auto& ts : tileMap->tileSets) {
-				if (tile.id >= ts->firstGid) {
-					tileSet = ts;
+			const auto& tile = tileLayer.tiles[((uint64)row * tileLayer.width) + col];
+			uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
+			for (uint8_t i = 0; i < tileMap.tileSets.size(); ++i) {
+				if (tile.id >= tileMap.tileSets[i].firstGid) {
+					tileSetIndex = i;
 					break;
 				}
 			}
-			assert(tileSet && "Tile does not have a tile set");
+			assert(tileSetIndex != std::numeric_limits<uint8_t>::max() && "Tile does not have a tile set");
 
-			mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(glm::uvec2(col, row), tileSet->GetTerrain(tile.id).movementCost);
+			mMap[((size_t)row * mNumCols) + col] = CreateRef<Cell>(
+				glm::uvec2(col, row),
+				tileMap.tileSets[tileSetIndex].GetTerrain(tile.id).movementCost);
 		}
 	}
 }

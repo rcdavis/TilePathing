@@ -11,7 +11,6 @@
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
 
-#include "TileMap/TileMap.h"
 #include "TileMap/TileSet.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
@@ -127,7 +126,10 @@ bool Application::Init() {
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
 
 	// TODO: Replace with Id
-	mTileMap = TileMap::LoadBinary("res/tilemaps/SMBMap.tmbin");
+	if (!mTileMap.Load("res/tilemaps/SMBMap.tmbin")) {
+		LOG_CRITICAL("Failed to load tilemap!");
+		return false;
+	}
 
 	mColorShader = GLShader::Create(
 		"ColoredTile",
@@ -145,11 +147,11 @@ bool Application::Init() {
 	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 	mImGuiWindows.push_back(charWindow);
 
-	auto character = CreateRef<Character>();
-	character->SetTexture(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon)));
-	character->SetVertexArray(MeshUtils::CreateColoredTileMesh(mTileMap));
-	character->SetTileCoords({ 7, 20 });
-	character->SetMovementSteps(6);
+	Character character;
+	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
+	character.tileCoords = { 7, 20 };
+	character.movementSteps = 6;
 	charWindow->AddCharacter(character);
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
@@ -169,10 +171,11 @@ bool Application::Init() {
 void Application::Shutdown() {
 	mImGuiWindows.clear();
 
+	mTileMap.Destroy();
+
 	mSelectionTexture = nullptr;
 	mTestTexture = nullptr;
 	mShader = nullptr;
-	mTileMap = nullptr;
 	mVAO = nullptr;
 
 	mColoredRectVao = nullptr;
@@ -208,12 +211,12 @@ void Application::RenderScene() {
 
 	if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow) {
 		for (const auto& c : charWindow->GetCharacters()) {
-			c->GetVertexArray()->Bind();
-			c->GetTexture()->Bind();
-			auto transform = GetTileTransform(c->GetTileCoords());
+			c.vao->Bind();
+			c.texture->Bind();
+			auto transform = GetTileTransform(c.tileCoords);
 			transform[3].z = 0.8f;
 			mShader->SetMat4("u_Transform", transform);
-			Render(c->GetVertexArray());
+			Render(c.vao);
 		}
 	}
 
@@ -256,7 +259,7 @@ void Application::RenderTilePaths() {
 	mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
 	if (mSelectedCharacter) {
-		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
+		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 		for (auto& tile : zone.tiles) {
 			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
 			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->movementZoneColor);
@@ -264,7 +267,7 @@ void Application::RenderTilePaths() {
 			Render(mColoredRectVao);
 		}
 
-		auto path = mTilePathing.FindPath(mSelectedCharacter->GetTileCoords(), mSelectionCoords);
+		auto path = mTilePathing.FindPath(mSelectedCharacter->tileCoords, mSelectionCoords);
 		for (const glm::uvec2 cell : path) {
 			if (std::find(std::cbegin(zone.tiles), std::cend(zone.tiles), cell) == std::cend(zone.tiles))
 				continue;
@@ -398,14 +401,14 @@ void Application::RenderMainMenu() {
 }
 
 void Application::HandleInput() {
-	if (mViewportClickable && mTileMap) {
+	if (mViewportClickable && !mTileMap.tileSets.empty()) {
 		constexpr TimeStep ts(0.1f);
 
 		if (Input::IsKeyDown(Key::Left, ts)) {
 			if (mSelectionCoords.x > 0)
 				mSelectionCoords.x--;
 		} else if (Input::IsKeyDown(Key::Right, ts)) {
-			if (mSelectionCoords.x < mTileMap->width - 1)
+			if (mSelectionCoords.x < mTileMap.width - 1)
 				mSelectionCoords.x++;
 		}
 
@@ -413,17 +416,17 @@ void Application::HandleInput() {
 			if (mSelectionCoords.y > 0)
 				mSelectionCoords.y--;
 		} else if (Input::IsKeyDown(Key::Down, ts)) {
-			if (mSelectionCoords.y < mTileMap->height - 1)
+			if (mSelectionCoords.y < mTileMap.height - 1)
 				mSelectionCoords.y++;
 		}
 
 		if (Input::IsKeyDown(Key::Enter, ts)) {
 			if (mSelectedCharacter) {
-				if (mSelectedCharacter->GetTileCoords() != mSelectionCoords) {
-					auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->GetTileCoords(), mSelectedCharacter->GetMovementSteps());
+				if (mSelectedCharacter->tileCoords != mSelectionCoords) {
+					auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 					auto iter = std::find(std::cbegin(zone.tiles), std::cend(zone.tiles), mSelectionCoords);
 					if (iter != std::cend(zone.tiles))
-						mSelectedCharacter->SetTileCoords(*iter);
+						mSelectedCharacter->tileCoords = *iter;
 				}
 
 				mSelectedCharacter = nullptr;
@@ -437,10 +440,10 @@ void Application::HandleInput() {
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords) {
-	const uint32 tileWidth = mTileMap->tileWidth;
-	const uint32 tileHeight = mTileMap->tileHeight;
-	const uint32 numTilesWidth = mTileMap->width;
-	const uint32 numTilesHeight = mTileMap->height;
+	const uint32 tileWidth = mTileMap.tileWidth;
+	const uint32 tileHeight = mTileMap.tileHeight;
+	const uint32 numTilesWidth = mTileMap.width;
+	const uint32 numTilesHeight = mTileMap.height;
 
 	const uint32 xPos = coords.x * tileWidth;
 	const int32 yPos = -((int32)coords.y * (int32)tileHeight);
@@ -449,8 +452,8 @@ glm::mat4 Application::GetTileTransform(glm::uvec2 coords) {
 }
 
 glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos) {
-	const uint32 tileWidth = mTileMap->tileWidth;
-	const uint32 tileHeight = mTileMap->tileHeight;
+	const uint32 tileWidth = mTileMap.tileWidth;
+	const uint32 tileHeight = mTileMap.tileHeight;
 
 	return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
 }
