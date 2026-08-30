@@ -56,7 +56,6 @@ private:
 	Camera mCamera;
 
 	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
-	Ref<Character> mSelectedCharacter;
 
 	glm::vec2 mMousePos{ 0.0f, 0.0f };
 	glm::vec2 mViewportSize{ 0.0f, 0.0f };
@@ -80,6 +79,8 @@ private:
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
 	GLFWwindow* mWindow = nullptr;
+
+	Character* mSelectedCharacter = nullptr;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;

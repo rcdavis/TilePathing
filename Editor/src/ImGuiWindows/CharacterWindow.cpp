@@ -36,22 +36,22 @@ void CharacterWindow::OnRender() {
 	}
 
 	if (mCurSelected < std::size(mCharacters)) {
-		glm::ivec2 coords = mCharacters[mCurSelected]->tileCoords;
+		glm::ivec2 coords = mCharacters[mCurSelected].tileCoords;
 		ImGui::InputInt("Row", &coords.y);
 		ImGui::InputInt("Columns", &coords.x);
-		mCharacters[mCurSelected]->tileCoords = coords;
+		mCharacters[mCurSelected].tileCoords = coords;
 
-		int32_t steps = (int32_t)mCharacters[mCurSelected]->movementSteps;
+		int32_t steps = (int32_t)mCharacters[mCurSelected].movementSteps;
 		ImGui::InputInt("Movement", &steps);
-		mCharacters[mCurSelected]->movementSteps = (uint32_t)steps;
+		mCharacters[mCurSelected].movementSteps = (uint32_t)steps;
 	}
 
 	if (ImGui::Button("Add Character")) {
 		constexpr auto dirIconPath = Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon);
-		Ref<Character> c = CreateRef<Character>();
-		c->texture = GLTexture::Load(dirIconPath);
-		c->vao = MeshUtils::CreateColoredTileMesh(mTileMap);
-		c->movementSteps = 6;
+		Character c;
+		c.texture = GLTexture::Load(dirIconPath);
+		c.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
+		c.movementSteps = 6;
 		AddCharacter(c);
 	}
 
@@ -61,15 +61,15 @@ void CharacterWindow::OnRender() {
 	}
 }
 
-void CharacterWindow::AddCharacter(Ref<Character> character) {
+void CharacterWindow::AddCharacter(Character& character) {
 	mCharacters.push_back(character);
 	mCurSelected = (uint32_t)std::size(mCharacters) - 1;
 }
 
-Ref<Character> CharacterWindow::GetCharacter(glm::uvec2 coords) {
-	for (const auto& c : mCharacters) {
-		if (c->tileCoords == coords)
-			return c;
+Character* CharacterWindow::GetCharacter(glm::uvec2 coords) {
+	for (auto& c : mCharacters) {
+		if (c.tileCoords == coords)
+			return &c;
 	}
 
 	return nullptr;

@@ -147,11 +147,11 @@ bool Application::Init() {
 	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 	mImGuiWindows.push_back(charWindow);
 
-	auto character = CreateRef<Character>();
-	character->texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
-	character->vao = MeshUtils::CreateColoredTileMesh(mTileMap);
-	character->tileCoords = { 7, 20 };
-	character->movementSteps = 6;
+	Character character;
+	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
+	character.tileCoords = { 7, 20 };
+	character.movementSteps = 6;
 	charWindow->AddCharacter(character);
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
@@ -211,12 +211,12 @@ void Application::RenderScene() {
 
 	if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow) {
 		for (const auto& c : charWindow->GetCharacters()) {
-			c->vao->Bind();
-			c->texture->Bind();
-			auto transform = GetTileTransform(c->tileCoords);
+			c.vao->Bind();
+			c.texture->Bind();
+			auto transform = GetTileTransform(c.tileCoords);
 			transform[3].z = 0.8f;
 			mShader->SetMat4("u_Transform", transform);
-			Render(c->vao);
+			Render(c.vao);
 		}
 	}
 
