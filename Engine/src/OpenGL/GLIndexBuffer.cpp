@@ -1,11 +1,12 @@
 #include "OpenGL/GLIndexBuffer.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 
-GLIndexBuffer::GLIndexBuffer(const uint16 *const indices, const uint32 count) : mCount(count) {
+GLIndexBuffer::GLIndexBuffer(const uint16_t *const indices, const uint32_t count) : mCount(count) {
 	glGenBuffers(1, &mId);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mId);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16) * count, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * count, indices, GL_STATIC_DRAW);
 }
 
 GLIndexBuffer::~GLIndexBuffer() {
@@ -20,6 +21,6 @@ void GLIndexBuffer::Unbind() const {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-Ref<GLIndexBuffer> GLIndexBuffer::Create(const uint16 *const indices, const uint32 count) {
+Ref<GLIndexBuffer> GLIndexBuffer::Create(const uint16_t *const indices, const uint32_t count) {
 	return CreateRef<GLIndexBuffer>(indices, count);
 }

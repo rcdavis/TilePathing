@@ -2,6 +2,7 @@
 
 #include "Core.h"
 
+#include <cstdint>
 #include <glm/glm.hpp>
 
 class GLTexture;
@@ -11,14 +12,14 @@ class Character {
 public:
 	Character() = default;
 
-	void MoveUp(const uint32 numRows) { tileCoords.y -= numRows; }
-	void MoveDown(const uint32 numRows) { tileCoords.y += numRows; }
-	void MoveRight(const uint32 numCol) { tileCoords.x += numCol; }
-	void MoveLeft(const uint32 numCol) { tileCoords.x -= numCol; }
+	void MoveUp(const uint32_t numRows) { tileCoords.y -= numRows; }
+	void MoveDown(const uint32_t numRows) { tileCoords.y += numRows; }
+	void MoveRight(const uint32_t numCol) { tileCoords.x += numCol; }
+	void MoveLeft(const uint32_t numCol) { tileCoords.x -= numCol; }
 
 public:
-	glm::uvec2 tileCoords{ 0.0f, 0.0f };
+	glm::uvec2 tileCoords{ 0, 0 };
 	Ref<GLTexture> texture;
 	Ref<GLVertexArray> vao;
-	uint32 movementSteps = 0;
+	uint32_t movementSteps = 0;
 };

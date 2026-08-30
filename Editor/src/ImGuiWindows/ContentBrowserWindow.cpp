@@ -1,5 +1,6 @@
 #include "ImGuiWindows/ContentBrowserWindow.h"
 
+#include <cstdint>
 #include <imgui.h>
 
 #include "OpenGL/GLTexture.h"
@@ -18,9 +19,9 @@ void ContentBrowserWindow::OnRender() {
 	if (mCurDir != "res" && ImGui::Button("<-"))
 		mCurDir = mCurDir.parent_path();
 
-	const f32 cellSize = mThumbnailSize + mPadding;
-	const f32 panelWidth = ImGui::GetContentRegionAvail().x;
-	const int32 columnCount = std::max((int32)(panelWidth / cellSize), 1);
+	const float cellSize = mThumbnailSize + mPadding;
+	const float panelWidth = ImGui::GetContentRegionAvail().x;
+	const int32_t columnCount = std::max((int32_t)(panelWidth / cellSize), 1);
 
 	ImGui::Columns(columnCount, nullptr, false);
 

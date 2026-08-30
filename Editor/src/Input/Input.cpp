@@ -47,11 +47,11 @@ namespace Input {
 		return { (float)x, (float)y };
 	}
 
-	f32 GetMouseX() {
+	float GetMouseX() {
 		return GetMousePosition().x;
 	}
 
-	f32 GetMouseY() {
+	float GetMouseY() {
 		return GetMousePosition().y;
 	}
 }

@@ -2,33 +2,34 @@
 
 #include "Utils/Log.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 
 #include <cassert>
 
-static constexpr uint32 s_MaxFramebufferSize = 8192;
+static constexpr uint32_t s_MaxFramebufferSize = 8192;
 
 namespace Utils {
 	static constexpr GLenum TextureTarget(const bool multisampled) {
 		return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	}
 
-	static void CreateTextures(const bool multisampled, uint32 *const outId, const uint32 count) {
+	static void CreateTextures(const bool multisampled, uint32_t *const outId, const uint32_t count) {
 		glGenTextures(count, outId);
 	}
 
-	static void BindTexture(const bool multisampled, const uint32 id) {
+	static void BindTexture(const bool multisampled, const uint32_t id) {
 		glBindTexture(TextureTarget(multisampled), id);
 	}
 
 	static void AttachColorTexture(
-		const uint32 id,
-		const int32 samples,
+		const uint32_t id,
+		const int32_t samples,
 		const GLenum internalFormat,
 		const GLenum format,
-		const uint32 width,
-		const uint32 height,
-		const int32 index)
+		const uint32_t width,
+		const uint32_t height,
+		const int32_t index)
 	{
 		const bool multisampled = samples > 1;
 		if (multisampled) {
@@ -47,12 +48,12 @@ namespace Utils {
 	}
 
 	static void AttachDepthTexture(
-		const uint32 id,
-		const int32 samples,
+		const uint32_t id,
+		const int32_t samples,
 		const GLenum format,
 		const GLenum attachmentType,
-		const uint32 width,
-		const uint32 height)
+		const uint32_t width,
+		const uint32_t height)
 	{
 		const bool multisampled = samples > 1;
 		if (multisampled) {
@@ -191,7 +192,7 @@ void GLFramebuffer::Unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLFramebuffer::Resize(const uint32 width, const uint32 height) {
+void GLFramebuffer::Resize(const uint32_t width, const uint32_t height) {
 	if (width == 0 || height == 0 || width > s_MaxFramebufferSize || height > s_MaxFramebufferSize) {
 		LOG_WARN("Attempted to resize framebuffer to {0}, {1}", width, height);
 		return;
@@ -203,16 +204,16 @@ void GLFramebuffer::Resize(const uint32 width, const uint32 height) {
 	Invalidate();
 }
 
-int32 GLFramebuffer::ReadPixel(const uint32 attachmentIndex, const int32 x, const int32 y) {
+	int32_t GLFramebuffer::ReadPixel(const uint32_t attachmentIndex, const int32_t x, const int32_t y) {
 	assert(attachmentIndex < std::size(mColorAttachments) && "attachmentIndex is out of bounds for color attachments");
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
-	int pixelData = 0;
+	int32_t pixelData = 0;
 	glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
 	return pixelData;
 }
 
-void GLFramebuffer::ClearAttachment(const uint32 attachmentIndex, const int32 value) {
+void GLFramebuffer::ClearAttachment(const uint32_t attachmentIndex, const int32_t value) {
 	assert(attachmentIndex < std::size(mColorAttachments) && "attachmentIndex is out of bounds for color attachments");
 
 	auto &spec = mColorAttachmentSpecs[attachmentIndex];

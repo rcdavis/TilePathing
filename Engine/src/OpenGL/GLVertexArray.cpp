@@ -65,8 +65,8 @@ void GLVertexArray::AddVertexBuffer(const Ref<GLVertexBuffer> &vertexBuffer) {
 		case ShaderDataType::Mat3:
 		case ShaderDataType::Mat4:
 		{
-			const uint32 componentCount = element.GetComponentCount();
-			for (uint32 i = 0; i < componentCount; ++i)
+			const uint32_t componentCount = element.GetComponentCount();
+			for (uint32_t i = 0; i < componentCount; ++i)
 			{
 				glEnableVertexAttribArray(mVertexBufferIndex);
 				glVertexAttribPointer(
@@ -75,7 +75,7 @@ void GLVertexArray::AddVertexBuffer(const Ref<GLVertexBuffer> &vertexBuffer) {
 					ShaderDataTypeToOpenGLBaseType(element.type),
 					element.normalized ? GL_TRUE : GL_FALSE,
 					layout.GetStride(),
-					(const void *)(intptr_t)(element.offset + (sizeof(f32) * componentCount * i)));
+					(const void *)(intptr_t)(element.offset + (sizeof(float) * componentCount * i)));
 				glVertexAttribDivisor(mVertexBufferIndex, 1);
 				++mVertexBufferIndex;
 			}

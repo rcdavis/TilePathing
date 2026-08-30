@@ -1,5 +1,6 @@
 #include "ImGuiWindows/TileMapPathsWindow.h"
 
+#include <cstdint>
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -11,7 +12,7 @@ TileMapPathsWindow::TileMapPathsWindow(const bool isOpen) :
 
 void TileMapPathsWindow::OnRender() {
 	if (ImGui::BeginListBox("Paths")) {
-		for (uint32 i = 0; i < std::size(mPaths); ++i) {
+		for (uint32_t i = 0; i < std::size(mPaths); ++i) {
 			char buffer[16] = {};
 			snprintf(buffer, sizeof(buffer), "Path %u", i);
 			bool isSelected = (mCurSelected == i);
@@ -26,30 +27,30 @@ void TileMapPathsWindow::OnRender() {
 	}
 
 	if (mCurSelected < std::size(mPaths)) {
-		int32 startRow = mPaths[mCurSelected].start.y;
+		int32_t startRow = mPaths[mCurSelected].start.y;
 		if (ImGui::InputInt("Start Row", &startRow))
 			mPaths[mCurSelected].start.y = startRow;
 
-		int32 startCol = mPaths[mCurSelected].start.x;
+		int32_t startCol = mPaths[mCurSelected].start.x;
 		if (ImGui::InputInt("Start Column", &startCol))
 			mPaths[mCurSelected].start.x = startCol;
 
-		int32 endRow = mPaths[mCurSelected].end.y;
+		int32_t endRow = mPaths[mCurSelected].end.y;
 		if (ImGui::InputInt("End Row", &endRow))
 			mPaths[mCurSelected].end.y = endRow;
 
-		int32 endCol = mPaths[mCurSelected].end.x;
+		int32_t endCol = mPaths[mCurSelected].end.x;
 		if (ImGui::InputInt("End Column", &endCol))
 			mPaths[mCurSelected].end.x = endCol;
 	}
 
 	if (ImGui::Button("Add Path")) {
 		mPaths.push_back({ {0, 0}, {0, 5} });
-		mCurSelected = (uint32)std::size(mPaths) - 1;
+		mCurSelected = (uint32_t)std::size(mPaths) - 1;
 	}
 
 	if (mCurSelected < std::size(mPaths) && ImGui::Button("Remove Path")) {
 		mPaths.erase(std::begin(mPaths) + mCurSelected);
-		mCurSelected = std::max(0, (int32)mCurSelected - 1);
+		mCurSelected = std::max(0, (int32_t)mCurSelected - 1);
 	}
 }

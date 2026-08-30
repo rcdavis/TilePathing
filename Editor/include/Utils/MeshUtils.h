@@ -21,5 +21,5 @@ namespace MeshUtils {
 
 	Ref<GLVertexArray> CreateColoredTileMesh(TileMap& tileMap);
 
-	std::array<Vertex, 4> CreateQuad(f32 xPos, f32 yPos, f32 width, f32 height);
+	std::array<Vertex, 4> CreateQuad(float xPos, float yPos, float width, float height);
 }

@@ -16,7 +16,7 @@ namespace MeshUtils {
 
 		for (const TileLayer& tileLayer : tileMap.tileLayers) {
 			const auto& tiles = tileLayer.tiles;
-			for (uint32 i = 0; i < std::size(tiles); ++i) {
+			for (uint32_t i = 0; i < std::size(tiles); ++i) {
 				const auto& tile = tiles[i];
 				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
 				for (uint8_t j = 0; j < tileMap.tileSets.size(); ++j) {
@@ -28,13 +28,13 @@ namespace MeshUtils {
 				assert(tileSetIndex != std::numeric_limits<uint8_t>::max() && "Tile does not have a tile set");
 
 				const auto& tileSet = tileMap.tileSets[tileSetIndex];
-				const uint32 tileWidth = tileSet.tileWidth;
-				const uint32 tileHeight = tileSet.tileHeight;
-				const uint32 numTilesWidth = tileLayer.width;
-				const uint32 numTilesHeight = tileLayer.height;
+				const uint32_t tileWidth = tileSet.tileWidth;
+				const uint32_t tileHeight = tileSet.tileHeight;
+				const uint32_t numTilesWidth = tileLayer.width;
+				const uint32_t numTilesHeight = tileLayer.height;
 
-				const uint32 xPos = ((i % numTilesWidth) * tileWidth);
-				const uint32 yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
+				const uint32_t xPos = ((i % numTilesWidth) * tileWidth);
+				const uint32_t yPos = (numTilesHeight * tileHeight) - ((i / numTilesWidth) * tileHeight);
 
 				const std::array<glm::vec4, 4> vertPositions = {
 					glm::vec4 { xPos, yPos, 0.0f, 1.0f },
@@ -59,17 +59,17 @@ namespace MeshUtils {
 		auto vao = GLVertexArray::Create();
 		vao->Bind();
 
-		auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-		vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
+		auto vb = GLVertexBuffer::Create((uint32_t)std::size(vertices) * sizeof(Vertex));
+		vb->SetData(std::data(vertices), (uint32_t)std::size(vertices) * sizeof(Vertex));
 		vb->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 		vao->AddVertexBuffer(vb);
 
-		std::vector<uint16> quadIndices(std::size(vertices) / 4 * 6);
+		std::vector<uint16_t> quadIndices(std::size(vertices) / 4 * 6);
 
-		uint16 offset = 0;
+		uint16_t offset = 0;
 		for (size_t i = 0; i < std::size(quadIndices); i += 6) {
 			quadIndices[i] = offset;
 			quadIndices[i + 1] = offset + 1;
@@ -82,7 +82,7 @@ namespace MeshUtils {
 			offset += 4;
 		}
 
-		auto quadIB = GLIndexBuffer::Create(std::data(quadIndices), (uint32)std::size(quadIndices));
+		auto quadIB = GLIndexBuffer::Create(std::data(quadIndices), (uint32_t)std::size(quadIndices));
 		vao->SetIndexBuffer(quadIB);
 
 		vao->Unbind();
@@ -95,35 +95,35 @@ namespace MeshUtils {
 		auto vao = GLVertexArray::Create();
 		vao->Bind();
 
-		const uint32 numTilesHeight = tileMap.height;
-		const uint32 tileWidth = tileMap.tileWidth;
-		const uint32 tileHeight = tileMap.tileHeight;
+		const uint32_t numTilesHeight = tileMap.height;
+		const uint32_t tileWidth = tileMap.tileWidth;
+		const uint32_t tileHeight = tileMap.tileHeight;
 
-		constexpr f32 xPos = 0.0f;
-		const f32 yPos = (f32)(numTilesHeight * tileHeight);
+		constexpr float xPos = 0.0f;
+		const float yPos = (float)(numTilesHeight * tileHeight);
 
-		const auto vertices = CreateQuad(xPos, yPos, (f32)tileWidth, (f32)tileHeight);
+		const auto vertices = CreateQuad(xPos, yPos, (float)tileWidth, (float)tileHeight);
 
-		auto vb = GLVertexBuffer::Create((uint32)std::size(vertices) * sizeof(Vertex));
-		vb->SetData(std::data(vertices), (uint32)std::size(vertices) * sizeof(Vertex));
+		auto vb = GLVertexBuffer::Create((uint32_t)std::size(vertices) * sizeof(Vertex));
+		vb->SetData(std::data(vertices), (uint32_t)std::size(vertices) * sizeof(Vertex));
 		vb->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 		vao->AddVertexBuffer(vb);
 
-		constexpr std::array<uint16, 6> indices = {
+		constexpr std::array<uint16_t, 6> indices = {
 			0, 1, 2, 2, 3, 0
 		};
 
-		auto quadIB = GLIndexBuffer::Create(std::data(indices), (uint32)std::size(indices));
+		auto quadIB = GLIndexBuffer::Create(std::data(indices), (uint32_t)std::size(indices));
 		vao->SetIndexBuffer(quadIB);
 
 		vao->Unbind();
 		return vao;
 	}
 
-	std::array<Vertex, 4> CreateQuad(f32 xPos, f32 yPos, f32 width, f32 height) {
+	std::array<Vertex, 4> CreateQuad(float xPos, float yPos, float width, float height) {
 		const std::array<glm::vec3, 4> vertPositions = {
 			glm::vec3 { xPos, yPos, 0.0f },
 			glm::vec3 { xPos + width, yPos, 0.0f },
