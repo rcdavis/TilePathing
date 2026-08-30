@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core.h"
 #include "ImGuiWindows/BaseImGuiWindow.h"
 
 #include <vector>
@@ -23,5 +22,5 @@ public:
 
 private:
 	std::vector<Path> mPaths;
-	uint32 mCurSelected = 0;
+	uint32_t mCurSelected = 0;
 };

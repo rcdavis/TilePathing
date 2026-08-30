@@ -10,6 +10,7 @@
 
 #include "Utils/MeshUtils.h"
 
+#include <cstdint>
 #include <imgui.h>
 
 CharacterWindow::CharacterWindow(const bool isOpen, TileMap& tileMap) :
@@ -21,7 +22,7 @@ CharacterWindow::CharacterWindow(const bool isOpen, TileMap& tileMap) :
 
 void CharacterWindow::OnRender() {
 	if (ImGui::BeginListBox("Characters")) {
-		for (uint32 i = 0; i < std::size(mCharacters); ++i) {
+		for (uint32_t i = 0; i < std::size(mCharacters); ++i) {
 			char buffer[16] = {};
 			snprintf(buffer, sizeof(buffer), "Character %u", i);
 			bool isSelected = (mCurSelected == i);

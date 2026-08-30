@@ -24,8 +24,8 @@ public:
 	static Ref<GLVertexArray> Create();
 
 private:
-	uint32 mId = 0;
-	uint32 mVertexBufferIndex = 0;
+	uint32_t mId = 0;
+	uint32_t mVertexBufferIndex = 0;
 	std::vector<Ref<GLVertexBuffer>> mVertexBuffers;
 	Ref<GLIndexBuffer> mIndexBuffer;
 };

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Core.h"
-
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -14,7 +13,7 @@ enum class ShaderDataType {
 	Bool
 };
 
-static uint32 ShaderDataTypeSize(const ShaderDataType type) {
+static uint32_t ShaderDataTypeSize(const ShaderDataType type) {
 	switch (type)
 	{
 	case ShaderDataType::Float:
@@ -48,14 +47,14 @@ static uint32 ShaderDataTypeSize(const ShaderDataType type) {
 struct GLBufferElement {
 	std::string name;
 	ShaderDataType type = ShaderDataType::None;
-	uint32 size = 0;
-	uint32 offset = 0;
+	uint32_t size = 0;
+	uint32_t offset = 0;
 	bool normalized = false;
 
 	GLBufferElement(ShaderDataType type, const std::string &name, bool normalized = false) :
 		name(name), type(type), size(ShaderDataTypeSize(type)), offset(0), normalized(normalized) {}
 
-	uint32 GetComponentCount() const {
+	uint32_t GetComponentCount() const {
 		switch (type)
 		{
 		case ShaderDataType::Float:
@@ -97,7 +96,7 @@ public:
 	}
 
 	const std::vector<GLBufferElement> &GetElements() const { return mElements; }
-	constexpr uint32 GetStride() const { return mStride; }
+	constexpr uint32_t GetStride() const { return mStride; }
 
 	auto begin() { return std::begin(mElements); }
 	auto begin() const { return std::begin(mElements); }
@@ -106,7 +105,7 @@ public:
 
 private:
 	void CalculateOffsetsAndStride() {
-		uint32 offset = 0;
+		uint32_t offset = 0;
 		mStride = 0;
 		for (auto &element : mElements) {
 			element.offset = offset;
@@ -117,5 +116,5 @@ private:
 
 private:
 	std::vector<GLBufferElement> mElements;
-	uint32 mStride = 0;
+	uint32_t mStride = 0;
 };

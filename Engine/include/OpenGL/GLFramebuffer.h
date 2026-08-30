@@ -28,9 +28,9 @@ struct FramebufferAttachmentSpecification {
 
 struct FramebufferSpecs {
 	FramebufferAttachmentSpecification attachments;
-	uint32 width = 0;
-	uint32 height = 0;
-	uint32 samples = 1;
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t samples = 1;
 	bool swapChainTarget = false;
 };
 
@@ -44,12 +44,12 @@ public:
 	void Bind();
 	void Unbind();
 
-	void Resize(const uint32 width, const uint32 height);
-	int32 ReadPixel(const uint32 attachmentIndex, const int32 x, const int32 y);
+	void Resize(const uint32_t width, const uint32_t height);
+	int32_t ReadPixel(const uint32_t attachmentIndex, const int32_t x, const int32_t y);
 
-	void ClearAttachment(const uint32 attachmentIndex, const int32 value);
+	void ClearAttachment(const uint32_t attachmentIndex, const int32_t value);
 
-	uint32 GetColorAttachment(const uint32 index = 0) const {
+	uint32_t GetColorAttachment(const uint32_t index = 0) const {
 		return mColorAttachments[index];
 	}
 
@@ -58,12 +58,12 @@ public:
 	static Ref<GLFramebuffer> Create(const FramebufferSpecs &specs);
 
 private:
-	std::vector<uint32> mColorAttachments;
+	std::vector<uint32_t> mColorAttachments;
 	std::vector<FramebufferTextureSpecs> mColorAttachmentSpecs;
 
 	FramebufferSpecs mSpecs;
 
-	uint32 mId = 0;
-	uint32 mDepthAttachment = 0;
+	uint32_t mId = 0;
+	uint32_t mDepthAttachment = 0;
 	FramebufferTextureSpecs mDepthAttachmentSpecs = FramebufferTextureFormat::None;
 };

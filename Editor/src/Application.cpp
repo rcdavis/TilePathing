@@ -30,12 +30,12 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-static constexpr uint32 WindowWidth = 1280;
-static constexpr uint32 WindowHeight = 720;
+static constexpr uint32_t WindowWidth = 1280;
+static constexpr uint32_t WindowHeight = 720;
 
 Application::Application() :
 	mTilePathing(),
-	mCamera(0.0f, (f32)WindowWidth, 0.0f, (f32)WindowHeight),
+	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
 	mImGuiWindows(),
 	mSelectedCharacter(),
 	mTileMap(),
@@ -56,7 +56,7 @@ void Application::Run() {
 	}
 
 	while (!glfwWindowShouldClose(mWindow)) {
-		const TimeStep time((f32)glfwGetTime());
+		const TimeStep time((float)glfwGetTime());
 		const TimeStep timestep = time - mLastFrameTime;
 		mLastFrameTime = time;
 
@@ -241,7 +241,7 @@ void Application::RenderScene() {
 
 	const glm::vec2 viewportSize = mViewportBounds[1] - mViewportBounds[0];
 	mousePos.y = viewportSize.y - mousePos.y;
-	mMousePos = glm::vec2((f32)mousePos.x, (f32)mousePos.y);
+	mMousePos = glm::vec2((float)mousePos.x, (float)mousePos.y);
 
 	mFramebuffer->Unbind();
 }
@@ -368,7 +368,7 @@ void Application::Render() {
 
 	mViewportClickable = ImGui::IsWindowFocused() && ImGui::IsWindowHovered();
 
-	const uint64 texId = (uint64)mFramebuffer->GetColorAttachment();
+	const uint64_t texId = (uint64_t)mFramebuffer->GetColorAttachment();
 	ImGui::Image((ImTextureID)texId, viewportPanelSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 	ImGui::End();
@@ -440,26 +440,26 @@ void Application::HandleInput() {
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords) {
-	const uint32 tileWidth = mTileMap.tileWidth;
-	const uint32 tileHeight = mTileMap.tileHeight;
-	const uint32 numTilesWidth = mTileMap.width;
-	const uint32 numTilesHeight = mTileMap.height;
+	const uint32_t tileWidth = mTileMap.tileWidth;
+	const uint32_t tileHeight = mTileMap.tileHeight;
+	const uint32_t numTilesWidth = mTileMap.width;
+	const uint32_t numTilesHeight = mTileMap.height;
 
-	const uint32 xPos = coords.x * tileWidth;
-	const int32 yPos = -((int32)coords.y * (int32)tileHeight);
+	const uint32_t xPos = coords.x * tileWidth;
+	const int32_t yPos = -((int32_t)coords.y * (int32_t)tileHeight);
 
-	return glm::translate(glm::mat4(1.0f), glm::vec3((f32)xPos, (f32)yPos, 0.5f));
+	return glm::translate(glm::mat4(1.0f), glm::vec3((float)xPos, (float)yPos, 0.5f));
 }
 
 glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos) {
-	const uint32 tileWidth = mTileMap.tileWidth;
-	const uint32 tileHeight = mTileMap.tileHeight;
+	const uint32_t tileWidth = mTileMap.tileWidth;
+	const uint32_t tileHeight = mTileMap.tileHeight;
 
 	return { mousePos.x / tileWidth, (mousePos.y - tileHeight) / tileHeight };
 }
 
 void Application::Render(const Ref<GLVertexArray>& vao) {
-	const uint32 count = vao->GetIndexBuffer()->GetCount();
+	const uint32_t count = vao->GetIndexBuffer()->GetCount();
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
 }
 

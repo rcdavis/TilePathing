@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core.h"
 #include "ImGuiWindows/BaseImGuiWindow.h"
 
 #include "Character.h"
@@ -25,5 +24,5 @@ public:
 private:
 	std::vector<Character> mCharacters;
 	TileMap& mTileMap;
-	uint32 mCurSelected = 0;
+	uint32_t mCurSelected = 0;
 };

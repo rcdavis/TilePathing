@@ -1,6 +1,5 @@
 #include "TileMap/TilePathing.h"
 
-#include <cstdint>
 #include <limits>
 #include <queue>
 #include <unordered_map>
@@ -35,10 +34,10 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
 	auto startNode = GetCell(startCoords);
 	auto endNode = GetCell(endCoords);
 
-	typedef std::pair<uint32, Ref<Cell>> QElement;
+	typedef std::pair<uint32_t, Ref<Cell>> QElement;
 	std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
 	std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
-	std::unordered_map<Ref<Cell>, uint32> costSoFar;
+	std::unordered_map<Ref<Cell>, uint32_t> costSoFar;
 	mVisitedCoords.clear();
 	mVisitedCoords.insert(startCoords);
 
@@ -57,7 +56,7 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
 			const glm::uvec2 newCoords = curNode->coords + neighbors[i];
 			if (IsInBounds(newCoords)) {
 				Ref<Cell> newNode = GetCell(newCoords);
-				const uint32 cost = costSoFar[curNode] + newNode->cost;
+				const uint32_t cost = costSoFar[curNode] + newNode->cost;
 				if (costSoFar.find(newNode) == std::end(costSoFar) || cost < costSoFar[newNode]) {
 					q.emplace(cost + Heuristic(newCoords, endCoords), newNode);
 					costSoFar[newNode] = cost;
@@ -79,7 +78,7 @@ std::vector<glm::uvec2> TilePathing::FindPath(glm::uvec2 startCoords, glm::uvec2
 	return path;
 }
 
-TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32 movementSteps) {
+TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32_t movementSteps) {
 	if (!IsInBounds(coords))
 		return {};
 
@@ -92,10 +91,10 @@ TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32 moveme
 
 	auto startNode = GetCell(coords);
 
-	typedef std::pair<uint32, Ref<Cell>> QElement;
+	typedef std::pair<uint32_t, Ref<Cell>> QElement;
 	std::priority_queue<QElement, std::vector<QElement>, std::greater<QElement>> q;
 	std::unordered_map<Ref<Cell>, Ref<Cell>> comeFrom;
-	std::unordered_map<Ref<Cell>, uint32> costSoFar;
+	std::unordered_map<Ref<Cell>, uint32_t> costSoFar;
 	mVisitedCoords.clear();
 	mVisitedCoords.insert(coords);
 
@@ -111,7 +110,7 @@ TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32 moveme
 			const glm::uvec2 newCoords = curNode->coords + neighbors[i];
 			if (IsInBounds(newCoords)) {
 				Ref<Cell> newNode = GetCell(newCoords);
-				const uint32 cost = costSoFar[curNode] + newNode->cost;
+				const uint32_t cost = costSoFar[curNode] + newNode->cost;
 				if (cost < movementSteps + 1 && (costSoFar.find(newNode) == std::end(costSoFar) || cost < costSoFar[newNode])) {
 					q.emplace(cost + Heuristic(coords, newCoords), newNode);
 					costSoFar[newNode] = cost;
@@ -129,7 +128,7 @@ TilePathing::Zone TilePathing::FindMovementZone(glm::uvec2 coords, uint32 moveme
 	return zone;
 }
 
-uint32 TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const {
+uint32_t TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const {
 	return std::abs((long)end.x - (long)start.x) + std::abs((long)end.y - (long)start.y);
 }
 
@@ -152,9 +151,9 @@ void TilePathing::CreateMap(TileMap& tileMap) {
 	mNumCols = tileMap.width;
 	mMap.resize((size_t)mNumRows * (size_t)mNumCols);
 
-	for (uint32 row = 0; row < mNumRows; ++row) {
-		for (uint32 col = 0; col < mNumCols; ++col) {
-			const auto& tile = tileLayer.tiles[((uint64)row * tileLayer.width) + col];
+	for (uint32_t row = 0; row < mNumRows; ++row) {
+		for (uint32_t col = 0; col < mNumCols; ++col) {
+			const auto& tile = tileLayer.tiles[(row * tileLayer.width) + col];
 			uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
 			for (uint8_t i = 0; i < tileMap.tileSets.size(); ++i) {
 				if (tile.id >= tileMap.tileSets[i].firstGid) {

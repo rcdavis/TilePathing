@@ -1,5 +1,6 @@
 #include "OpenGL/GLTexture.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 #include <stb_image.h>
 
@@ -10,7 +11,7 @@ GLTexture::GLTexture() {
 }
 
 GLTexture::GLTexture(const std::filesystem::path &filepath) {
-	int32 width, height, channels;
+	int32_t width, height, channels;
 	stbi_set_flip_vertically_on_load(1);
 	stbi_uc *const data = stbi_load(filepath.string().c_str(), &width, &height, &channels, 0);
 	if (!data) {
@@ -53,7 +54,7 @@ GLTexture::~GLTexture() {
 	glDeleteTextures(1, &mId);
 }
 
-void GLTexture::Bind(uint32 slot) const {
+void GLTexture::Bind(uint32_t slot) const {
 	glBindTexture(GL_TEXTURE_2D, mId);
 }
 

@@ -2,13 +2,11 @@
 
 #include <glm/glm.hpp>
 
-#include "Core.h"
-
 class Camera {
 public:
-	Camera(f32 left, f32 right, f32 bottom, f32 top);
+	Camera(float left, float right, float bottom, float top);
 
-	void SetProjection(f32 left, f32 right, f32 bottom, f32 top);
+	void SetProjection(float left, float right, float bottom, float top);
 
 	const glm::vec3& GetPosition() const { return mPosition; }
 	void SetPosition(const glm::vec3& position) { mPosition = position; RecalculateViewMatrix(); }

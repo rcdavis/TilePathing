@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
-class TimeStep;
 
 namespace Input {
 	void Init(GLFWwindow* window);
@@ -21,6 +20,6 @@ namespace Input {
 	bool IsMouseButtonPressed(const MouseCode button);
 
 	glm::vec2 GetMousePosition();
-	f32 GetMouseX();
-	f32 GetMouseY();
+	float GetMouseX();
+	float GetMouseY();
 }

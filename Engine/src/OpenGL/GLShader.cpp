@@ -1,5 +1,6 @@
 #include "OpenGL/GLShader.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -22,7 +23,7 @@ namespace Utils {
 GLShader::GLShader(const std::string &name, const std::filesystem::path &vs, const std::filesystem::path &fs) :
 	mName(name)
 {
-	std::unordered_map<uint32, std::filesystem::path> shaders;
+	std::unordered_map<uint32_t, std::filesystem::path> shaders;
 	shaders[GL_VERTEX_SHADER] = vs;
 	shaders[GL_FRAGMENT_SHADER] = fs;
 	CompileProgram(shaders);
@@ -40,17 +41,17 @@ void GLShader::Unbind() const {
 	glUseProgram(0);
 }
 
-void GLShader::SetInt(const std::string &name, const int32 value) {
+void GLShader::SetInt(const std::string &name, const int32_t value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
 	glUniform1i(location, value);
 }
 
-void GLShader::SetIntArray(const std::string &name, const int32 *value, const uint32 count) {
+void GLShader::SetIntArray(const std::string &name, const int32_t *value, const uint32_t count) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
 	glUniform1iv(location, count, value);
 }
 
-void GLShader::SetFloat(const std::string &name, const f32 value) {
+void GLShader::SetFloat(const std::string &name, const float value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
 	glUniform1f(location, value);
 }
@@ -80,10 +81,10 @@ void GLShader::SetMat4(const std::string &name, const glm::mat4 &value) {
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void GLShader::CompileFromSources(const std::unordered_map<uint32, std::string> &shaderSources) {
+void GLShader::CompileFromSources(const std::unordered_map<uint32_t, std::string> &shaderSources) {
 	assert(std::size(shaderSources) <= 2 && "Only 2 shaders supported (vertex and fragment)");
 	const GLuint program = glCreateProgram();
-	std::vector<uint32> shaderIds;
+	std::vector<uint32_t> shaderIds;
 	shaderIds.reserve(std::size(shaderSources));
 	for (const auto &[shaderId, source] : shaderSources) {
 		auto shader = CompileShaderFromSource(shaderId, source);
@@ -121,7 +122,7 @@ void GLShader::CompileFromSources(const std::unordered_map<uint32, std::string> 
 	mId = program;
 }
 
-uint32 GLShader::CompileShaderFromSource(const uint32 type, const std::string &src) {
+uint32_t GLShader::CompileShaderFromSource(const uint32_t type, const std::string &src) {
 	const GLuint shader = glCreateShader(type);
 
 	const GLchar *const source = std::data(src);
@@ -146,10 +147,10 @@ uint32 GLShader::CompileShaderFromSource(const uint32 type, const std::string &s
 	return shader;
 }
 
-void GLShader::CompileProgram(const std::unordered_map<uint32, std::filesystem::path> &shaderFiles) {
+void GLShader::CompileProgram(const std::unordered_map<uint32_t, std::filesystem::path> &shaderFiles) {
 	assert(std::size(shaderFiles) <= 2 && "Only 2 shaders supported (vertex and fragment)");
 	const GLuint program = glCreateProgram();
-	std::vector<uint32> shaderIds;
+	std::vector<uint32_t> shaderIds;
 	shaderIds.reserve(std::size(shaderFiles));
 	for (const auto &[shaderId, file] : shaderFiles) {
 		auto shader = CompileShader(shaderId, file);
@@ -187,7 +188,7 @@ void GLShader::CompileProgram(const std::unordered_map<uint32, std::filesystem::
 	mId = program;
 }
 
-uint32 GLShader::CompileShader(const uint32 type, const std::filesystem::path& shaderFile) {
+uint32_t GLShader::CompileShader(const uint32_t type, const std::filesystem::path& shaderFile) {
 	const std::string src = FileUtils::ReadText(shaderFile);
 	const GLuint shader = glCreateShader(type);
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <filesystem>
 
 #include "Core.h"
@@ -10,11 +11,11 @@ public:
 	GLTexture(const std::filesystem::path &filepath);
 	~GLTexture();
 
-	uint32 GetId() const { return mId; }
-	uint32 GetWidth() const { return mWidth; }
-	uint32 GetHeight() const { return mHeight; }
+	uint32_t GetId() const { return mId; }
+	uint32_t GetWidth() const { return mWidth; }
+	uint32_t GetHeight() const { return mHeight; }
 
-	void Bind(uint32 slot = 0) const;
+	void Bind(uint32_t slot = 0) const;
 	void Unbind() const;
 
 	bool IsLoaded() const { return mIsLoaded; }
@@ -24,10 +25,10 @@ public:
 	static Ref<GLTexture> Load(const std::filesystem::path &filepath);
 
 private:
-	uint32 mId = 0;
-	uint32 mWidth = 0;
-	uint32 mHeight = 0;
-	uint32 mInternalFormat = 0;
-	uint32 mDataFormat = 0;
+	uint32_t mId = 0;
+	uint32_t mWidth = 0;
+	uint32_t mHeight = 0;
+	uint32_t mInternalFormat = 0;
+	uint32_t mDataFormat = 0;
 	bool mIsLoaded = false;
 };
