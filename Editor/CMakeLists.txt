@@ -18,6 +18,11 @@ add_executable(Editor
     src/Utils/MeshUtils.cpp
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_compile_options(-fsanitize=address,undefined -g)
+  add_link_options(-fsanitize=address,undefined)
+endif()
+
 # Copy textures to the build directory
 file(GLOB_RECURSE TEXTURE_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/res/textures/*.png)
 set(COPIED_TEXTURES "")
