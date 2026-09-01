@@ -13,7 +13,6 @@ GLTexture::GLTexture() {
 
 GLTexture::GLTexture(const std::filesystem::path &filepath) {
 	const auto stbiDeleter = [&filepath](stbi_uc* data) {
-		LOG_INFO("Freeing image data for \"{0}\"", filepath.c_str());
 		stbi_image_free(data);
 	};
 
