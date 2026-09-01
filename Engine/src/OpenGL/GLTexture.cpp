@@ -13,18 +13,18 @@ GLTexture::GLTexture() {
 
 GLTexture::GLTexture(const std::filesystem::path &filepath) {
 	const auto stbiDeleter = [&filepath](stbi_uc* data) {
-		LOG_INFO("Freeing image data for {0}", filepath.filename().string());
+		LOG_INFO("Freeing image data for \"{0}\"", filepath.c_str());
 		stbi_image_free(data);
 	};
 
 	int32_t width, height, channels;
 	stbi_set_flip_vertically_on_load(1);
 	std::unique_ptr<stbi_uc, decltype(stbiDeleter)> data(
-		stbi_load(filepath.string().c_str(), &width, &height, &channels, 0),
+		stbi_load(filepath.c_str(), &width, &height, &channels, 0),
 		stbiDeleter
 	);
 	if (!data) {
-		LOG_ERROR("Failed to load image {0}", filepath.filename().string());
+		LOG_ERROR("Failed to load image \"{0}\"", filepath.c_str());
 		return;
 	}
 
