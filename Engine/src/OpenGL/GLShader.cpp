@@ -43,42 +43,42 @@ void GLShader::Unbind() const {
 
 void GLShader::SetInt(const std::string &name, const int32_t value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform1i(location, value);
+	glProgramUniform1i(mId, location, value);
 }
 
 void GLShader::SetIntArray(const std::string &name, const int32_t *value, const uint32_t count) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform1iv(location, count, value);
+	glProgramUniform1iv(mId, location, count, value);
 }
 
 void GLShader::SetFloat(const std::string &name, const float value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform1f(location, value);
+	glProgramUniform1f(mId, location, value);
 }
 
 void GLShader::SetFloat2(const std::string &name, const glm::vec2 &value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform2f(location, value.x, value.y);
+	glProgramUniform2f(mId, location, value.x, value.y);
 }
 
 void GLShader::SetFloat3(const std::string &name, const glm::vec3 &value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform3f(location, value.x, value.y, value.z);
+	glProgramUniform3f(mId, location, value.x, value.y, value.z);
 }
 
 void GLShader::SetFloat4(const std::string &name, const glm::vec4 &value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniform4f(location, value.x, value.y, value.z, value.w);
+	glProgramUniform4f(mId, location, value.x, value.y, value.z, value.w);
 }
 
 void GLShader::SetMat3(const std::string &name, const glm::mat3 &value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	glProgramUniformMatrix3fv(mId, location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void GLShader::SetMat4(const std::string &name, const glm::mat4 &value) {
 	const GLint location = glGetUniformLocation(mId, std::data(name));
-	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	glProgramUniformMatrix4fv(mId, location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void GLShader::CompileFromSources(const std::unordered_map<uint32_t, std::string> &shaderSources) {
