@@ -4,9 +4,8 @@
 #include <glad/glad.h>
 
 GLIndexBuffer::GLIndexBuffer(const uint16_t *const indices, const uint32_t count) : mCount(count) {
-	glGenBuffers(1, &mId);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mId);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * count, indices, GL_STATIC_DRAW);
+	glCreateBuffers(1, &mId);
+	glNamedBufferData(mId, sizeof(uint16_t) * count, indices, GL_STATIC_DRAW);
 }
 
 GLIndexBuffer::~GLIndexBuffer() {
