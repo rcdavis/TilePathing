@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <glad/glad.h>
+#include <memory>
 #include <stb_image.h>
 
 #include "Utils/Log.h"
@@ -11,11 +12,18 @@ GLTexture::GLTexture() {
 }
 
 GLTexture::GLTexture(const std::filesystem::path &filepath) {
+	const auto stbiDeleter = [&filepath](stbi_uc* data) {
+		stbi_image_free(data);
+	};
+
 	int32_t width, height, channels;
 	stbi_set_flip_vertically_on_load(1);
-	stbi_uc *const data = stbi_load(filepath.string().c_str(), &width, &height, &channels, 0);
+	std::unique_ptr<stbi_uc, decltype(stbiDeleter)> data(
+		stbi_load(filepath.c_str(), &width, &height, &channels, 0),
+		stbiDeleter
+	);
 	if (!data) {
-		LOG_ERROR("Failed to load image {0}", filepath.filename().string());
+		LOG_ERROR("Failed to load image \"{0}\"", filepath.c_str());
 		return;
 	}
 
@@ -34,20 +42,16 @@ GLTexture::GLTexture(const std::filesystem::path &filepath) {
 
 	assert(mInternalFormat & mDataFormat && "Format not supported");
 
-	glGenTextures(1, &mId);
-	glBindTexture(GL_TEXTURE_2D, mId);
-	glTexImage2D(GL_TEXTURE_2D, 0, mInternalFormat, mWidth, mHeight, 0, mDataFormat, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	glCreateTextures(GL_TEXTURE_2D, 1, &mId);
+	glTextureStorage2D(mId, 1, mInternalFormat, mWidth, mHeight);
+	glTextureSubImage2D(mId, 0, 0, 0, mWidth, mHeight, mDataFormat, GL_UNSIGNED_BYTE, data.get());
+	glGenerateTextureMipmap(mId);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, mDataFormat, GL_UNSIGNED_BYTE, data);
-
-	stbi_image_free(data);
+	glTextureParameteri(mId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(mId, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 GLTexture::~GLTexture() {
@@ -55,11 +59,11 @@ GLTexture::~GLTexture() {
 }
 
 void GLTexture::Bind(uint32_t slot) const {
-	glBindTexture(GL_TEXTURE_2D, mId);
+	glBindTextureUnit(slot, mId);
 }
 
 void GLTexture::Unbind() const {
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTextureUnit(0, 0);
 }
 
 bool GLTexture::operator==(const GLTexture &texture) const {

@@ -32,6 +32,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         LOGGING_ENABLED
         ASSERTS_ENABLED
     )
+
+    add_compile_options(-fsanitize=address,undefined -g)
+    add_link_options(-fsanitize=address,undefined)
 endif()
 
 target_include_directories(Engine PUBLIC

@@ -3,15 +3,13 @@
 #include <glad/glad.h>
 
 GLVertexBuffer::GLVertexBuffer(uint32_t size) {
-	glGenBuffers(1, &mId);
-	glBindBuffer(GL_ARRAY_BUFFER, mId);
-	glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+	glCreateBuffers(1, &mId);
+	glNamedBufferData(mId, size, nullptr, GL_DYNAMIC_DRAW);
 }
 
 GLVertexBuffer::GLVertexBuffer(const float *const vertices, const uint32_t count) {
-	glGenBuffers(1, &mId);
-	glBindBuffer(GL_ARRAY_BUFFER, mId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * count, vertices, GL_STATIC_DRAW);
+	glCreateBuffers(1, &mId);
+	glNamedBufferData(mId, sizeof(float) * count, vertices, GL_STATIC_DRAW);
 }
 
 GLVertexBuffer::~GLVertexBuffer() {
@@ -27,8 +25,7 @@ void GLVertexBuffer::Unbind() const {
 }
 
 void GLVertexBuffer::SetData(const void *data, const uint32_t size) {
-	glBindBuffer(GL_ARRAY_BUFFER, mId);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+	glNamedBufferSubData(mId, 0, size, data);
 }
 
 Ref<GLVertexBuffer> GLVertexBuffer::Create(uint32_t size) {
