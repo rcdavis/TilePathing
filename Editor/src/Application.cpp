@@ -27,6 +27,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -347,8 +348,13 @@ void Application::Render() {
 		ImGui::PopStyleVar(2);
 
 	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		ImGui::DockSpace(ImGui::GetID("MyDockSpace"), ImVec2(0.0f, 0.0f), dockspaceFlags);
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+		const ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+		if (!ImGui::DockBuilderGetNode(dockspaceId))
+			BuildDefaultDockLayout(dockspaceId);
+
+		ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
+	}
 
 	RenderMainMenu();
 
@@ -386,6 +392,24 @@ void Application::Render() {
 		ImGui::RenderPlatformWindowsDefault();
 		glfwMakeContextCurrent(backupCurrentContext);
 	}
+}
+
+void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
+	ImGui::DockBuilderRemoveNode(dockspaceId);
+	ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
+	ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetMainViewport()->Size);
+
+	ImGuiID center = dockspaceId;
+	const ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, 0.25f, nullptr, &center);
+	const ImGuiID bottom = ImGui::DockBuilderSplitNode(center, ImGuiDir_Down, 0.3f, nullptr, &center);
+
+	ImGui::DockBuilderDockWindow("Tile Map Properties", left);
+	ImGui::DockBuilderDockWindow("Tile Map Paths", left);
+	ImGui::DockBuilderDockWindow("Viewport", center);
+	ImGui::DockBuilderDockWindow("Content Browser", bottom);
+	ImGui::DockBuilderDockWindow("Character", left);
+
+	ImGui::DockBuilderFinish(dockspaceId);
 }
 
 void Application::RenderMainMenu() {

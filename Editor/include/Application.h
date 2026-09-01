@@ -38,6 +38,8 @@ private:
 	void RenderMainMenu();
 	void RenderTilePaths();
 
+	void BuildDefaultDockLayout(unsigned int dockspaceId);
+
 	void HandleInput();
 
 	glm::mat4 GetTileTransform(glm::uvec2 coords);
