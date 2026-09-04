@@ -89,26 +89,6 @@ add_custom_command(
 add_custom_target(BuildAssets ALL DEPENDS ${CMAKE_BINARY_DIR}/Editor/build_assets.stamp)
 add_dependencies(Editor BuildAssets)
 
-# TODO: Remove copying Tiled files when fully moved to the new tilemap system with binary files.
-set(COPIED_TILE_MAPS "")
-
-foreach(TILE_MAP_FILE ${TILE_MAP_SOURCES})
-    get_filename_component(TILE_MAP_NAME ${TILE_MAP_FILE} NAME)
-    set(DEST_TILE_MAP_FILE ${CMAKE_BINARY_DIR}/Editor/res/tilemaps/${TILE_MAP_NAME})
-
-    add_custom_command(
-        OUTPUT ${DEST_TILE_MAP_FILE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TILE_MAP_FILE} ${DEST_TILE_MAP_FILE}
-        DEPENDS ${TILE_MAP_FILE}
-        COMMENT "Copying tile map: ${TILE_MAP_NAME}"
-    )
-
-    list(APPEND COPIED_TILE_MAPS ${DEST_TILE_MAP_FILE})
-endforeach()
-
-add_custom_target(CopyTileMaps ALL DEPENDS ${COPIED_TILE_MAPS})
-add_dependencies(Editor CopyTileMaps)
-
 target_include_directories(Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/generated
