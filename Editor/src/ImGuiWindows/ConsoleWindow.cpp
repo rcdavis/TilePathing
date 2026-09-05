@@ -2,13 +2,6 @@
 
 #include <imgui.h>
 
-void ConsoleWindow::AddLine(const ConsoleItem& item) {
-	if ((uint32_t)std::size(items) == limit)
-		items.pop_front();
-
-	items.push_back(item);
-}
-
 void ConsoleWindow::Render() {
 	if (!isOpen)
 		return;
@@ -25,4 +18,15 @@ void ConsoleWindow::Render() {
 	}
 
 	ImGui::End();
+}
+
+void ConsoleWindow::RenderMenuItem() {
+	ImGui::MenuItem(Title, nullptr, &isOpen);
+}
+
+void ConsoleWindow::AddLine(const ConsoleItem& item) {
+	if ((uint32_t)std::size(items) == limit)
+		items.pop_front();
+
+	items.push_back(item);
 }
