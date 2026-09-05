@@ -37,7 +37,6 @@ static constexpr uint32_t WindowHeight = 720;
 Application::Application() :
 	mTilePathing(),
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
-	mImGuiWindows(),
 	mSelectedCharacter(),
 	mTileMap(),
 	mLastFrameTime(0.0f),
@@ -143,18 +142,17 @@ bool Application::Init() {
 	mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
-	auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
-	mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
-	mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
-	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
-	mImGuiWindows.push_back(charWindow);
+	mContentBrowserWindow.dirIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon));
+	mContentBrowserWindow.fileIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+
+	mCharacterWindow.tileMap = &mTileMap;
 
 	Character character;
 	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
 	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
 	character.tileCoords = { 7, 20 };
 	character.movementSteps = 6;
-	charWindow->AddCharacter(character);
+	mCharacterWindow.AddCharacter(character);
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
 
@@ -171,8 +169,6 @@ bool Application::Init() {
 }
 
 void Application::Shutdown() {
-	mImGuiWindows.clear();
-
 	mTileMap.Destroy();
 
 	mSelectionTexture = nullptr;
@@ -211,21 +207,18 @@ void Application::RenderScene() {
 	mVAO->Bind();
 	Render(mVAO);
 
-	if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow) {
-		for (const auto& c : charWindow->GetCharacters()) {
-			c.vao->Bind();
-			c.texture->Bind();
-			auto transform = GetTileTransform(c.tileCoords);
-			transform[3].z = 0.8f;
-			mShader->SetMat4("u_Transform", transform);
-			Render(c.vao);
-		}
+	for (const auto& c : mCharacterWindow.characters) {
+		c.vao->Bind();
+		c.texture->Bind();
+		auto transform = GetTileTransform(c.tileCoords);
+		transform[3].z = 0.8f;
+		mShader->SetMat4("u_Transform", transform);
+		Render(c.vao);
 	}
 
 	RenderTilePaths();
 
-	auto tilePropsWindow = GetImGuiWindow<TileMapPropertiesWindow>();
-	if (mSelectionTexture && tilePropsWindow) {
+	if (mSelectionTexture) {
 		mColoredRectVao->Bind();
 		mShader->Bind();
 		mSelectionTexture->Bind();
@@ -233,7 +226,7 @@ void Application::RenderScene() {
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
 		mShader->SetMat4("u_Transform", transform);
-		mShader->SetFloat4("u_Color", tilePropsWindow->selectionColor);
+		mShader->SetFloat4("u_Color", mTileMapPropertiesWindow.selectionColor);
 		Render(mColoredRectVao);
 	}
 
@@ -249,11 +242,6 @@ void Application::RenderScene() {
 }
 
 void Application::RenderTilePaths() {
-	auto tileMapPropertiesWindow = GetImGuiWindow<TileMapPropertiesWindow>();
-	auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
-	if (!tileMapPropertiesWindow || !tileMapPathsWindow)
-		return;
-
 	glEnable(GL_BLEND);
 
 	mColoredRectVao->Bind();
@@ -264,7 +252,7 @@ void Application::RenderTilePaths() {
 		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 		for (auto& tile : zone.tiles) {
 			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->movementZoneColor);
+			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.movementZoneColor);
 
 			Render(mColoredRectVao);
 		}
@@ -277,22 +265,22 @@ void Application::RenderTilePaths() {
 			auto transform = GetTileTransform(cell);
 			transform[3].z = 0.6f;
 			mColorShader->SetMat4("u_Transform", transform);
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->pathColor);
+			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.pathColor);
 
 			Render(mColoredRectVao);
 		}
 	}
 
-	for (const auto& p : tileMapPathsWindow->GetPaths()) {
+	for (const auto& p : mTileMapPathsWindow.paths) {
 		const auto path = mTilePathing.FindPath(p.start, p.end);
 		for (const glm::uvec2 cell : path) {
 			glm::vec4 color;
 			if (cell == p.start)
-				color = tileMapPropertiesWindow->startColor;
+				color = mTileMapPropertiesWindow.startColor;
 			else if (cell == p.end)
-				color = tileMapPropertiesWindow->endColor;
+				color = mTileMapPropertiesWindow.endColor;
 			else
-				color = tileMapPropertiesWindow->pathColor;
+				color = mTileMapPropertiesWindow.pathColor;
 
 			mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
 			mColorShader->SetFloat4("u_Color", color);
@@ -300,10 +288,10 @@ void Application::RenderTilePaths() {
 			Render(mColoredRectVao);
 		}
 
-		if (tileMapPropertiesWindow->showVisitedTiles) {
+		if (mTileMapPropertiesWindow.showVisitedTiles) {
 			for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords()) {
 				mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-				mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->checkedColor);
+				mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.checkedColor);
 
 				Render(mColoredRectVao);
 			}
@@ -358,8 +346,10 @@ void Application::Render() {
 
 	RenderMainMenu();
 
-	for (auto& window : mImGuiWindows)
-		window->Render();
+	mTileMapPropertiesWindow.Render();
+	mTileMapPathsWindow.Render();
+	mContentBrowserWindow.Render();
+	mCharacterWindow.Render();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Viewport");
@@ -403,10 +393,10 @@ void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
 	const ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, 0.25f, nullptr, &center);
 	const ImGuiID bottom = ImGui::DockBuilderSplitNode(center, ImGuiDir_Down, 0.3f, nullptr, &center);
 
-	ImGui::DockBuilderDockWindow("Tile Map Properties", left);
-	ImGui::DockBuilderDockWindow("Tile Map Paths", left);
+	ImGui::DockBuilderDockWindow(TileMapPropertiesWindow::Title, left);
+	ImGui::DockBuilderDockWindow(TileMapPathsWindow::Title, left);
 	ImGui::DockBuilderDockWindow("Viewport", center);
-	ImGui::DockBuilderDockWindow("Content Browser", bottom);
+	ImGui::DockBuilderDockWindow(ContentBrowserWindow::Title, bottom);
 	ImGui::DockBuilderDockWindow("Character", left);
 
 	ImGui::DockBuilderFinish(dockspaceId);
@@ -415,8 +405,10 @@ void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
 void Application::RenderMainMenu() {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("Windows")) {
-			for (auto& window : mImGuiWindows)
-				window->RenderMenuItem();
+			mTileMapPropertiesWindow.RenderMenuItem();
+			mTileMapPathsWindow.RenderMenuItem();
+			mContentBrowserWindow.RenderMenuItem();
+			mCharacterWindow.RenderMenuItem();
 
 			ImGui::EndMenu();
 		}
@@ -456,9 +448,7 @@ void Application::HandleInput() {
 
 				mSelectedCharacter = nullptr;
 			} else {
-				auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]);
-				if (charWindow)
-					mSelectedCharacter = charWindow->GetCharacter(mSelectionCoords);
+				mSelectedCharacter = mCharacterWindow.GetCharacter(mSelectionCoords);
 			}
 		}
 	}
@@ -486,17 +476,6 @@ glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos) {
 void Application::Render(const Ref<GLVertexArray>& vao) {
 	const uint32_t count = vao->GetIndexBuffer()->GetCount();
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
-}
-
-template <typename T>
-Ref<T> Application::GetImGuiWindow() {
-	for (auto window : mImGuiWindows) {
-		auto convertedWindow = DynamicCastRef<T>(window);
-		if (convertedWindow)
-			return convertedWindow;
-	}
-
-	return nullptr;
 }
 
 void Application::GlfwErrorCallback(int error, const char* description) {
