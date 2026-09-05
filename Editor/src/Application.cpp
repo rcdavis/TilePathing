@@ -144,7 +144,7 @@ bool Application::Init() {
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
 	auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
-	mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
+	//mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
 	mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
 	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 	mImGuiWindows.push_back(charWindow);
@@ -224,8 +224,7 @@ void Application::RenderScene() {
 
 	RenderTilePaths();
 
-	auto tilePropsWindow = GetImGuiWindow<TileMapPropertiesWindow>();
-	if (mSelectionTexture && tilePropsWindow) {
+	if (mSelectionTexture) {
 		mColoredRectVao->Bind();
 		mShader->Bind();
 		mSelectionTexture->Bind();
@@ -233,7 +232,7 @@ void Application::RenderScene() {
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
 		mShader->SetMat4("u_Transform", transform);
-		mShader->SetFloat4("u_Color", tilePropsWindow->selectionColor);
+		mShader->SetFloat4("u_Color", mTileMapPropertiesWindow.selectionColor);
 		Render(mColoredRectVao);
 	}
 
@@ -249,9 +248,8 @@ void Application::RenderScene() {
 }
 
 void Application::RenderTilePaths() {
-	auto tileMapPropertiesWindow = GetImGuiWindow<TileMapPropertiesWindow>();
 	auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
-	if (!tileMapPropertiesWindow || !tileMapPathsWindow)
+	if (!tileMapPathsWindow)
 		return;
 
 	glEnable(GL_BLEND);
@@ -264,7 +262,7 @@ void Application::RenderTilePaths() {
 		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 		for (auto& tile : zone.tiles) {
 			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->movementZoneColor);
+			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.movementZoneColor);
 
 			Render(mColoredRectVao);
 		}
@@ -277,7 +275,7 @@ void Application::RenderTilePaths() {
 			auto transform = GetTileTransform(cell);
 			transform[3].z = 0.6f;
 			mColorShader->SetMat4("u_Transform", transform);
-			mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->pathColor);
+			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.pathColor);
 
 			Render(mColoredRectVao);
 		}
@@ -288,11 +286,11 @@ void Application::RenderTilePaths() {
 		for (const glm::uvec2 cell : path) {
 			glm::vec4 color;
 			if (cell == p.start)
-				color = tileMapPropertiesWindow->startColor;
+				color = mTileMapPropertiesWindow.startColor;
 			else if (cell == p.end)
-				color = tileMapPropertiesWindow->endColor;
+				color = mTileMapPropertiesWindow.endColor;
 			else
-				color = tileMapPropertiesWindow->pathColor;
+				color = mTileMapPropertiesWindow.pathColor;
 
 			mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
 			mColorShader->SetFloat4("u_Color", color);
@@ -300,10 +298,10 @@ void Application::RenderTilePaths() {
 			Render(mColoredRectVao);
 		}
 
-		if (tileMapPropertiesWindow->showVisitedTiles) {
+		if (mTileMapPropertiesWindow.showVisitedTiles) {
 			for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords()) {
 				mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-				mColorShader->SetFloat4("u_Color", tileMapPropertiesWindow->checkedColor);
+				mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.checkedColor);
 
 				Render(mColoredRectVao);
 			}
@@ -357,6 +355,8 @@ void Application::Render() {
 	}
 
 	RenderMainMenu();
+
+	mTileMapPropertiesWindow.Render();
 
 	for (auto& window : mImGuiWindows)
 		window->Render();
@@ -415,6 +415,8 @@ void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
 void Application::RenderMainMenu() {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("Windows")) {
+			mTileMapPropertiesWindow.RenderMenuItem();
+
 			for (auto& window : mImGuiWindows)
 				window->RenderMenuItem();
 
@@ -456,7 +458,7 @@ void Application::HandleInput() {
 
 				mSelectedCharacter = nullptr;
 			} else {
-				auto charWindow = DynamicCastRef<CharacterWindow>(mImGuiWindows[3]);
+				auto charWindow = GetImGuiWindow<CharacterWindow>();
 				if (charWindow)
 					mSelectedCharacter = charWindow->GetCharacter(mSelectionCoords);
 			}

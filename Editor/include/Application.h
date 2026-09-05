@@ -7,6 +7,8 @@
 #include "TileMap/TileMap.h"
 #include "TileMap/TilePathing.h"
 
+#include "ImGuiWindows/TileMapPropertiesWindow.h"
+
 #include <array>
 
 #include <glm/glm.hpp>
@@ -58,6 +60,7 @@ private:
 	Camera mCamera;
 
 	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
+	TileMapPropertiesWindow mTileMapPropertiesWindow;
 
 	glm::vec2 mMousePos{ 0.0f, 0.0f };
 	glm::vec2 mViewportSize{ 0.0f, 0.0f };

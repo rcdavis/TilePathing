@@ -2,15 +2,9 @@
 
 #include <glm/glm.hpp>
 
-#include "ImGuiWindows/BaseImGuiWindow.h"
+struct TileMapPropertiesWindow {
+	static constexpr const char* Title = "Tile Map Properties";
 
-class TileMapPropertiesWindow : public BaseImGuiWindow {
-public:
-	TileMapPropertiesWindow(bool isOpen = false);
-
-	void OnRender() override;
-
-public:
 	glm::vec4 startColor{ 0.0f, 0.0f, 1.0f, 0.5f };
 	glm::vec4 endColor{ 1.0f, 0.0f, 0.0f, 0.5f };
 	glm::vec4 pathColor{ 0.0f, 1.0f, 1.0f, 0.5f };
@@ -20,4 +14,9 @@ public:
 	glm::vec4 movementZoneColor{ 0.0f, 0.0f, 1.0f, 0.5f };
 
 	bool showVisitedTiles = false;
+	bool isOpen = true;
+
+	void Render();
+
+	void RenderMenuItem();
 };
