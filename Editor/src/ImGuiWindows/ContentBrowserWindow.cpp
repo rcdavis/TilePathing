@@ -4,16 +4,6 @@
 #include <imgui.h>
 
 #include "OpenGL/GLTexture.h"
-#include "TextureIds.h"
-
-/*ContentBrowserWindow::ContentBrowserWindow(const bool isOpen) :
-	BaseImGuiWindow("Content Browser", isOpen),
-	mCurDir("res"),
-	mDirIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon))),
-	mFileIcon(GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon))),
-	mPadding(16.0f),
-	mThumbnailSize(74.0f)
-{}*/
 
 void ContentBrowserWindow::Render() {
 	if (!isOpen)
