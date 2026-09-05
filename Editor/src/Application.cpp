@@ -37,7 +37,6 @@ static constexpr uint32_t WindowHeight = 720;
 Application::Application() :
 	mTilePathing(),
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
-	mImGuiWindows(),
 	mSelectedCharacter(),
 	mTileMap(),
 	mLastFrameTime(0.0f),
@@ -146,15 +145,14 @@ bool Application::Init() {
 	mContentBrowserWindow.dirIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon));
 	mContentBrowserWindow.fileIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
 
-	auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
-	mImGuiWindows.push_back(charWindow);
+	mCharacterWindow.tileMap = &mTileMap;
 
 	Character character;
 	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
 	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
 	character.tileCoords = { 7, 20 };
 	character.movementSteps = 6;
-	charWindow->AddCharacter(character);
+	mCharacterWindow.AddCharacter(character);
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
 
@@ -171,8 +169,6 @@ bool Application::Init() {
 }
 
 void Application::Shutdown() {
-	mImGuiWindows.clear();
-
 	mTileMap.Destroy();
 
 	mSelectionTexture = nullptr;
@@ -211,15 +207,13 @@ void Application::RenderScene() {
 	mVAO->Bind();
 	Render(mVAO);
 
-	if (auto charWindow = GetImGuiWindow<CharacterWindow>(); charWindow) {
-		for (const auto& c : charWindow->GetCharacters()) {
-			c.vao->Bind();
-			c.texture->Bind();
-			auto transform = GetTileTransform(c.tileCoords);
-			transform[3].z = 0.8f;
-			mShader->SetMat4("u_Transform", transform);
-			Render(c.vao);
-		}
+	for (const auto& c : mCharacterWindow.characters) {
+		c.vao->Bind();
+		c.texture->Bind();
+		auto transform = GetTileTransform(c.tileCoords);
+		transform[3].z = 0.8f;
+		mShader->SetMat4("u_Transform", transform);
+		Render(c.vao);
 	}
 
 	RenderTilePaths();
@@ -355,9 +349,7 @@ void Application::Render() {
 	mTileMapPropertiesWindow.Render();
 	mTileMapPathsWindow.Render();
 	mContentBrowserWindow.Render();
-
-	for (auto& window : mImGuiWindows)
-		window->Render();
+	mCharacterWindow.Render();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Viewport");
@@ -416,9 +408,7 @@ void Application::RenderMainMenu() {
 			mTileMapPropertiesWindow.RenderMenuItem();
 			mTileMapPathsWindow.RenderMenuItem();
 			mContentBrowserWindow.RenderMenuItem();
-
-			for (auto& window : mImGuiWindows)
-				window->RenderMenuItem();
+			mCharacterWindow.RenderMenuItem();
 
 			ImGui::EndMenu();
 		}
@@ -458,9 +448,7 @@ void Application::HandleInput() {
 
 				mSelectedCharacter = nullptr;
 			} else {
-				auto charWindow = GetImGuiWindow<CharacterWindow>();
-				if (charWindow)
-					mSelectedCharacter = charWindow->GetCharacter(mSelectionCoords);
+				mSelectedCharacter = mCharacterWindow.GetCharacter(mSelectionCoords);
 			}
 		}
 	}
@@ -488,17 +476,6 @@ glm::uvec2 Application::GetTileCoords(glm::uvec2 mousePos) {
 void Application::Render(const Ref<GLVertexArray>& vao) {
 	const uint32_t count = vao->GetIndexBuffer()->GetCount();
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, nullptr);
-}
-
-template <typename T>
-Ref<T> Application::GetImGuiWindow() {
-	for (auto window : mImGuiWindows) {
-		auto convertedWindow = DynamicCastRef<T>(window);
-		if (convertedWindow)
-			return convertedWindow;
-	}
-
-	return nullptr;
 }
 
 void Application::GlfwErrorCallback(int error, const char* description) {

@@ -10,6 +10,7 @@
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
 #include "ImGuiWindows/ContentBrowserWindow.h"
+#include "ImGuiWindows/CharacterWindow.h"
 
 #include <array>
 
@@ -51,9 +52,6 @@ private:
 
 	void Render(const Ref<GLVertexArray>& vao);
 
-	template <typename T>
-	Ref<T> GetImGuiWindow();
-
 	static void GlfwErrorCallback(int error, const char* description);
 
 private:
@@ -61,10 +59,10 @@ private:
 	TilePathing mTilePathing;
 	Camera mCamera;
 
-	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
 	TileMapPropertiesWindow mTileMapPropertiesWindow;
 	TileMapPathsWindow mTileMapPathsWindow;
 	ContentBrowserWindow mContentBrowserWindow;
+	CharacterWindow mCharacterWindow;
 
 	glm::vec2 mMousePos{ 0.0f, 0.0f };
 	glm::vec2 mViewportSize{ 0.0f, 0.0f };
