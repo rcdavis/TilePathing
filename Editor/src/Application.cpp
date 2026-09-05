@@ -144,8 +144,6 @@ bool Application::Init() {
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
 	auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
-	//mImGuiWindows.push_back(CreateRef<TileMapPropertiesWindow>(true));
-	mImGuiWindows.push_back(CreateRef<TileMapPathsWindow>(true));
 	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 	mImGuiWindows.push_back(charWindow);
 
@@ -248,10 +246,6 @@ void Application::RenderScene() {
 }
 
 void Application::RenderTilePaths() {
-	auto tileMapPathsWindow = GetImGuiWindow<TileMapPathsWindow>();
-	if (!tileMapPathsWindow)
-		return;
-
 	glEnable(GL_BLEND);
 
 	mColoredRectVao->Bind();
@@ -281,7 +275,7 @@ void Application::RenderTilePaths() {
 		}
 	}
 
-	for (const auto& p : tileMapPathsWindow->GetPaths()) {
+	for (const auto& p : mTileMapPathsWindow.paths) {
 		const auto path = mTilePathing.FindPath(p.start, p.end);
 		for (const glm::uvec2 cell : path) {
 			glm::vec4 color;
@@ -357,6 +351,7 @@ void Application::Render() {
 	RenderMainMenu();
 
 	mTileMapPropertiesWindow.Render();
+	mTileMapPathsWindow.Render();
 
 	for (auto& window : mImGuiWindows)
 		window->Render();
@@ -403,8 +398,8 @@ void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
 	const ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, 0.25f, nullptr, &center);
 	const ImGuiID bottom = ImGui::DockBuilderSplitNode(center, ImGuiDir_Down, 0.3f, nullptr, &center);
 
-	ImGui::DockBuilderDockWindow("Tile Map Properties", left);
-	ImGui::DockBuilderDockWindow("Tile Map Paths", left);
+	ImGui::DockBuilderDockWindow(TileMapPropertiesWindow::Title, left);
+	ImGui::DockBuilderDockWindow(TileMapPathsWindow::Title, left);
 	ImGui::DockBuilderDockWindow("Viewport", center);
 	ImGui::DockBuilderDockWindow("Content Browser", bottom);
 	ImGui::DockBuilderDockWindow("Character", left);
@@ -416,6 +411,7 @@ void Application::RenderMainMenu() {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("Windows")) {
 			mTileMapPropertiesWindow.RenderMenuItem();
+			mTileMapPathsWindow.RenderMenuItem();
 
 			for (auto& window : mImGuiWindows)
 				window->RenderMenuItem();
