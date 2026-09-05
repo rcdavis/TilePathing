@@ -143,8 +143,10 @@ bool Application::Init() {
 	mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
+	mContentBrowserWindow.dirIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon));
+	mContentBrowserWindow.fileIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+
 	auto charWindow = CreateRef<CharacterWindow>(true, mTileMap);
-	mImGuiWindows.push_back(CreateRef<ContentBrowserWindow>(true));
 	mImGuiWindows.push_back(charWindow);
 
 	Character character;
@@ -352,6 +354,7 @@ void Application::Render() {
 
 	mTileMapPropertiesWindow.Render();
 	mTileMapPathsWindow.Render();
+	mContentBrowserWindow.Render();
 
 	for (auto& window : mImGuiWindows)
 		window->Render();
@@ -401,7 +404,7 @@ void Application::BuildDefaultDockLayout(unsigned int dockspaceId) {
 	ImGui::DockBuilderDockWindow(TileMapPropertiesWindow::Title, left);
 	ImGui::DockBuilderDockWindow(TileMapPathsWindow::Title, left);
 	ImGui::DockBuilderDockWindow("Viewport", center);
-	ImGui::DockBuilderDockWindow("Content Browser", bottom);
+	ImGui::DockBuilderDockWindow(ContentBrowserWindow::Title, bottom);
 	ImGui::DockBuilderDockWindow("Character", left);
 
 	ImGui::DockBuilderFinish(dockspaceId);
@@ -412,6 +415,7 @@ void Application::RenderMainMenu() {
 		if (ImGui::BeginMenu("Windows")) {
 			mTileMapPropertiesWindow.RenderMenuItem();
 			mTileMapPathsWindow.RenderMenuItem();
+			mContentBrowserWindow.RenderMenuItem();
 
 			for (auto& window : mImGuiWindows)
 				window->RenderMenuItem();

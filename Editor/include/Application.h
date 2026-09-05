@@ -9,6 +9,7 @@
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
+#include "ImGuiWindows/ContentBrowserWindow.h"
 
 #include <array>
 
@@ -63,6 +64,7 @@ private:
 	std::vector<Ref<BaseImGuiWindow>> mImGuiWindows;
 	TileMapPropertiesWindow mTileMapPropertiesWindow;
 	TileMapPathsWindow mTileMapPathsWindow;
+	ContentBrowserWindow mContentBrowserWindow;
 
 	glm::vec2 mMousePos{ 0.0f, 0.0f };
 	glm::vec2 mViewportSize{ 0.0f, 0.0f };
