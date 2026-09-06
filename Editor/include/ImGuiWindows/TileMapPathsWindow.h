@@ -1,26 +1,22 @@
 #pragma once
 
-#include "ImGuiWindows/BaseImGuiWindow.h"
-
 #include <vector>
 
 #include <glm/glm.hpp>
 
-class TileMapPathsWindow : public BaseImGuiWindow {
-public:
+struct TileMapPathsWindow {
+	static constexpr const char* Title = "Tile Map Paths";
+
 	struct Path {
 		glm::uvec2 start{ 0, 0 };
 		glm::uvec2 end{ 0, 0 };
 	};
 
-public:
-	TileMapPathsWindow(const bool isOpen = false);
+	std::vector<Path> paths;
+	uint32_t curSelected = 0;
+	bool isOpen = true;
 
-	const std::vector<Path>& GetPaths() const { return mPaths; }
+	void Render();
 
-	void OnRender() override;
-
-private:
-	std::vector<Path> mPaths;
-	uint32_t mCurSelected = 0;
+	void RenderMenuItem();
 };

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ImGuiWindows/BaseImGuiWindow.h"
-
 #include "Character.h"
 
 #include <glm/glm.hpp>
@@ -10,19 +8,19 @@
 
 class TileMap;
 
-class CharacterWindow : public BaseImGuiWindow {
-public:
-	CharacterWindow(const bool isOpen, TileMap& tileMap);
+struct CharacterWindow {
+	static constexpr const char* Title = "Character";
 
-	const std::vector<Character>& GetCharacters() const { return mCharacters; }
+	std::vector<Character> characters;
+	TileMap* tileMap = nullptr;
+	uint32_t curSelected = 0;
+	bool isOpen = true;
+
+	void Render();
+
+	void RenderMenuItem();
+
 	Character* GetCharacter(glm::uvec2 coords);
 
-	void OnRender() override;
-
 	void AddCharacter(Character& character);
-
-private:
-	std::vector<Character> mCharacters;
-	TileMap& mTileMap;
-	uint32_t mCurSelected = 0;
 };

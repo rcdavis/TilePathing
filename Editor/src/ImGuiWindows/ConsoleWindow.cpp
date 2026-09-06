@@ -2,23 +2,31 @@
 
 #include <imgui.h>
 
-ConsoleWindow::ConsoleWindow(bool isOpen) :
-	BaseImGuiWindow("Console", isOpen)
-{}
+void ConsoleWindow::Render() {
+	if (!isOpen)
+		return;
 
-void ConsoleWindow::AddLine(const ConsoleItem& item) {
-	if (std::size(mItems) == mLimit)
-		mItems.pop_front();
+	if (ImGui::Begin(Title, &isOpen)) {
+		if (ImGui::BeginChild("ConsoleLines")) {
+			for (const ConsoleItem& item : items) {
+				const ImVec4 color(item.color.r, item.color.g, item.color.b, 1.0f);
+				ImGui::TextColored(color, "[%s] %s", std::data(item.tag), std::data(item.text));
+			}
+		}
 
-	mItems.push_back(item);
+		ImGui::EndChild();
+	}
+
+	ImGui::End();
 }
 
-void ConsoleWindow::OnRender() {
-	if (ImGui::BeginChild("ConsoleLines")) {
-		for (const ConsoleItem& item : mItems) {
-			const ImVec4 color(item.color.r, item.color.g, item.color.b, 1.0f);
-			ImGui::TextColored(color, "[%s] %s", std::data(item.tag), std::data(item.text));
-		}
-	}
-	ImGui::EndChild();
+void ConsoleWindow::RenderMenuItem() {
+	ImGui::MenuItem(Title, nullptr, &isOpen);
+}
+
+void ConsoleWindow::AddLine(const ConsoleItem& item) {
+	if ((uint32_t)std::size(items) == limit)
+		items.pop_front();
+
+	items.push_back(item);
 }

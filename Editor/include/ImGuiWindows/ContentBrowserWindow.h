@@ -1,27 +1,26 @@
 #pragma once
 
 #include "Core.h"
-#include "ImGuiWindows/BaseImGuiWindow.h"
 
 #include <filesystem>
 
 class GLTexture;
 
-class ContentBrowserWindow : public BaseImGuiWindow {
-public:
-	static constexpr auto ContentBrowserItemType = "ContentBrowserItemType";
+struct ContentBrowserWindow {
+	static constexpr const char* Title = "Content Browser";
+	static constexpr const char* ContentBrowserItemType = "ContentBrowserItemType";
 
-public:
-	ContentBrowserWindow(const bool isOpen = false);
+	std::filesystem::path curDir = "res";
 
-	void OnRender() override;
+	Ref<GLTexture> dirIcon;
+	Ref<GLTexture> fileIcon;
 
-private:
-	std::filesystem::path mCurDir;
+	float padding = 16.0f;
+	float thumbnailSize = 74.0f;
 
-	Ref<GLTexture> mDirIcon;
-	Ref<GLTexture> mFileIcon;
+	bool isOpen = true;
 
-	float mPadding = 16.0f;
-	float mThumbnailSize = 128.0f;
+	void Render();
+
+	void RenderMenuItem();
 };
