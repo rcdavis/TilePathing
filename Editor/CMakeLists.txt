@@ -7,7 +7,6 @@ add_executable(Editor
     src/ImGuiWindows/CharacterWindow.cpp
     src/ImGuiWindows/ConsoleWindow.cpp
     src/ImGuiWindows/ContentBrowserWindow.cpp
-    src/ImGuiWindows/BaseImGuiWindow.cpp
     src/ImGuiWindows/TileMapPathsWindow.cpp
     src/ImGuiWindows/TileMapPropertiesWindow.cpp
     src/Input/Input.cpp
