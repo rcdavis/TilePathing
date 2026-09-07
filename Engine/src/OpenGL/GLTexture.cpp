@@ -7,12 +7,8 @@
 
 #include "Utils/Log.h"
 
-GLTexture::GLTexture() {
-	glCreateTextures(GL_TEXTURE_2D, 1, &mId);
-}
-
 GLTexture::GLTexture(const std::filesystem::path &filepath) {
-	const auto stbiDeleter = [&filepath](stbi_uc* data) {
+	const auto stbiDeleter = [](stbi_uc* data) {
 		stbi_image_free(data);
 	};
 
@@ -26,8 +22,6 @@ GLTexture::GLTexture(const std::filesystem::path &filepath) {
 		LOG_ERROR("Failed to load image \"{0}\"", filepath.c_str());
 		return;
 	}
-
-	mIsLoaded = true;
 
 	mWidth = width;
 	mHeight = height;
@@ -55,7 +49,8 @@ GLTexture::GLTexture(const std::filesystem::path &filepath) {
 }
 
 GLTexture::~GLTexture() {
-	glDeleteTextures(1, &mId);
+	if (mId)
+		glDeleteTextures(1, &mId);
 }
 
 void GLTexture::Bind(uint32_t slot) const {
