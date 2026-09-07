@@ -39,9 +39,9 @@ Application::Application() :
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
 	mSelectedCharacter(),
 	mTileMap(),
-	mLastFrameTime(0.0f),
 	mTestTexture(),
 	mWindow(nullptr),
+	mLastFrameTime(0.0f),
 	mInitializedImGui(false)
 {}
 
@@ -89,7 +89,7 @@ bool Application::Init() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
 	mWindow = glfwCreateWindow(WindowWidth, WindowHeight, "Tile Pathing", nullptr, nullptr);
 
@@ -156,13 +156,14 @@ bool Application::Init() {
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
 
-	FramebufferSpecs specs;
-	specs.attachments = {
-		FramebufferTextureFormat::RGBA8,
-		FramebufferTextureFormat::Depth
+	const FramebufferSpecs specs {
+		.attachments = {
+			FramebufferTextureFormat::RGBA8,
+			FramebufferTextureFormat::Depth
+		},
+		.width = WindowWidth,
+		.height = WindowHeight,
 	};
-	specs.width = WindowWidth;
-	specs.height = WindowHeight;
 	mFramebuffer = GLFramebuffer::Create(specs);
 
 	return true;

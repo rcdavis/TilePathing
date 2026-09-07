@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-enum class ShaderDataType {
+enum class ShaderDataType : uint8_t {
 	None,
 	Float, Float2, Float3, Float4,
 	Mat3, Mat4,
@@ -13,9 +13,10 @@ enum class ShaderDataType {
 	Bool
 };
 
-static uint32_t ShaderDataTypeSize(const ShaderDataType type) {
-	switch (type)
-	{
+static constexpr uint32_t ShaderDataTypeSize(const ShaderDataType type) {
+	switch (type) {
+	case ShaderDataType::None:
+		return 0;
 	case ShaderDataType::Float:
 		return sizeof(float);
 	case ShaderDataType::Float2:
@@ -46,17 +47,18 @@ static uint32_t ShaderDataTypeSize(const ShaderDataType type) {
 
 struct GLBufferElement {
 	std::string name;
-	ShaderDataType type = ShaderDataType::None;
 	uint32_t size = 0;
 	uint32_t offset = 0;
+	ShaderDataType type = ShaderDataType::None;
 	bool normalized = false;
 
-	GLBufferElement(ShaderDataType type, const std::string &name, bool normalized = false) :
-		name(name), type(type), size(ShaderDataTypeSize(type)), offset(0), normalized(normalized) {}
+	GLBufferElement(ShaderDataType type, const std::string& name, bool normalized = false) :
+		name(name), size(ShaderDataTypeSize(type)), offset(0), type(type), normalized(normalized) {}
 
 	uint32_t GetComponentCount() const {
-		switch (type)
-		{
+		switch (type) {
+		case ShaderDataType::None:
+			return 0;
 		case ShaderDataType::Float:
 			return 1;
 		case ShaderDataType::Float2:
@@ -89,13 +91,13 @@ struct GLBufferElement {
 class GLBufferLayout {
 public:
 	GLBufferLayout() {}
-	GLBufferLayout(const std::initializer_list<GLBufferElement> &elements) :
+	GLBufferLayout(const std::initializer_list<GLBufferElement>& elements) :
 		mElements(elements)
 	{
 		CalculateOffsetsAndStride();
 	}
 
-	const std::vector<GLBufferElement> &GetElements() const { return mElements; }
+	const std::vector<GLBufferElement>& GetElements() const { return mElements; }
 	constexpr uint32_t GetStride() const { return mStride; }
 
 	auto begin() { return std::begin(mElements); }
@@ -105,11 +107,9 @@ public:
 
 private:
 	void CalculateOffsetsAndStride() {
-		uint32_t offset = 0;
 		mStride = 0;
-		for (auto &element : mElements) {
-			element.offset = offset;
-			offset += element.size;
+		for (auto& element : mElements) {
+			element.offset = mStride;
 			mStride += element.size;
 		}
 	}
