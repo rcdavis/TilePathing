@@ -39,9 +39,9 @@ Application::Application() :
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
 	mSelectedCharacter(),
 	mTileMap(),
-	mLastFrameTime(0.0f),
 	mTestTexture(),
 	mWindow(nullptr),
+	mLastFrameTime(0.0f),
 	mInitializedImGui(false)
 {}
 
@@ -89,7 +89,7 @@ bool Application::Init() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
 	mWindow = glfwCreateWindow(WindowWidth, WindowHeight, "Tile Pathing", nullptr, nullptr);
 
@@ -156,13 +156,14 @@ bool Application::Init() {
 
 	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
 
-	FramebufferSpecs specs;
-	specs.attachments = {
-		FramebufferTextureFormat::RGBA8,
-		FramebufferTextureFormat::Depth
+	const FramebufferSpecs specs {
+		.attachments = {
+			FramebufferTextureFormat::RGBA8,
+			FramebufferTextureFormat::Depth
+		},
+		.width = WindowWidth,
+		.height = WindowHeight,
 	};
-	specs.width = WindowWidth;
-	specs.height = WindowHeight;
 	mFramebuffer = GLFramebuffer::Create(specs);
 
 	return true;
@@ -455,13 +456,8 @@ void Application::HandleInput() {
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords) {
-	const uint32_t tileWidth = mTileMap.tileWidth;
-	const uint32_t tileHeight = mTileMap.tileHeight;
-	const uint32_t numTilesWidth = mTileMap.width;
-	const uint32_t numTilesHeight = mTileMap.height;
-
-	const uint32_t xPos = coords.x * tileWidth;
-	const int32_t yPos = -((int32_t)coords.y * (int32_t)tileHeight);
+	const uint32_t xPos = coords.x * mTileMap.tileWidth;
+	const int32_t yPos = -((int32_t)coords.y * (int32_t)mTileMap.tileHeight);
 
 	return glm::translate(glm::mat4(1.0f), glm::vec3((float)xPos, (float)yPos, 0.5f));
 }

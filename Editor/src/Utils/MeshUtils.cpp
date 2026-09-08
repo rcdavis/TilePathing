@@ -9,7 +9,7 @@
 #include "OpenGL/GLIndexBuffer.h"
 
 namespace MeshUtils {
-	std::vector<Vertex> CreateTileMapVertices(TileMap& tileMap) {
+	std::vector<Vertex> CreateTileMapVertices(const TileMap& tileMap) {
 		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
 		std::vector<Vertex> vertices;
@@ -53,7 +53,7 @@ namespace MeshUtils {
 		return vertices;
 	}
 
-	Ref<GLVertexArray> CreateTileMapMesh(TileMap& tileMap) {
+	Ref<GLVertexArray> CreateTileMapMesh(const TileMap& tileMap) {
 		const auto vertices = CreateTileMapVertices(tileMap);
 
 		auto vao = GLVertexArray::Create();
@@ -89,7 +89,7 @@ namespace MeshUtils {
 		return vao;
 	}
 
-	Ref<GLVertexArray> CreateColoredTileMesh(TileMap& tileMap) {
+	Ref<GLVertexArray> CreateColoredTileMesh(const TileMap& tileMap) {
 		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
 
 		auto vao = GLVertexArray::Create();

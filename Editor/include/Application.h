@@ -71,8 +71,6 @@ private:
 		glm::vec2 { 0.0f, 0.0f }
 	};
 
-	TimeStep mLastFrameTime;
-
 	Ref<GLFramebuffer> mFramebuffer;
 
 	Ref<GLVertexArray> mVAO;
@@ -88,6 +86,8 @@ private:
 	GLFWwindow* mWindow = nullptr;
 
 	Character* mSelectedCharacter = nullptr;
+
+	TimeStep mLastFrameTime;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;

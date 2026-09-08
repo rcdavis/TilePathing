@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-using KeyCode = uint32_t;
+using KeyCode = uint16_t;
 
 namespace Key {
 	enum : KeyCode {

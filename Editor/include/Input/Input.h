@@ -12,7 +12,7 @@ struct GLFWwindow;
 namespace Input {
 	void Init(GLFWwindow* window);
 
-	void Poll(TimeStep ts);
+	void Poll(const TimeStep ts);
 
 	bool IsKeyPressed(const KeyCode keycode);
 	bool IsKeyReleased(const KeyCode keycode);
