@@ -13,7 +13,7 @@ enum class ShaderDataType : uint8_t {
 	Bool
 };
 
-static constexpr uint32_t ShaderDataTypeSize(const ShaderDataType type) {
+static constexpr uint8_t ShaderDataTypeSize(const ShaderDataType type) {
 	switch (type) {
 	case ShaderDataType::None:
 		return 0;
@@ -47,15 +47,15 @@ static constexpr uint32_t ShaderDataTypeSize(const ShaderDataType type) {
 
 struct GLBufferElement {
 	std::string name;
-	uint32_t size = 0;
 	uint32_t offset = 0;
+	uint8_t size = 0;
 	ShaderDataType type = ShaderDataType::None;
 	bool normalized = false;
 
 	GLBufferElement(ShaderDataType type, const std::string& name, bool normalized = false) :
-		name(name), size(ShaderDataTypeSize(type)), offset(0), type(type), normalized(normalized) {}
+		name(name), offset(0), size(ShaderDataTypeSize(type)), type(type), normalized(normalized) {}
 
-	uint32_t GetComponentCount() const {
+	uint8_t GetComponentCount() const {
 		switch (type) {
 		case ShaderDataType::None:
 			return 0;

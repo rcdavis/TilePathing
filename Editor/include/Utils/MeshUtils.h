@@ -16,10 +16,10 @@ namespace MeshUtils {
 		glm::vec2 texCoord{ 0.0f };
 	};
 
-	std::vector<Vertex> CreateTileMapVertices(TileMap& tileMap);
-	Ref<GLVertexArray> CreateTileMapMesh(TileMap& tileMap);
+	std::vector<Vertex> CreateTileMapVertices(const TileMap& tileMap);
+	Ref<GLVertexArray> CreateTileMapMesh(const TileMap& tileMap);
 
-	Ref<GLVertexArray> CreateColoredTileMesh(TileMap& tileMap);
+	Ref<GLVertexArray> CreateColoredTileMesh(const TileMap& tileMap);
 
 	std::array<Vertex, 4> CreateQuad(float xPos, float yPos, float width, float height);
 }

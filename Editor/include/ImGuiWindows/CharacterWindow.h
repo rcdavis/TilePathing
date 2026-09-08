@@ -12,7 +12,7 @@ struct CharacterWindow {
 	static constexpr const char* Title = "Character";
 
 	std::vector<Character> characters;
-	TileMap* tileMap = nullptr;
+	const TileMap* tileMap = nullptr;
 	uint32_t curSelected = 0;
 	bool isOpen = true;
 
