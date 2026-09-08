@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-using MouseCode = uint32_t;
+using MouseCode = uint8_t;
 
 namespace Mouse {
 	enum : MouseCode {

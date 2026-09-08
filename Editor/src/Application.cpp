@@ -456,13 +456,8 @@ void Application::HandleInput() {
 }
 
 glm::mat4 Application::GetTileTransform(glm::uvec2 coords) {
-	const uint32_t tileWidth = mTileMap.tileWidth;
-	const uint32_t tileHeight = mTileMap.tileHeight;
-	const uint32_t numTilesWidth = mTileMap.width;
-	const uint32_t numTilesHeight = mTileMap.height;
-
-	const uint32_t xPos = coords.x * tileWidth;
-	const int32_t yPos = -((int32_t)coords.y * (int32_t)tileHeight);
+	const uint32_t xPos = coords.x * mTileMap.tileWidth;
+	const int32_t yPos = -((int32_t)coords.y * (int32_t)mTileMap.tileHeight);
 
 	return glm::translate(glm::mat4(1.0f), glm::vec3((float)xPos, (float)yPos, 0.5f));
 }

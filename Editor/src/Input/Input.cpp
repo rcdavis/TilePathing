@@ -10,17 +10,17 @@ namespace Input {
 		s_Window = window;
 	}
 
-	void Poll(TimeStep ts) {
+	void Poll(const TimeStep ts) {
 		s_CurTime += ts;
 	}
 
 	bool IsKeyPressed(const KeyCode keycode) {
-		auto state = glfwGetKey(s_Window, keycode);
+		const int state = glfwGetKey(s_Window, keycode);
 		return state == GLFW_PRESS;
 	}
 
 	bool IsKeyReleased(const KeyCode keycode) {
-		auto state = glfwGetKey(s_Window, keycode);
+		const int state = glfwGetKey(s_Window, keycode);
 		return state == GLFW_RELEASE;
 	}
 
@@ -28,16 +28,17 @@ namespace Input {
 		if (s_CurTime <= timeDiff)
 			return false;
 
-		auto state = glfwGetKey(s_Window, keycode);
+		const int state = glfwGetKey(s_Window, keycode);
 		if (state == GLFW_PRESS || state == GLFW_REPEAT) {
 			s_CurTime = 0.0f;
 			return true;
 		}
+
 		return false;
 	}
 
 	bool IsMouseButtonPressed(const MouseCode button) {
-		auto state = glfwGetMouseButton(s_Window, button);
+		const int state = glfwGetMouseButton(s_Window, button);
 		return state == GLFW_PRESS;
 	}
 
