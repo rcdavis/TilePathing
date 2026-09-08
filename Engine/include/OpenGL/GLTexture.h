@@ -22,6 +22,8 @@ public:
 
 	bool operator==(const GLTexture &texture) const;
 
+	bool LoadFromFile(const char* const filepath);
+
 	static Ref<GLTexture> Load(const std::filesystem::path &filepath);
 
 private:
