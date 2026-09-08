@@ -24,6 +24,8 @@ public:
 
 	bool LoadFromFile(const char* const filepath);
 
+	void Destroy();
+
 	static Ref<GLTexture> Load(const std::filesystem::path &filepath);
 
 private:

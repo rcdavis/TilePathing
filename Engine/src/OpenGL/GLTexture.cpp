@@ -12,8 +12,7 @@ GLTexture::GLTexture(const std::filesystem::path &filepath) {
 }
 
 GLTexture::~GLTexture() {
-	if (mId)
-		glDeleteTextures(1, &mId);
+	Destroy();
 }
 
 void GLTexture::Bind(uint32_t slot) const {
@@ -78,6 +77,13 @@ bool GLTexture::LoadFromFile(const char* const filepath) {
 	glTextureParameteri(mId, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	return true;
+}
+
+void GLTexture::Destroy() {
+	if (mId) {
+		glDeleteTextures(1, &mId);
+		mId = 0;
+	}
 }
 
 Ref<GLTexture> GLTexture::Load(const std::filesystem::path &filepath) {
