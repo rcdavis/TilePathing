@@ -80,7 +80,6 @@ private:
 	Ref<GLVertexArray> mColoredRectVao;
 	Ref<GLShader> mColorShader;
 
-	Ref<GLTexture> mSelectionTexture;
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
 	GLFWwindow* mWindow = nullptr;
@@ -88,6 +87,8 @@ private:
 	Character* mSelectedCharacter = nullptr;
 
 	TimeStep mLastFrameTime;
+
+	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::Count;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;

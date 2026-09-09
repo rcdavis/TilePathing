@@ -158,7 +158,7 @@ bool Application::Init() {
 	character.movementSteps = 6;
 	mCharacterWindow.AddCharacter(character);
 
-	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
+	mSelectionTextureId = Res::Textures::Id::SelectionRing;
 
 	const FramebufferSpecs specs {
 		.attachments = {
@@ -178,7 +178,6 @@ void Application::Shutdown() {
 
 	TextureSystem::Shutdown();
 
-	mSelectionTexture = nullptr;
 	mTestTexture = nullptr;
 	mShader = nullptr;
 	mVAO = nullptr;
@@ -225,10 +224,10 @@ void Application::RenderScene() {
 
 	RenderTilePaths();
 
-	if (mSelectionTexture) {
+	if (mSelectionTextureId != Res::Textures::Id::Count) {
 		mColoredRectVao->Bind();
 		mShader->Bind();
-		mSelectionTexture->Bind();
+		TextureSystem::Bind(mSelectionTextureId);
 		mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
