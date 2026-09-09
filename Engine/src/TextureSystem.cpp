@@ -14,7 +14,7 @@ namespace TextureSystem {
 
 	bool Init() {
 		for (uint32_t i = 0; i < TextureCount; ++i) {
-			const char* path = Res::Textures::GetPath((Res::Textures::Id)i);
+			const char* const path = Res::Textures::GetPath((Res::Textures::Id)i);
 			if (!s_Textures[i].LoadFromFile(path)) {
 				LOG_ERROR("Failed to load texture: {}", path);
 				return false;

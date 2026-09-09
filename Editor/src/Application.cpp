@@ -6,6 +6,8 @@
 #include "ShaderIds.h"
 #include "TileIds.h"
 
+#include "TextureSystem.h"
+
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
@@ -102,6 +104,11 @@ bool Application::Init() {
 
 	glfwSwapInterval(1);
 
+	if (!TextureSystem::Init()) {
+		LOG_CRITICAL("Failed to initialize TextureSystem!");
+		return false;
+	}
+
 	Input::Init(mWindow);
 
 	ImGui::CreateContext();
@@ -142,9 +149,6 @@ bool Application::Init() {
 	mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
-	mContentBrowserWindow.dirIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon));
-	mContentBrowserWindow.fileIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
-
 	mCharacterWindow.tileMap = &mTileMap;
 
 	Character character;
@@ -171,6 +175,8 @@ bool Application::Init() {
 
 void Application::Shutdown() {
 	mTileMap.Destroy();
+
+	TextureSystem::Shutdown();
 
 	mSelectionTexture = nullptr;
 	mTestTexture = nullptr;
