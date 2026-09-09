@@ -4,6 +4,7 @@
 #include "Input/Input.h"
 #include "TextureIds.h"
 #include "ShaderIds.h"
+#include "TileIds.h"
 
 #include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
@@ -126,8 +127,7 @@ bool Application::Init() {
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
 
-	// TODO: Replace with Id
-	if (!mTileMap.Load("res/tilemaps/SMBMap.tmbin")) {
+	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
 		return false;
 	}

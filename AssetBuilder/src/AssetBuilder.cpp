@@ -330,7 +330,7 @@ void AssetBuilder::CreateTileIdHeader(const std::filesystem::path& inputDir, con
 
 	file << "\t\tenum class Id : uint8_t {\n";
 	for (const auto& path : mTilemaps) {
-		file << "\t\t\t" << path.stem().string() << ",\n";
+		file << "\t\t\t" << path.stem().generic_string() << ",\n";
 	}
 	file << "\t\t\tCount\n";
 	file << "\t\t};\n\n";
@@ -338,7 +338,7 @@ void AssetBuilder::CreateTileIdHeader(const std::filesystem::path& inputDir, con
 	file << "\t\tinline constexpr const char* ToString(Id id) {\n";
 	file << "\t\t\tswitch (id) {\n";
 	for (const auto& path : mTilemaps) {
-		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
+		file << "\t\t\t\tcase Id::" << path.stem().generic_string() << ": return \"" << path.stem().generic_string() << "\";\n";
 	}
 	file << "\t\t\t\tdefault: return \"Unknown\";\n";
 	file << "\t\t\t}\n";
@@ -349,42 +349,12 @@ void AssetBuilder::CreateTileIdHeader(const std::filesystem::path& inputDir, con
 	file << "\t\t\tswitch (id) {\n";
 	for (const auto& path : mTilemaps) {
 		const auto relativePath = std::filesystem::relative(path, resParentDir);
-		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+		file << "\t\t\t\tcase Id::" << path.stem().generic_string() << ": return \""
+			 << relativePath.parent_path().generic_string() << "/" << path.stem().generic_string() << ".tmbin" << "\";\n";
 	}
 	file << "\t\t\t\tdefault: return nullptr;\n";
 	file << "\t\t\t}\n";
 	file << "\t\t}\n";
-
-	file << "\t}\n\n";
-
-	file << "\tnamespace Sets {\n";
-
-	file << "\t\tenum class Id : uint8_t {\n";
-	for (const auto& path : mTilesets) {
-		file << "\t\t\t" << path.stem().string() << ",\n";
-	}
-	file << "\t\t\tCount\n";
-	file << "\t\t};\n\n";
-
-	file << "\t\tinline constexpr const char* ToString(Id id) {\n";
-	file << "\t\t\tswitch (id) {\n";
-	for (const auto& path : mTilesets) {
-		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
-	}
-	file << "\t\t\t\tdefault: return \"Unknown\";\n";
-	file << "\t\t\t}\n";
-	file << "\t\t}\n";
-
-	file << "\n\t\tinline constexpr const char* GetPath(Id id) {\n";
-	file << "\t\t\tswitch (id) {\n";
-	for (const auto& path : mTilesets) {
-		const auto relativePath = std::filesystem::relative(path, resParentDir);
-		file << "\t\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
-	}
-	file << "\t\t\t\tdefault: return nullptr;\n";
-	file << "\t\t\t}\n";
-	file << "\t\t}\n";
-
 	file << "\t}\n";
 
 	file << "}\n";
