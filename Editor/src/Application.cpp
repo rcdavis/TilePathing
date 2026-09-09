@@ -127,8 +127,8 @@ bool Application::Init() {
 	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
 	mShader = GLShader::Create(
 		"TileMap",
-		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
-		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
+		Res::Shaders::GetVertexPath(Res::Shaders::Id::TileMap),
+		Res::Shaders::GetFragmentPath(Res::Shaders::Id::TileMap));
 
 	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
@@ -137,8 +137,8 @@ bool Application::Init() {
 
 	mColorShader = GLShader::Create(
 		"ColoredTile",
-		Res::Shaders::GetPath(Res::Shaders::Id::ColoredTileVS),
-		Res::Shaders::GetPath(Res::Shaders::Id::ColoredTileFS));
+		Res::Shaders::GetVertexPath(Res::Shaders::Id::ColoredTile),
+		Res::Shaders::GetFragmentPath(Res::Shaders::Id::ColoredTile));
 
 	mTilePathing.SetTileMap(mTileMap);
 

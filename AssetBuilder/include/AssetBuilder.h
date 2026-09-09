@@ -62,7 +62,7 @@ private:
 
 private:
 	std::vector<std::filesystem::path> mTextures;
-	std::vector<std::filesystem::path> mShaders;
+	std::vector<std::pair<std::filesystem::path, std::filesystem::path>> mShaders;
 	std::vector<std::filesystem::path> mTilemaps;
 	std::vector<std::filesystem::path> mTilesets;
 };
