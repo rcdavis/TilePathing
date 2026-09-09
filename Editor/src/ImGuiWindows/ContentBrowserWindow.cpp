@@ -3,7 +3,8 @@
 #include <cstdint>
 #include <imgui.h>
 
-#include "OpenGL/GLTexture.h"
+#include "TextureIds.h"
+#include "TextureSystem.h"
 
 void ContentBrowserWindow::Render() {
 	if (!isOpen)
@@ -23,12 +24,13 @@ void ContentBrowserWindow::Render() {
 			const auto& path = dirEntry.path();
 			const auto relativePath = std::filesystem::relative(path, "res");
 			const auto filenameStr = relativePath.filename().string();
-			const Ref<GLTexture>& icon = dirEntry.is_directory() ? dirIcon : fileIcon;
+			const Res::Textures::Id iconId = dirEntry.is_directory() ? Res::Textures::Id::DirectoryIcon : Res::Textures::Id::FileIcon;
+			const ImTextureID icon = (ImTextureID)TextureSystem::GetTextureId(iconId);
 
 			ImGui::PushID(filenameStr.c_str());
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
-			ImGui::ImageButton("icon_content_browser", (ImTextureID)icon->GetId(),
+			ImGui::ImageButton("icon_content_browser", icon,
 				{ thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 			if (ImGui::BeginDragDropSource()) {

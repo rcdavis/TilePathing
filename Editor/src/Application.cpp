@@ -6,13 +6,12 @@
 #include "ShaderIds.h"
 #include "TileIds.h"
 
-#include "OpenGL/GLTexture.h"
+#include "TextureSystem.h"
+
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
-
-#include "TileMap/TileSet.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
@@ -40,7 +39,6 @@ Application::Application() :
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
 	mSelectedCharacter(),
 	mTileMap(),
-	mTestTexture(),
 	mWindow(nullptr),
 	mLastFrameTime(0.0f),
 	mInitializedImGui(false)
@@ -102,6 +100,11 @@ bool Application::Init() {
 
 	glfwSwapInterval(1);
 
+	if (!TextureSystem::Init()) {
+		LOG_CRITICAL("Failed to initialize TextureSystem!");
+		return false;
+	}
+
 	Input::Init(mWindow);
 
 	ImGui::CreateContext();
@@ -121,7 +124,7 @@ bool Application::Init() {
 
 	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-	mTestTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SMB_BlockTiles));
+	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
 	mShader = GLShader::Create(
 		"TileMap",
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
@@ -142,19 +145,16 @@ bool Application::Init() {
 	mVAO = MeshUtils::CreateTileMapMesh(mTileMap);
 	mColoredRectVao = MeshUtils::CreateColoredTileMesh(mTileMap);
 
-	mContentBrowserWindow.dirIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon));
-	mContentBrowserWindow.fileIcon = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
-
 	mCharacterWindow.tileMap = &mTileMap;
 
 	Character character;
-	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+	character.textureId = Res::Textures::Id::FileIcon;
 	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
 	character.tileCoords = { 7, 20 };
 	character.movementSteps = 6;
 	mCharacterWindow.AddCharacter(character);
 
-	mSelectionTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SelectionRing));
+	mSelectionTextureId = Res::Textures::Id::SelectionRing;
 
 	const FramebufferSpecs specs {
 		.attachments = {
@@ -172,8 +172,8 @@ bool Application::Init() {
 void Application::Shutdown() {
 	mTileMap.Destroy();
 
-	mSelectionTexture = nullptr;
-	mTestTexture = nullptr;
+	TextureSystem::Shutdown();
+
 	mShader = nullptr;
 	mVAO = nullptr;
 
@@ -198,7 +198,7 @@ void Application::RenderScene() {
 	mFramebuffer->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mTestTexture->Bind();
+	TextureSystem::Bind(mBlockTextureId);
 
 	mShader->Bind();
 	mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
@@ -210,7 +210,7 @@ void Application::RenderScene() {
 
 	for (const auto& c : mCharacterWindow.characters) {
 		c.vao->Bind();
-		c.texture->Bind();
+		TextureSystem::Bind(c.textureId);
 		auto transform = GetTileTransform(c.tileCoords);
 		transform[3].z = 0.8f;
 		mShader->SetMat4("u_Transform", transform);
@@ -219,10 +219,10 @@ void Application::RenderScene() {
 
 	RenderTilePaths();
 
-	if (mSelectionTexture) {
+	if (mSelectionTextureId != Res::Textures::Id::Count) {
 		mColoredRectVao->Bind();
 		mShader->Bind();
-		mSelectionTexture->Bind();
+		TextureSystem::Bind(mSelectionTextureId);
 		mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;

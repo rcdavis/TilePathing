@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "TextureIds.h"
 #include "TimeStep.h"
 #include "Camera.h"
 
@@ -17,7 +18,6 @@
 #include <glm/glm.hpp>
 
 struct GLFWwindow;
-class GLTexture;
 class GLVertexArray;
 class GLFramebuffer;
 class GLShader;
@@ -74,13 +74,11 @@ private:
 	Ref<GLFramebuffer> mFramebuffer;
 
 	Ref<GLVertexArray> mVAO;
-	Ref<GLTexture> mTestTexture;
 	Ref<GLShader> mShader;
 
 	Ref<GLVertexArray> mColoredRectVao;
 	Ref<GLShader> mColorShader;
 
-	Ref<GLTexture> mSelectionTexture;
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
 	GLFWwindow* mWindow = nullptr;
@@ -88,6 +86,9 @@ private:
 	Character* mSelectedCharacter = nullptr;
 
 	TimeStep mLastFrameTime;
+
+	Res::Textures::Id mBlockTextureId = Res::Textures::Id::Count;
+	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::Count;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;

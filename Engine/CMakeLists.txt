@@ -21,6 +21,7 @@ add_library(Engine STATIC
     src/Utils/FileUtils.cpp
     src/Utils/Log.cpp
     src/Utils/StringUtils.cpp
+    src/TextureSystem.cpp
 )
 
 target_compile_definitions(Engine PUBLIC
@@ -43,6 +44,7 @@ target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ImGuiFileDialog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ImGui/include
+    ${CMAKE_BINARY_DIR}/generated
 )
 
 target_include_directories(Engine PRIVATE
