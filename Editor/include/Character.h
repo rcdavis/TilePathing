@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Core.h"
+#include "TextureIds.h"
 
 #include <cstdint>
 #include <glm/glm.hpp>
 
-class GLTexture;
 class GLVertexArray;
 
 class Character {
@@ -19,7 +19,7 @@ public:
 
 public:
 	glm::uvec2 tileCoords{ 0, 0 };
-	Ref<GLTexture> texture;
 	Ref<GLVertexArray> vao;
 	uint32_t movementSteps = 0;
+	Res::Textures::Id textureId;
 };

@@ -3,7 +3,6 @@
 #include "Character.h"
 #include "TextureIds.h"
 
-#include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
 
 #include "TileMap/TileMap.h"
@@ -45,9 +44,8 @@ void CharacterWindow::Render() {
 		}
 
 		if (ImGui::Button("Add Character") && tileMap) {
-			constexpr auto dirIconPath = Res::Textures::GetPath(Res::Textures::Id::DirectoryIcon);
 			Character c;
-			c.texture = GLTexture::Load(dirIconPath);
+			c.textureId = Res::Textures::Id::DirectoryIcon;
 			c.vao = MeshUtils::CreateColoredTileMesh(*tileMap);
 			c.movementSteps = 6;
 			AddCharacter(c);

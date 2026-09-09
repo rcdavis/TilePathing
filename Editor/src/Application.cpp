@@ -152,7 +152,7 @@ bool Application::Init() {
 	mCharacterWindow.tileMap = &mTileMap;
 
 	Character character;
-	character.texture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::FileIcon));
+	character.textureId = Res::Textures::Id::FileIcon;
 	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
 	character.tileCoords = { 7, 20 };
 	character.movementSteps = 6;
@@ -216,7 +216,7 @@ void Application::RenderScene() {
 
 	for (const auto& c : mCharacterWindow.characters) {
 		c.vao->Bind();
-		c.texture->Bind();
+		TextureSystem::Bind(c.textureId);
 		auto transform = GetTileTransform(c.tileCoords);
 		transform[3].z = 0.8f;
 		mShader->SetMat4("u_Transform", transform);
