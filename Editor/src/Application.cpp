@@ -127,7 +127,6 @@ bool Application::Init() {
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapFS));
 
-	// TODO: Replace with Id
 	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
 		return false;
