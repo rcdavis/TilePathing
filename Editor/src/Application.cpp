@@ -8,13 +8,10 @@
 
 #include "TextureSystem.h"
 
-#include "OpenGL/GLTexture.h"
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
-
-#include "TileMap/TileSet.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
 #include "ImGuiWindows/TileMapPathsWindow.h"
@@ -42,7 +39,6 @@ Application::Application() :
 	mCamera(0.0f, (float)WindowWidth, 0.0f, (float)WindowHeight),
 	mSelectedCharacter(),
 	mTileMap(),
-	mTestTexture(),
 	mWindow(nullptr),
 	mLastFrameTime(0.0f),
 	mInitializedImGui(false)
@@ -128,7 +124,7 @@ bool Application::Init() {
 
 	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
-	mTestTexture = GLTexture::Load(Res::Textures::GetPath(Res::Textures::Id::SMB_BlockTiles));
+	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
 	mShader = GLShader::Create(
 		"TileMap",
 		Res::Shaders::GetPath(Res::Shaders::Id::TileMapVS),
@@ -178,7 +174,6 @@ void Application::Shutdown() {
 
 	TextureSystem::Shutdown();
 
-	mTestTexture = nullptr;
 	mShader = nullptr;
 	mVAO = nullptr;
 
@@ -203,7 +198,7 @@ void Application::RenderScene() {
 	mFramebuffer->Bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mTestTexture->Bind();
+	TextureSystem::Bind(mBlockTextureId);
 
 	mShader->Bind();
 	mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
