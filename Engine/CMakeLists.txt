@@ -11,6 +11,7 @@ add_library(Engine STATIC
     ImGuiFileDialog/src/ImGuiFileDialog.cpp
     glad/src/glad.c
     stb/src/stb_image.c
+    src/Input/Input.cpp
     src/OpenGL/GLFramebuffer.cpp
     src/OpenGL/GLIndexBuffer.cpp
     src/OpenGL/GLShader.cpp
