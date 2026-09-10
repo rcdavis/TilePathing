@@ -193,7 +193,7 @@ void Application::RenderScene() {
 
 	TextureSystem::Bind(mBlockTextureId);
 
-	GLShader* shader = ShaderSystem::Get(mTileMapShaderId);
+	GLShader* const shader = ShaderSystem::Get(mTileMapShaderId);
 	shader->Bind();
 	shader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 	shader->SetMat4("u_Transform", glm::mat4(1.0f));
@@ -240,7 +240,7 @@ void Application::RenderTilePaths() {
 	glEnable(GL_BLEND);
 
 	mColoredRectVao->Bind();
-	GLShader* colorShader = ShaderSystem::Get(mColorShaderId);
+	GLShader* const colorShader = ShaderSystem::Get(mColorShaderId);
 	colorShader->Bind();
 	colorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
