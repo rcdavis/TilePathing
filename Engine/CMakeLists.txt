@@ -21,6 +21,7 @@ add_library(Engine STATIC
     src/Utils/FileUtils.cpp
     src/Utils/Log.cpp
     src/Utils/StringUtils.cpp
+    src/ShaderSystem.cpp
     src/TextureSystem.cpp
 )
 
