@@ -31,4 +31,9 @@ namespace ShaderSystem {
 		assert(id < Res::Shaders::Id::Count && "Invalid shader ID");
 		s_Shaders[(uint8_t)id].Bind();
 	}
+
+	GLShader* Get(Res::Shaders::Id id) {
+		assert(id < Res::Shaders::Id::Count && "Invalid shader ID");
+		return &s_Shaders[(uint8_t)id];
+	}
 }
