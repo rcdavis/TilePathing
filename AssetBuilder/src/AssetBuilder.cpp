@@ -2,10 +2,12 @@
 
 #include "pugixml.hpp"
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <cstring>
 #include <regex>
+#include <utility>
 
 void AssetBuilder::BuildAssets(const std::filesystem::path& inputDir, const std::filesystem::path& outputDir, const std::filesystem::path& generatedDir) {
 	std::filesystem::create_directories(outputDir);
@@ -33,13 +35,27 @@ void AssetBuilder::BuildTextures(const std::filesystem::path& inputDir, const st
 }
 
 void AssetBuilder::BuildShaders(const std::filesystem::path& inputDir, const std::filesystem::path& generatedDir) {
+	std::vector<std::filesystem::path> vertexShaders;
+	std::vector<std::filesystem::path> fragmentShaders;
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(inputDir / "shaders")) {
 		if (entry.is_regular_file()) {
 			const auto& path = entry.path();
-			if (path.extension() == ".vert" || path.extension() == ".frag") {
-				mShaders.push_back(path);
+			if (path.extension() == ".vert") {
+				vertexShaders.push_back(path);
+				std::cout << "Found vertex shader: " << path << std::endl;
+			} else if (path.extension() == ".frag") {
+				fragmentShaders.push_back(path);
 				std::cout << "Found shader: " << path << std::endl;
 			}
+		}
+	}
+
+	for (const auto& vertexShader : vertexShaders) {
+		const auto fragmentShaderIt = std::find_if(fragmentShaders.cbegin(), fragmentShaders.cend(), [&](const auto& fragmentShader) {
+			return fragmentShader.stem() == vertexShader.stem();
+		});
+		if (fragmentShaderIt != fragmentShaders.cend()) {
+			mShaders.emplace_back(vertexShader, *fragmentShaderIt);
 		}
 	}
 
@@ -259,15 +275,8 @@ void AssetBuilder::CreateShaderIdHeader(const std::filesystem::path& inputDir, c
 	file << "namespace Res::Shaders {\n";
 
 	file << "\tenum class Id : uint8_t {\n";
-	for (const auto& path : mShaders) {
-		const auto extension = path.extension().string();
-		if (extension == ".vert") {
-			file << "\t\t" << path.stem().string() << "VS,\n";
-		} else if (extension == ".frag") {
-			file << "\t\t" << path.stem().string() << "FS,\n";
-		} else {
-			file << "\t\t" << path.stem().string() << ",\n";
-		}
+	for (const auto& [vertexShader, fragmentShader] : mShaders) {
+		file << "\t\t" << vertexShader.stem().string() << ",\n";
 	}
 	file << "\t\tCount\n";
 	file << "\t};\n\n";
@@ -275,32 +284,28 @@ void AssetBuilder::CreateShaderIdHeader(const std::filesystem::path& inputDir, c
 	file << "\tinline constexpr const char* ToString(Id id) {\n";
 	file << "\t\tswitch (id) {\n";
 	for (const auto& path : mShaders) {
-		const auto extension = path.extension().string();
-		if (extension == ".vert") {
-			file << "\t\t\tcase Id::" << path.stem().string() << "VS: return \"" << path.stem().string() << "VS\";\n";
-		} else if (extension == ".frag") {
-			file << "\t\t\tcase Id::" << path.stem().string() << "FS: return \"" << path.stem().string() << "FS\";\n";
-		} else {
-			file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << path.stem().string() << "\";\n";
-		}
+		file << "\t\t\tcase Id::" << path.first.stem().string() << ": return \"" << path.first.stem().string() << "\";\n";
 	}
 	file << "\t\t\tdefault: return \"Unknown\";\n";
 	file << "\t\t}\n";
 	file << "\t}\n";
 
 	const auto resParentDir = inputDir / "..";
-	file << "\n\tinline constexpr const char* GetPath(Id id) {\n";
+	file << "\n\tinline constexpr const char* GetVertexPath(Id id) {\n";
 	file << "\t\tswitch (id) {\n";
 	for (const auto& path : mShaders) {
-		const auto relativePath = std::filesystem::relative(path, resParentDir);
-		const auto extension = path.extension().string();
-		if (extension == ".vert") {
-			file << "\t\t\tcase Id::" << path.stem().string() << "VS: return \"" << relativePath.generic_string() << "\";\n";
-		} else if (extension == ".frag") {
-			file << "\t\t\tcase Id::" << path.stem().string() << "FS: return \"" << relativePath.generic_string() << "\";\n";
-		} else {
-			file << "\t\t\tcase Id::" << path.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
-		}
+		const auto relativePath = std::filesystem::relative(path.first, resParentDir);
+		file << "\t\t\tcase Id::" << path.first.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
+	}
+	file << "\t\t\tdefault: return nullptr;\n";
+	file << "\t\t}\n";
+	file << "\t}\n";
+
+	file << "\n\tinline constexpr const char* GetFragmentPath(Id id) {\n";
+	file << "\t\tswitch (id) {\n";
+	for (const auto& path : mShaders) {
+		const auto relativePath = std::filesystem::relative(path.second, resParentDir);
+		file << "\t\t\tcase Id::" << path.second.stem().string() << ": return \"" << relativePath.generic_string() << "\";\n";
 	}
 	file << "\t\t\tdefault: return nullptr;\n";
 	file << "\t\t}\n";

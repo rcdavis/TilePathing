@@ -10,8 +10,12 @@
 
 class GLShader {
 public:
+	GLShader() = default;
 	GLShader(const std::string &name, const std::filesystem::path &vs, const std::filesystem::path &fs);
 	~GLShader();
+
+	bool Create(const std::filesystem::path &vs, const std::filesystem::path &fs);
+	void Destroy();
 
 	void Bind() const;
 	void Unbind() const;

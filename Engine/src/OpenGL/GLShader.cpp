@@ -30,7 +30,22 @@ GLShader::GLShader(const std::string &name, const std::filesystem::path &vs, con
 }
 
 GLShader::~GLShader() {
-	glDeleteProgram(mId);
+	Destroy();
+}
+
+bool GLShader::Create(const std::filesystem::path &vs, const std::filesystem::path &fs) {
+	std::unordered_map<uint32_t, std::filesystem::path> shaders;
+	shaders[GL_VERTEX_SHADER] = vs;
+	shaders[GL_FRAGMENT_SHADER] = fs;
+	CompileProgram(shaders);
+	return true;
+}
+
+void GLShader::Destroy() {
+	if (mId) {
+		glDeleteProgram(mId);
+		mId = 0;
+	}
 }
 
 void GLShader::Bind() const {
