@@ -7,6 +7,7 @@
 #include "TileIds.h"
 
 #include "TextureSystem.h"
+#include "ShaderSystem.h"
 
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
@@ -105,6 +106,11 @@ bool Application::Init() {
 		return false;
 	}
 
+	if (!ShaderSystem::Init()) {
+		LOG_CRITICAL("Failed to initialize ShaderSystem!");
+		return false;
+	}
+
 	Input::Init(mWindow);
 
 	ImGui::CreateContext();
@@ -173,6 +179,7 @@ void Application::Shutdown() {
 	mTileMap.Destroy();
 
 	TextureSystem::Shutdown();
+	ShaderSystem::Shutdown();
 
 	mShader = nullptr;
 	mVAO = nullptr;
