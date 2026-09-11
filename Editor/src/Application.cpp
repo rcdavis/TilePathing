@@ -2,11 +2,10 @@
 
 #include "Character.h"
 #include "Input/Input.h"
-#include "TextureIds.h"
-#include "ShaderIds.h"
 #include "TileIds.h"
 
 #include "TextureSystem.h"
+#include "ShaderSystem.h"
 
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
@@ -105,6 +104,11 @@ bool Application::Init() {
 		return false;
 	}
 
+	if (!ShaderSystem::Init()) {
+		LOG_CRITICAL("Failed to initialize ShaderSystem!");
+		return false;
+	}
+
 	Input::Init(mWindow);
 
 	ImGui::CreateContext();
@@ -125,20 +129,11 @@ bool Application::Init() {
 	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
-	mShader = GLShader::Create(
-		"TileMap",
-		Res::Shaders::GetVertexPath(Res::Shaders::Id::TileMap),
-		Res::Shaders::GetFragmentPath(Res::Shaders::Id::TileMap));
 
 	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
 		return false;
 	}
-
-	mColorShader = GLShader::Create(
-		"ColoredTile",
-		Res::Shaders::GetVertexPath(Res::Shaders::Id::ColoredTile),
-		Res::Shaders::GetFragmentPath(Res::Shaders::Id::ColoredTile));
 
 	mTilePathing.SetTileMap(mTileMap);
 
@@ -173,12 +168,10 @@ void Application::Shutdown() {
 	mTileMap.Destroy();
 
 	TextureSystem::Shutdown();
+	ShaderSystem::Shutdown();
 
-	mShader = nullptr;
 	mVAO = nullptr;
-
 	mColoredRectVao = nullptr;
-	mColorShader = nullptr;
 
 	mFramebuffer = nullptr;
 
@@ -200,10 +193,11 @@ void Application::RenderScene() {
 
 	TextureSystem::Bind(mBlockTextureId);
 
-	mShader->Bind();
-	mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-	mShader->SetMat4("u_Transform", glm::mat4(1.0f));
-	mShader->SetFloat4("u_Color", glm::vec4(1.0f));
+	GLShader* const shader = ShaderSystem::Get(mTileMapShaderId);
+	shader->Bind();
+	shader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+	shader->SetMat4("u_Transform", glm::mat4(1.0f));
+	shader->SetFloat4("u_Color", glm::vec4(1.0f));
 
 	mVAO->Bind();
 	Render(mVAO);
@@ -213,7 +207,7 @@ void Application::RenderScene() {
 		TextureSystem::Bind(c.textureId);
 		auto transform = GetTileTransform(c.tileCoords);
 		transform[3].z = 0.8f;
-		mShader->SetMat4("u_Transform", transform);
+		shader->SetMat4("u_Transform", transform);
 		Render(c.vao);
 	}
 
@@ -221,13 +215,13 @@ void Application::RenderScene() {
 
 	if (mSelectionTextureId != Res::Textures::Id::Count) {
 		mColoredRectVao->Bind();
-		mShader->Bind();
+		shader->Bind();
 		TextureSystem::Bind(mSelectionTextureId);
-		mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+		shader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
-		mShader->SetMat4("u_Transform", transform);
-		mShader->SetFloat4("u_Color", mTileMapPropertiesWindow.selectionColor);
+		shader->SetMat4("u_Transform", transform);
+		shader->SetFloat4("u_Color", mTileMapPropertiesWindow.selectionColor);
 		Render(mColoredRectVao);
 	}
 
@@ -246,14 +240,15 @@ void Application::RenderTilePaths() {
 	glEnable(GL_BLEND);
 
 	mColoredRectVao->Bind();
-	mColorShader->Bind();
-	mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+	GLShader* const colorShader = ShaderSystem::Get(mColorShaderId);
+	colorShader->Bind();
+	colorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
 
 	if (mSelectedCharacter) {
 		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 		for (auto& tile : zone.tiles) {
-			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.movementZoneColor);
+			colorShader->SetMat4("u_Transform", GetTileTransform(tile));
+			colorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.movementZoneColor);
 
 			Render(mColoredRectVao);
 		}
@@ -265,8 +260,8 @@ void Application::RenderTilePaths() {
 
 			auto transform = GetTileTransform(cell);
 			transform[3].z = 0.6f;
-			mColorShader->SetMat4("u_Transform", transform);
-			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.pathColor);
+			colorShader->SetMat4("u_Transform", transform);
+			colorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.pathColor);
 
 			Render(mColoredRectVao);
 		}
@@ -283,16 +278,16 @@ void Application::RenderTilePaths() {
 			else
 				color = mTileMapPropertiesWindow.pathColor;
 
-			mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-			mColorShader->SetFloat4("u_Color", color);
+			colorShader->SetMat4("u_Transform", GetTileTransform(cell));
+			colorShader->SetFloat4("u_Color", color);
 
 			Render(mColoredRectVao);
 		}
 
 		if (mTileMapPropertiesWindow.showVisitedTiles) {
 			for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords()) {
-				mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-				mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.checkedColor);
+				colorShader->SetMat4("u_Transform", GetTileTransform(cell));
+				colorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.checkedColor);
 
 				Render(mColoredRectVao);
 			}

@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "TextureIds.h"
+#include "ShaderIds.h"
 #include "TimeStep.h"
 #include "Camera.h"
 
@@ -74,10 +75,7 @@ private:
 	Ref<GLFramebuffer> mFramebuffer;
 
 	Ref<GLVertexArray> mVAO;
-	Ref<GLShader> mShader;
-
 	Ref<GLVertexArray> mColoredRectVao;
-	Ref<GLShader> mColorShader;
 
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
@@ -89,6 +87,9 @@ private:
 
 	Res::Textures::Id mBlockTextureId = Res::Textures::Id::Count;
 	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::Count;
+
+	Res::Shaders::Id mTileMapShaderId = Res::Shaders::Id::TileMap;
+	Res::Shaders::Id mColorShaderId = Res::Shaders::Id::ColoredTile;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;
