@@ -133,10 +133,10 @@ uint32_t TilePathing::Heuristic(glm::uvec2 start, glm::uvec2 end) const {
 }
 
 void TilePathing::CreateMap(TileMap& tileMap) {
-	assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
+	assert(tileMap.tileSetCount && "Tile map does not have a tile set");
 
 	uint8_t tileLayerIndex = std::numeric_limits<uint8_t>::max();
-	for (uint8_t i = 0; i < tileMap.tileLayers.size(); ++i) {
+	for (uint8_t i = 0; i < tileMap.tileLayerCount; ++i) {
 		if (!std::empty(tileMap.tileLayers[i].tiles)) {
 			tileLayerIndex = i;
 			break;
@@ -155,7 +155,7 @@ void TilePathing::CreateMap(TileMap& tileMap) {
 		for (uint32_t col = 0; col < mNumCols; ++col) {
 			const auto& tile = tileLayer.tiles[(row * tileLayer.width) + col];
 			uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
-			for (uint8_t i = 0; i < tileMap.tileSets.size(); ++i) {
+			for (uint8_t i = 0; i < tileMap.tileSetCount; ++i) {
 				if (tile.id >= tileMap.tileSets[i].firstGid) {
 					tileSetIndex = i;
 					break;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <cstdint>
 
-#include "TileMap/TileSet.h"
-#include "TileMap/TileLayer.h"
+class TileSet;
+class TileLayer;
 
 class TileMap {
 public:
@@ -15,8 +15,11 @@ public:
 	void Destroy();
 
 public:
-	std::vector<TileSet> tileSets;
-	std::vector<TileLayer> tileLayers;
+	TileSet* tileSets = nullptr;
+	TileLayer* tileLayers = nullptr;
+
+	uint16_t tileSetCount = 0;
+	uint16_t tileLayerCount = 0;
 
 	uint16_t width = 0;
 	uint16_t height = 0;
