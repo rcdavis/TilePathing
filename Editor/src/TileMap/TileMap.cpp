@@ -5,7 +5,6 @@
 #include "TileMap/TileLayer.h"
 #include "TileMap/TileMapLoader.h"
 
-#include "OpenGL/GLTexture.h"
 #include "TextureIds.h"
 
 TileMap::~TileMap() {
@@ -30,14 +29,15 @@ bool TileMap::Load(const char* const filepath) {
 	tileSets = new TileSet[tileSetCount];
 	for (uint16_t i = 0; i < tileSetCount; ++i) {
 		tileSets[i].firstGid = tileMapData.tilesets[i].firstGid;
-		tileSets[i].texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
+		tileSets[i].textureId = (Res::Textures::Id)tileMapData.tilesets[i].imageId;
 		tileSets[i].tileWidth = tileMapData.tilesets[i].tileWidth;
 		tileSets[i].tileHeight = tileMapData.tilesets[i].tileHeight;
 		tileSets[i].tileCount = tileMapData.tilesets[i].tileCount;
 		tileSets[i].columnCount = tileMapData.tilesets[i].columnCount;
 
-		tileSets[i].terrains.resize(tileMapData.tilesets[i].movementCosts.size());
-		for (uint16_t k = 0; k < tileMapData.tilesets[i].movementCosts.size(); ++k) {
+		tileSets[i].terrainCount = (uint8_t)tileMapData.tilesets[i].movementCosts.size();
+		tileSets[i].terrains = new TileSet::Terrain[tileSets[i].terrainCount];
+		for (uint16_t k = 0; k < tileSets[i].terrainCount; ++k) {
 			tileSets[i].terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
 		}
 	}

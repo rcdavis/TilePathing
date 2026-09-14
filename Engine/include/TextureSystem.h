@@ -12,4 +12,7 @@ namespace TextureSystem {
 	void Bind(Res::Textures::Id id, uint32_t slot = 0);
 
 	void Unbind(Res::Textures::Id id);
+
+	uint32_t GetWidth(Res::Textures::Id id);
+	uint32_t GetHeight(Res::Textures::Id id);
 }
