@@ -2,15 +2,13 @@
 
 #include "Character.h"
 #include "Input/Input.h"
-#include "TextureIds.h"
-#include "ShaderIds.h"
 #include "TileIds.h"
 
 #include "TextureSystem.h"
+#include "ShaderSystem.h"
 
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLIndexBuffer.h"
-#include "OpenGL/GLShader.h"
 #include "OpenGL/GLFramebuffer.h"
 
 #include "ImGuiWindows/TileMapPropertiesWindow.h"
@@ -105,6 +103,11 @@ bool Application::Init() {
 		return false;
 	}
 
+	if (!ShaderSystem::Init()) {
+		LOG_CRITICAL("Failed to initialize ShaderSystem!");
+		return false;
+	}
+
 	Input::Init(mWindow);
 
 	ImGui::CreateContext();
@@ -125,20 +128,15 @@ bool Application::Init() {
 	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
-	mShader = GLShader::Create(
-		"TileMap",
-		Res::Shaders::GetVertexPath(Res::Shaders::Id::TileMap),
-		Res::Shaders::GetFragmentPath(Res::Shaders::Id::TileMap));
+	mSelectionTextureId = Res::Textures::Id::SelectionRing;
+
+	mTileMapShaderId = Res::Shaders::Id::TileMap;
+	mColorShaderId = Res::Shaders::Id::ColoredTile;
 
 	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
 		return false;
 	}
-
-	mColorShader = GLShader::Create(
-		"ColoredTile",
-		Res::Shaders::GetVertexPath(Res::Shaders::Id::ColoredTile),
-		Res::Shaders::GetFragmentPath(Res::Shaders::Id::ColoredTile));
 
 	mTilePathing.SetTileMap(mTileMap);
 
@@ -150,11 +148,9 @@ bool Application::Init() {
 	Character character;
 	character.textureId = Res::Textures::Id::FileIcon;
 	character.vao = MeshUtils::CreateColoredTileMesh(mTileMap);
-	character.tileCoords = { 7, 20 };
+	character.tileCoords = { 6, 12 };
 	character.movementSteps = 6;
 	mCharacterWindow.AddCharacter(character);
-
-	mSelectionTextureId = Res::Textures::Id::SelectionRing;
 
 	const FramebufferSpecs specs {
 		.attachments = {
@@ -173,12 +169,10 @@ void Application::Shutdown() {
 	mTileMap.Destroy();
 
 	TextureSystem::Shutdown();
+	ShaderSystem::Shutdown();
 
-	mShader = nullptr;
 	mVAO = nullptr;
-
 	mColoredRectVao = nullptr;
-	mColorShader = nullptr;
 
 	mFramebuffer = nullptr;
 
@@ -200,11 +194,10 @@ void Application::RenderScene() {
 
 	TextureSystem::Bind(mBlockTextureId);
 
-	mShader->Bind();
-	mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
-	mShader->SetMat4("u_Transform", glm::mat4(1.0f));
-	mShader->SetFloat4("u_Color", glm::vec4(1.0f));
-
+	ShaderSystem::Bind(mTileMapShaderId);
+	ShaderSystem::SetMat4(mTileMapShaderId, "u_ViewProjection", mCamera.GetViewProjection());
+	ShaderSystem::SetMat4(mTileMapShaderId, "u_Transform", glm::mat4(1.0f));
+	ShaderSystem::SetFloat4(mTileMapShaderId, "u_Color", glm::vec4(1.0f));
 	mVAO->Bind();
 	Render(mVAO);
 
@@ -213,7 +206,7 @@ void Application::RenderScene() {
 		TextureSystem::Bind(c.textureId);
 		auto transform = GetTileTransform(c.tileCoords);
 		transform[3].z = 0.8f;
-		mShader->SetMat4("u_Transform", transform);
+		ShaderSystem::SetMat4(mTileMapShaderId, "u_Transform", transform);
 		Render(c.vao);
 	}
 
@@ -221,13 +214,13 @@ void Application::RenderScene() {
 
 	if (mSelectionTextureId != Res::Textures::Id::Count) {
 		mColoredRectVao->Bind();
-		mShader->Bind();
+		ShaderSystem::Bind(mTileMapShaderId);
 		TextureSystem::Bind(mSelectionTextureId);
-		mShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+		ShaderSystem::SetMat4(mTileMapShaderId, "u_ViewProjection", mCamera.GetViewProjection());
 		auto transform = GetTileTransform(mSelectionCoords);
 		transform[3].z = 0.7f;
-		mShader->SetMat4("u_Transform", transform);
-		mShader->SetFloat4("u_Color", mTileMapPropertiesWindow.selectionColor);
+		ShaderSystem::SetMat4(mTileMapShaderId, "u_Transform", transform);
+		ShaderSystem::SetFloat4(mTileMapShaderId, "u_Color", mTileMapPropertiesWindow.selectionColor);
 		Render(mColoredRectVao);
 	}
 
@@ -246,14 +239,14 @@ void Application::RenderTilePaths() {
 	glEnable(GL_BLEND);
 
 	mColoredRectVao->Bind();
-	mColorShader->Bind();
-	mColorShader->SetMat4("u_ViewProjection", mCamera.GetViewProjection());
+	ShaderSystem::Bind(mColorShaderId);
+	ShaderSystem::SetMat4(mColorShaderId, "u_ViewProjection", mCamera.GetViewProjection());
 
 	if (mSelectedCharacter) {
 		auto zone = mTilePathing.FindMovementZone(mSelectedCharacter->tileCoords, mSelectedCharacter->movementSteps);
 		for (auto& tile : zone.tiles) {
-			mColorShader->SetMat4("u_Transform", GetTileTransform(tile));
-			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.movementZoneColor);
+			ShaderSystem::SetMat4(mColorShaderId, "u_Transform", GetTileTransform(tile));
+			ShaderSystem::SetFloat4(mColorShaderId, "u_Color", mTileMapPropertiesWindow.movementZoneColor);
 
 			Render(mColoredRectVao);
 		}
@@ -265,8 +258,8 @@ void Application::RenderTilePaths() {
 
 			auto transform = GetTileTransform(cell);
 			transform[3].z = 0.6f;
-			mColorShader->SetMat4("u_Transform", transform);
-			mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.pathColor);
+			ShaderSystem::SetMat4(mColorShaderId, "u_Transform", transform);
+			ShaderSystem::SetFloat4(mColorShaderId, "u_Color", mTileMapPropertiesWindow.pathColor);
 
 			Render(mColoredRectVao);
 		}
@@ -283,16 +276,16 @@ void Application::RenderTilePaths() {
 			else
 				color = mTileMapPropertiesWindow.pathColor;
 
-			mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-			mColorShader->SetFloat4("u_Color", color);
+			ShaderSystem::SetMat4(mColorShaderId, "u_Transform", GetTileTransform(cell));
+			ShaderSystem::SetFloat4(mColorShaderId, "u_Color", color);
 
 			Render(mColoredRectVao);
 		}
 
 		if (mTileMapPropertiesWindow.showVisitedTiles) {
 			for (const glm::uvec2 cell : mTilePathing.GetVisitedCoords()) {
-				mColorShader->SetMat4("u_Transform", GetTileTransform(cell));
-				mColorShader->SetFloat4("u_Color", mTileMapPropertiesWindow.checkedColor);
+				ShaderSystem::SetMat4(mColorShaderId, "u_Transform", GetTileTransform(cell));
+				ShaderSystem::SetFloat4(mColorShaderId, "u_Color", mTileMapPropertiesWindow.checkedColor);
 
 				Render(mColoredRectVao);
 			}

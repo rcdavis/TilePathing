@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "TextureIds.h"
+#include "ShaderIds.h"
 #include "TimeStep.h"
 #include "Camera.h"
 
@@ -20,7 +21,6 @@
 struct GLFWwindow;
 class GLVertexArray;
 class GLFramebuffer;
-class GLShader;
 class TileMap;
 class BaseImGuiWindow;
 class Character;
@@ -74,10 +74,7 @@ private:
 	Ref<GLFramebuffer> mFramebuffer;
 
 	Ref<GLVertexArray> mVAO;
-	Ref<GLShader> mShader;
-
 	Ref<GLVertexArray> mColoredRectVao;
-	Ref<GLShader> mColorShader;
 
 	glm::uvec2 mSelectionCoords{ 0, 0 };
 
@@ -87,8 +84,11 @@ private:
 
 	TimeStep mLastFrameTime;
 
-	Res::Textures::Id mBlockTextureId = Res::Textures::Id::Count;
-	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::Count;
+	Res::Textures::Id mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
+	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::SelectionRing;
+
+	Res::Shaders::Id mTileMapShaderId = Res::Shaders::Id::TileMap;
+	Res::Shaders::Id mColorShaderId = Res::Shaders::Id::ColoredTile;
 
 	bool mInitializedImGui = false;
 	bool mViewportClickable = false;
