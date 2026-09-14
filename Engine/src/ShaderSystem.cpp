@@ -32,8 +32,13 @@ namespace ShaderSystem {
 		s_Shaders[(uint8_t)id].Bind();
 	}
 
-	GLShader* Get(Res::Shaders::Id id) {
+	void SetMat4(Res::Shaders::Id id, const char* name, const glm::mat4& matrix) {
 		assert(id < Res::Shaders::Id::Count && "Invalid shader ID");
-		return &s_Shaders[(uint8_t)id];
+		s_Shaders[(uint8_t)id].SetMat4(name, matrix);
+	}
+
+	void SetFloat4(Res::Shaders::Id id, const char* name, const glm::vec4& value) {
+		assert(id < Res::Shaders::Id::Count && "Invalid shader ID");
+		s_Shaders[(uint8_t)id].SetFloat4(name, value);
 	}
 }
