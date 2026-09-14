@@ -11,7 +11,7 @@
 
 namespace MeshUtils {
 	std::vector<Vertex> CreateTileMapVertices(const TileMap& tileMap) {
-		assert(tileMap.tileSetCount && "Tile map does not have a tile set");
+		assert(tileMap.tileSets && tileMap.tileSetCount && "Tile map does not have a tile set");
 
 		std::vector<Vertex> vertices;
 
@@ -92,7 +92,7 @@ namespace MeshUtils {
 	}
 
 	Ref<GLVertexArray> CreateColoredTileMesh(const TileMap& tileMap) {
-		assert(tileMap.tileSetCount && "Tile map does not have a tile set");
+		assert(tileMap.tileSets && tileMap.tileSetCount && "Tile map does not have a tile set");
 
 		auto vao = GLVertexArray::Create();
 		vao->Bind();
