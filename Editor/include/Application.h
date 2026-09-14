@@ -21,7 +21,6 @@
 struct GLFWwindow;
 class GLVertexArray;
 class GLFramebuffer;
-class GLShader;
 class TileMap;
 class BaseImGuiWindow;
 class Character;
@@ -85,8 +84,8 @@ private:
 
 	TimeStep mLastFrameTime;
 
-	Res::Textures::Id mBlockTextureId = Res::Textures::Id::Count;
-	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::Count;
+	Res::Textures::Id mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
+	Res::Textures::Id mSelectionTextureId = Res::Textures::Id::SelectionRing;
 
 	Res::Shaders::Id mTileMapShaderId = Res::Shaders::Id::TileMap;
 	Res::Shaders::Id mColorShaderId = Res::Shaders::Id::ColoredTile;

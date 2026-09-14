@@ -129,6 +129,10 @@ bool Application::Init() {
 	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
 	mBlockTextureId = Res::Textures::Id::SMB_BlockTiles;
+	mSelectionTextureId = Res::Textures::Id::SelectionRing;
+
+	mTileMapShaderId = Res::Shaders::Id::TileMap;
+	mColorShaderId = Res::Shaders::Id::ColoredTile;
 
 	if (!mTileMap.Load(Res::Tiles::Maps::GetPath(Res::Tiles::Maps::Id::SMBMap))) {
 		LOG_CRITICAL("Failed to load tilemap!");
@@ -148,8 +152,6 @@ bool Application::Init() {
 	character.tileCoords = { 7, 20 };
 	character.movementSteps = 6;
 	mCharacterWindow.AddCharacter(character);
-
-	mSelectionTextureId = Res::Textures::Id::SelectionRing;
 
 	const FramebufferSpecs specs {
 		.attachments = {
