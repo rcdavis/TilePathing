@@ -137,7 +137,7 @@ void TilePathing::CreateMap(TileMap& tileMap) {
 
 	uint8_t tileLayerIndex = std::numeric_limits<uint8_t>::max();
 	for (uint8_t i = 0; i < tileMap.tileLayerCount; ++i) {
-		if (!std::empty(tileMap.tileLayers[i].tiles)) {
+		if (tileMap.tileLayers[i].tiles) {
 			tileLayerIndex = i;
 			break;
 		}

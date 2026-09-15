@@ -9,6 +9,7 @@ add_executable(Editor
     src/ImGuiWindows/ContentBrowserWindow.cpp
     src/ImGuiWindows/TileMapPathsWindow.cpp
     src/ImGuiWindows/TileMapPropertiesWindow.cpp
+    src/TileMap/TileLayer.cpp
     src/TileMap/TileMap.cpp
     src/TileMap/TileMapLoader.cpp
     src/TileMap/TilePathing.cpp

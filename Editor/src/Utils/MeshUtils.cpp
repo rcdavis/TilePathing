@@ -16,9 +16,10 @@ namespace MeshUtils {
 		std::vector<Vertex> vertices;
 
 		for (uint16_t layerIndex = 0; layerIndex < tileMap.tileLayerCount; ++layerIndex) {
-			const auto& tileLayer = tileMap.tileLayers[layerIndex];
-			const auto& tiles = tileLayer.tiles;
-			for (uint32_t i = 0; i < std::size(tiles); ++i) {
+			const TileLayer& tileLayer = tileMap.tileLayers[layerIndex];
+			const TileLayer::Tile* const tiles = tileLayer.tiles;
+			const uint32_t tileCount = tileLayer.GetTileCount();
+			for (uint32_t i = 0; i < tileCount; ++i) {
 				const auto& tile = tiles[i];
 				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
 				for (uint8_t j = 0; j < tileMap.tileSetCount; ++j) {

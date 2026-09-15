@@ -48,8 +48,9 @@ bool TileMap::Load(const char* const filepath) {
 		tileLayers[i].width = tileMapData.layers[i].width;
 		tileLayers[i].height = tileMapData.layers[i].height;
 
-		tileLayers[i].tiles.resize(tileMapData.layers[i].tiles.size());
-		for (uint16_t k = 0; k < tileMapData.layers[i].tiles.size(); ++k) {
+		uint32_t tileCount = (uint32_t)tileMapData.layers[i].tiles.size();
+		tileLayers[i].tiles = new TileLayer::Tile[tileCount];
+		for (uint32_t k = 0; k < tileCount; ++k) {
 			tileLayers[i].tiles[k].id = tileMapData.layers[i].tiles[k];
 		}
 	}

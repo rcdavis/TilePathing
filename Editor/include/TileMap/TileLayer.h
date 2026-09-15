@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 class TileLayer {
 public:
@@ -11,9 +10,15 @@ public:
 
 public:
 	TileLayer() = default;
+	~TileLayer();
+
+	void Destroy();
+
+	uint32_t GetTileCount() const { return width * height; }
 
 public:
-	std::vector<Tile> tiles;
+	Tile* tiles = nullptr;
+
 	uint32_t width = 0;
 	uint32_t height = 0;
 };
