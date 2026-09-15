@@ -7,19 +7,22 @@
 #include "OpenGL/GLVertexArray.h"
 #include "OpenGL/GLVertexBuffer.h"
 #include "OpenGL/GLIndexBuffer.h"
+#include <cstdint>
 
 namespace MeshUtils {
 	std::vector<Vertex> CreateTileMapVertices(const TileMap& tileMap) {
-		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
+		assert(tileMap.tileSets && tileMap.tileSetCount && "Tile map does not have a tile set");
 
 		std::vector<Vertex> vertices;
 
-		for (const TileLayer& tileLayer : tileMap.tileLayers) {
-			const auto& tiles = tileLayer.tiles;
-			for (uint32_t i = 0; i < std::size(tiles); ++i) {
+		for (uint16_t layerIndex = 0; layerIndex < tileMap.tileLayerCount; ++layerIndex) {
+			const TileLayer& tileLayer = tileMap.tileLayers[layerIndex];
+			const TileLayer::Tile* const tiles = tileLayer.tiles;
+			const uint32_t tileCount = tileLayer.GetTileCount();
+			for (uint32_t i = 0; i < tileCount; ++i) {
 				const auto& tile = tiles[i];
 				uint8_t tileSetIndex = std::numeric_limits<uint8_t>::max();
-				for (uint8_t j = 0; j < tileMap.tileSets.size(); ++j) {
+				for (uint8_t j = 0; j < tileMap.tileSetCount; ++j) {
 					if (tile.id >= tileMap.tileSets[j].firstGid) {
 						tileSetIndex = j;
 						break;
@@ -90,7 +93,7 @@ namespace MeshUtils {
 	}
 
 	Ref<GLVertexArray> CreateColoredTileMesh(const TileMap& tileMap) {
-		assert(!std::empty(tileMap.tileSets) && "Tile map does not have a tile set");
+		assert(tileMap.tileSets && tileMap.tileSetCount && "Tile map does not have a tile set");
 
 		auto vao = GLVertexArray::Create();
 		vao->Bind();

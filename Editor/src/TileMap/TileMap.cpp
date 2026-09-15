@@ -5,7 +5,6 @@
 #include "TileMap/TileLayer.h"
 #include "TileMap/TileMapLoader.h"
 
-#include "OpenGL/GLTexture.h"
 #include "TextureIds.h"
 
 TileMap::~TileMap() {
@@ -26,44 +25,48 @@ bool TileMap::Load(const char* const filepath) {
 	tileWidth = tileMapData.tileWidth;
 	tileHeight = tileMapData.tileHeight;
 
-	tileSets.reserve(tileMapData.tilesets.size());
-	for (uint32_t i = 0; i < tileMapData.tilesets.size(); ++i) {
-		TileSet tileSet;
-		tileSet.firstGid = tileMapData.tilesets[i].firstGid;
-		tileSet.texture = GLTexture::Load(Res::Textures::GetPath((Res::Textures::Id)tileMapData.tilesets[i].imageId));
-		tileSet.tileWidth = tileMapData.tilesets[i].tileWidth;
-		tileSet.tileHeight = tileMapData.tilesets[i].tileHeight;
-		tileSet.tileCount = tileMapData.tilesets[i].tileCount;
-		tileSet.columnCount = tileMapData.tilesets[i].columnCount;
+	tileSetCount = (uint16_t)tileMapData.tilesets.size();
+	tileSets = new TileSet[tileSetCount];
+	for (uint16_t i = 0; i < tileSetCount; ++i) {
+		tileSets[i].firstGid = tileMapData.tilesets[i].firstGid;
+		tileSets[i].textureId = (Res::Textures::Id)tileMapData.tilesets[i].imageId;
+		tileSets[i].tileWidth = tileMapData.tilesets[i].tileWidth;
+		tileSets[i].tileHeight = tileMapData.tilesets[i].tileHeight;
+		tileSets[i].tileCount = tileMapData.tilesets[i].tileCount;
+		tileSets[i].columnCount = tileMapData.tilesets[i].columnCount;
 
-		tileSet.terrains.resize(tileMapData.tilesets[i].movementCosts.size());
-		for (uint32_t k = 0; k < tileMapData.tilesets[i].movementCosts.size(); ++k) {
-			tileSet.terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
+		tileSets[i].terrainCount = (uint8_t)tileMapData.tilesets[i].movementCosts.size();
+		tileSets[i].terrains = new TileSet::Terrain[tileSets[i].terrainCount];
+		for (uint16_t k = 0; k < tileSets[i].terrainCount; ++k) {
+			tileSets[i].terrains[k].movementCost = tileMapData.tilesets[i].movementCosts[k];
 		}
-
-		tileSets.emplace_back(tileSet);
 	}
 
-	tileLayers.reserve(tileMapData.layers.size());
-	for (uint32_t i = 0; i < tileMapData.layers.size(); ++i) {
-		TileLayer tileLayer;
-		tileLayer.width = tileMapData.layers[i].width;
-		tileLayer.height = tileMapData.layers[i].height;
+	tileLayerCount = (uint16_t)tileMapData.layers.size();
+	tileLayers = new TileLayer[tileLayerCount];
+	for (uint16_t i = 0; i < tileLayerCount; ++i) {
+		tileLayers[i].width = tileMapData.layers[i].width;
+		tileLayers[i].height = tileMapData.layers[i].height;
 
-		tileLayer.tiles.resize(tileMapData.layers[i].tiles.size());
-		for (uint32_t k = 0; k < tileMapData.layers[i].tiles.size(); ++k) {
-			tileLayer.tiles[k].id = tileMapData.layers[i].tiles[k];
+		uint32_t tileCount = (uint32_t)tileMapData.layers[i].tiles.size();
+		tileLayers[i].tiles = new TileLayer::Tile[tileCount];
+		for (uint32_t k = 0; k < tileCount; ++k) {
+			tileLayers[i].tiles[k].id = tileMapData.layers[i].tiles[k];
 		}
-
-		tileLayers.emplace_back(tileLayer);
 	}
 
 	return true;
 }
 
 void TileMap::Destroy() {
-	tileSets.clear();
-	tileLayers.clear();
+	delete[] tileSets;
+	tileSets = nullptr;
+	tileSetCount = 0;
+
+	delete[] tileLayers;
+	tileLayers = nullptr;
+	tileLayerCount = 0;
+
 	width = 0;
 	height = 0;
 	tileWidth = 0;

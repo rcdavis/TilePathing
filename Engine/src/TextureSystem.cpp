@@ -43,4 +43,14 @@ namespace TextureSystem {
 		assert(id < Res::Textures::Id::Count && "Texture ID out of range");
 		s_Textures[(uint32_t)id].Unbind();
 	}
+
+	uint32_t GetWidth(Res::Textures::Id id) {
+		assert(id < Res::Textures::Id::Count && "Texture ID out of range");
+		return s_Textures[(uint32_t)id].GetWidth();
+	}
+
+	uint32_t GetHeight(Res::Textures::Id id) {
+		assert(id < Res::Textures::Id::Count && "Texture ID out of range");
+		return s_Textures[(uint32_t)id].GetHeight();
+	}
 }

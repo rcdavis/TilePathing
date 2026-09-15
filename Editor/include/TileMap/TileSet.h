@@ -1,13 +1,10 @@
 #pragma once
 
-#include "Core.h"
+#include "TextureIds.h"
 
-#include <vector>
 #include <array>
 
 #include <glm/glm.hpp>
-
-class GLTexture;
 
 class TileSet {
 public:
@@ -17,13 +14,18 @@ public:
 
 public:
 	TileSet() = default;
+	~TileSet();
 
 	std::array<glm::vec2, 4> GetTexCoords(const uint8_t tileId) const;
 	const Terrain& GetTerrain(const uint8_t tileId) const;
 
+	void Destroy();
+
 public:
-	Ref<GLTexture> texture;
-	std::vector<Terrain> terrains;
+	Terrain* terrains = nullptr;
+	uint8_t terrainCount = 0;
+
+	Res::Textures::Id textureId = Res::Textures::Id::Count;
 
 	uint8_t firstGid = 1;
 	uint8_t tileWidth = 0;

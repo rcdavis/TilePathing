@@ -412,7 +412,7 @@ void Application::RenderMainMenu() {
 }
 
 void Application::HandleInput() {
-	if (mViewportClickable && !mTileMap.tileSets.empty()) {
+	if (mViewportClickable && mTileMap.tileSetCount) {
 		constexpr TimeStep ts(0.1f);
 
 		if (Input::IsKeyDown(Key::Left, ts)) {
